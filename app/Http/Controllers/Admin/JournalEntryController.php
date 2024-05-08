@@ -271,13 +271,13 @@ class JournalEntryController extends Controller{
         $org_id = $request->input('org_id');
         $arr=[];
         $models =new \App\Models\Members();
-        $name = $models->select('id', 'name', 'unit_number', 'mobile_number')->where([['delstatus', '<', '1'],['status', '>', '0'], ['organization_id', '=', $org_id]])->where(DB::raw("CONCAT_WS(' ', name, unit_number, mobile_number)"), 'like', '%'.$input.'%')
+        $name = $models->select('id', 'name', 'unit_number', 'mobile_number')->where([['delstatus', '<', '1'],['status', '>', '0'], ['organization_id', '=', $org_id]])->where(DB::raw("CONCAT_WS(' ', name, unit_number, mobile_number, alternate_name, alternate_number, sublet_name)"), 'like', '%'.$input.'%')
             ->get()->toArray();
         $count=0;
         foreach($name as $nm){
             $arr[$count]['id']= $nm['id'];
-            $arr[$count]['label']="Name : ".$nm['name']."; Unit No : ".$nm['unit_number']."; Mob No : ".$nm['mobile_number'];
-            $arr[$count]['value'] = $nm['mobile_number'];
+            $arr[$count]['text']="Name : ".$nm['name']."; Unit No : ".$nm['unit_number']."; Mob No : ".$nm['mobile_number'];
+            $arr[$count]['value'] = $nm['id'];
             // $arr[$count]['name'] = $nm['name'];
             // $arr[$count]['desc']= $nm['unit_number'].$nm['name'].$nm['mobile_number'];
             $count++;
