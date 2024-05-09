@@ -53,7 +53,8 @@ function datetimepicker_month(id){
                 data: {'_token': '{!! csrf_token() !!}',formData},
                 dataType: 'json',
                 success: function(response) {
-                    console.log(response);
+                    //console.log(response);
+                    $('#table-responsive2').html(response.html);
                 },
                 error: function(xhr, status, error) {
                     // Handle errors if needed
@@ -182,7 +183,7 @@ function datetimepicker_month(id){
                 </div>
             </div>
 
-            <div class="table-responsive">
+            <div class="table-responsive" id="table-responsive2">
                 {{-- @include($module['main_view'].'.ajax_reports',['bsmodal'=>true, 'module'=>$module]) --}}
                 <table class="table table-striped table-hover table-bordered table-sm mb-2 main-listing-table">
                     <thead>

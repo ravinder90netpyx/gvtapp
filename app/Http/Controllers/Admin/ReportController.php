@@ -64,7 +64,9 @@ class ReportController extends Controller{
     }
 
     public function getReportByDate(Request $request, helpers $helpers,JournalEntryModel $journalEntryModel){
-        
+        $carbon = new Carbon();
+        $module = $this->module;
+        $title_shown = 'Manage '.$module['main_heading'].'s';
         $from_date = $request->formData['from_date'];
         $to_date = $request->formData['to_date'];
         $memberIds = $request->formData['memberIds'];
@@ -79,7 +81,7 @@ class ReportController extends Controller{
         //$journalEntries = $journalEntryModel->whereIn('member_id', [3,4])->whereIn('from_month',$month_arr)->orWhereIn('to_month',$month_arr)->get();
         
         $data =[];
-        $data = $journalEntryModel->select('from_month','to_month')->whereIn('member_id',[3,4])->get();
+        $data = $journalEntryModel->select('from_month','to_month')->whereIn('member_id',$memberIds)->get();
 
 
         //var_dump($data);
@@ -101,11 +103,21 @@ class ReportController extends Controller{
 
 
         //$data = $journalEntryModel->select('from_month','to_month')->whereIn('member_id',[3,4])->get();
-        $journalEntries2 = $journalEntryModel->whereIn('member_id', [3,4])->whereIn('from_month',$inter)->orWhereIn('to_month',$inter)->get();
+        $form_data = $journalEntryModel->whereIn('member_id', $memberIds)->whereIn('from_month',$inter)->orWhereIn('to_month',$inter)->get();
 
-       foreach($journalEntries2 as $jr2){
-            //var_dump($jr2);
-       }
+
+       /*foreach($form_data as $jr2){
+            var_dump($jr2['member_id']);
+       }*/
+
+       if($request->ajax()) {
+            $html_data = view($module['main_view'].'.ajax_reports', compact(['form_data', 'module',
+                'month_arr','carbon','helpers']))->render();
+            $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown, ]);
+            return $response;
+        } else{
+            return view($module['main_view'].'.cred2', compact('form_data', 'financial_years', 'model', 'module', 'folder', 'title_shown', 'mode', 'id'));
+        }
 
 
     }
