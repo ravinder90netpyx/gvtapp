@@ -32,11 +32,20 @@
                          $from = $item['from_month'];
                          $to = $item['to_month']; 
                          $month_arr1 = $helpers->get_financial_month_year($from,$to,$format);
+                         echo count($month_arr1);
 
                     @endphp
-                        @foreach($month_arr as $mn)
-                            <td>{{ $item['charge'] }}</td>
-                        @endforeach
+                        @php 
+                        $match = "";
+                       foreach($month_arr as $k => $v) {
+                            if(in_array($v,$month_arr1)) {
+                                    $match = "matched";
+                            }else {
+                                $match = "not";
+                            }
+                            @endphp
+                                <td>{{ $match }}</td>
+                        @php } @endphp
                     
                     <td>{{ $row_time }}</td>
                 </tr>
