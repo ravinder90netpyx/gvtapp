@@ -32,8 +32,6 @@
                          $from = $item['from_month'];
                          $to = $item['to_month']; 
                          $month_arr1 = $helpers->get_financial_month_year($from,$to,$format);
-                         echo count($month_arr1);
-
                     @endphp
                         @php 
                         $match = "";
