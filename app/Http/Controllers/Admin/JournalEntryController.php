@@ -267,7 +267,7 @@ class JournalEntryController extends Controller{
 
     public function ajax_member(Request $request) {
         // dd($request->input());
-        $input=$request->input('term');
+        $input=$request->input('q');
         $org_id = $request->input('org_id');
         $arr=[];
         $models =new \App\Models\Members();

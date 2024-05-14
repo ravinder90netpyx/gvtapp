@@ -3,6 +3,7 @@
         <tr>
             <th>{{__('#')}}</th>
             <th style="width:120px">{{ __('Name') }}</th>
+            <th style="width:120px">{{ __('Mobile Number') }}</th>
             @foreach($month_arr as $mn)
                 <th>{{ $mn }}</th>
             @endforeach
@@ -18,6 +19,7 @@
                 $row_id = $item['id'];
                 $dt_str = $carbon->createFromFormat('Y-m-d H:i:s', $item['created_at']);
                 $row_time = $dt_str->format(config('custom.datetime_format'));
+                $member=\App\Models\Members::where('id',$item['member_id'])->first();
                 @endphp
                 <tr>
                     <td>
@@ -26,7 +28,18 @@
                             <label class="custom-control-label" for="row_check_{{ $row_id }}"></label>
                         </div>                  
                     </td> 
-                    <td>{{ $item['member_id'] }}</td>
+                    
+                    @php 
+                    $member_name=$member->name; 
+                    $member_number=$member->mobile_number;
+                    $charges_id =$member->charges_id; 
+                    @endphp
+
+                    <td>{{ $member_name }}</td>
+                    <td>{{ $member_number }}</td>
+                    
+                    @php $charge=\App\Models\Charges::where('id',$charges_id)->first()->rate; @endphp
+
                     @php 
                     $format = "Y-m";
                          $from = $item['from_month'];
@@ -35,11 +48,30 @@
                     @endphp
                         @php 
                         $match = "";
+                        $new_charge = "";
                        foreach($month_arr as $k => $v) {
                             if(in_array($v,$month_arr1)) {
-                                    $match = "matched";
+
+                                    if($item['charge'] == $charge){
+                                        if($v == $month_arr1[0]){
+                                            $match = $charge;
+                                        }else {
+                                            $match = "N/A";
+                                        }
+                                    }
+                                    if($item['charge'] > $charge){
+                                        if($v == $month_arr1[0]){
+                                            $match = $charge;
+                                        }elseif($v == $month_arr1[1]){
+                                            $match = $item['charge'] - $charge;
+                                            $new_charge = $match;
+                                        }else{
+                                           $match = "N/A"; 
+                                        }
+                                    }
+
                             }else {
-                                $match = "not";
+                                $match = "NA";
                             }
                             @endphp
                                 <td>{{ $match }}</td>
