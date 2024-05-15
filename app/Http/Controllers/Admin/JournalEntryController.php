@@ -117,11 +117,23 @@ class JournalEntryController extends Controller{
         $check = \App\Models\Members::where('id',$request->input('member_id'))->count();
         
         $series_number = \App\Models\Series::find($request->input('series_id'));
-        if(empty($check)) $validator->errors()->add('member_id',"Choose a valid Member");
+        // if(empty($check)) $validator->errors()->add('member_id',"Choose a valid Member");
         if(empty($series_number->count)) $validator->errors()->add('series_id',"Choose a valid Series");
         $request->validate($rules);
         $member = \App\Models\Members::find($request->input('member_id'));
         $charge = \App\Models\Charges::find($member->charges_id)->rate;
+        $paid = $request->input('paid_money');
+        $count=0;
+        while($paid > 0){
+            if($paid>=$charge){
+                $paid = $paid - $charge;
+            } else{
+                $paid =0;
+            }
+            $count++;
+        }
+        $month_arr = $helpers->get_financial_month_year($request->input('from_month'), $request->input('to_month'));
+        // $mouth_arr
         $name = $model->where('organization_id',$request->input('organization_id'))->orderBy('entry_date','DESC')->first();
         $date = $request->input('entry_date');
         $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
@@ -276,9 +288,7 @@ class JournalEntryController extends Controller{
         $count=0;
         foreach($name as $nm){
             $arr[$count]['id']= $nm['id'];
-            $arr[$count]['text']="Name : ".$nm['name']."; Unit No : ".$nm['unit_number']."; Mob No : ".$nm['mobile_number'];
-            $arr[$count]['value'] = $nm['id'];
-            // $arr[$count]['name'] = $nm['name'];
+            $arr[$count]['text']="Name : ".$nm['name']."; Unit No : ".$nm['unit_number']."; Mob No : ".$nm['mobile_number'];            // $arr[$count]['name'] = $nm['name'];
             // $arr[$count]['desc']= $nm['unit_number'].$nm['name'].$nm['mobile_number'];
             $count++;
         }

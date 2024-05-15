@@ -12,8 +12,8 @@ class SettingsSeeder extends Seeder
      * @return void
      */
     public function run(){
-        /*$permissions = [
-          [ 'group' => 'connection', 'key' => 'schedule_hit_count', 'value' => '1' ],
+        $permissions = [
+          [ 'group' => 'system', 'key' => 'starting_year', 'value' => '2020' ],
         ];
 
         $counter = 1;
@@ -23,6 +23,6 @@ class SettingsSeeder extends Seeder
             $ins_rr = array_merge($default_data, $prr);
             DB::table('settings')->insert($ins_rr);
             $counter++;
-        }*/
+        }
     }
 }

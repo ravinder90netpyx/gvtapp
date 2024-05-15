@@ -70,7 +70,7 @@ class ReportController extends Controller{
         $from_date = $request->formData['from_date'];
         $to_date = $request->formData['to_date'];
         $memberIds = $request->formData['memberIds'];
-
+        $member_modal = new \App\Models\Members(); 
         $format = "Y-m";
         $month_arr = $helpers->get_financial_month_year($from_date, $to_date, $format);
         /*$format = "M Y";
@@ -79,17 +79,17 @@ class ReportController extends Controller{
         
         $journalEntries = [];
         //$journalEntries = $journalEntryModel->whereIn('member_id', [3,4])->whereIn('from_month',$month_arr)->orWhereIn('to_month',$month_arr)->get();
-        
+        $member_data= 
         $data =[];
         $data = $journalEntryModel->select('from_month','to_month')->whereIn('member_id',$memberIds)->get();
 
 
-        //var_dump($data);
+        
         //$data2 = $models->select('id', 'name')->where('organization_id',$input)->get()->toArray();
 
         //$users = User::whereIn(‘name’,[‘John’,’Peter’])->orWhereIn(‘id’,[1,5])->get();
         
-        //dd($months);
+        //dd($data);
         
         $all_dates = [];
         foreach($data as $jr){
@@ -97,14 +97,30 @@ class ReportController extends Controller{
             array_push($all_dates,$jr['to_month']);
         }
 
+        //dd($all_dates);
+
         $inter = [];
         $inter = array_intersect($month_arr, $all_dates);
         //var_dump($inter);
 
-
+        $new_arr = [];
         //$data = $journalEntryModel->select('from_month','to_month')->whereIn('member_id',[3,4])->get();
-        $form_data = $journalEntryModel->whereIn('member_id', $memberIds)->whereIn('from_month',$inter)->orWhereIn('to_month',$inter)->get();
+        $form_data = $journalEntryModel->whereIn('member_id', $memberIds)->whereIn('from_month',$inter)->orWhereIn('to_month',$inter)->get()->toArray();
 
+        //echo count($form_data);
+ 
+        foreach($form_data as $value){
+           
+                $new_arr[$value['id']] = [
+                    'from_month' => $value['from_month'],
+                    'to_month' => $value['to_month'],
+                ];            
+        }
+        dd($new_arr);
+        
+
+        //var_dump($new_arr);
+        
 
        /*foreach($form_data as $jr2){
             var_dump($jr2['member_id']);

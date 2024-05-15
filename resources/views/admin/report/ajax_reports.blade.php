@@ -59,7 +59,7 @@
                                             $match = "N/A";
                                         }
                                     }
-                                    if($item['charge'] > $charge){
+                                    if($item['charge'] >= $charge){
                                         if($v == $month_arr1[0]){
                                             $match = $charge;
                                         }elseif($v == $month_arr1[1]){

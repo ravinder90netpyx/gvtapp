@@ -20,7 +20,7 @@ class helpers{
 		return $financeYears;
 	}
 	// format YYYY-MM
-	function get_financial_month_year($from_date, $to_date, $format){
+	function get_financial_month_year($from_date, $to_date, $format = 'Y-m'){
 		$m_arr=[];
 		foreach (CarbonPeriod::create(Carbon::parse($from_date), '1 month', Carbon::parse($to_date)) as $month) {
             $m_arr[] = $month->format($format);

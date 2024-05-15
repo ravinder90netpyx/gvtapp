@@ -13,6 +13,7 @@
 @section('scripts')
 <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-ui@1.10.5/keycode.js"></script> -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap-autocomplete@2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
 <script type="text/javascript">
 function form_submit(id = null){
     var series_id= $('#series_id').val();
@@ -141,10 +142,15 @@ function series_data(ser_id){
 }
 
 function datetimepicker_month(id){
+    date = new Date('2020-01-01');
+    // console.log(date);
     $('#'+id).datepicker({
-        showClear : true,
-        viewMode : 'years',
-        format : 'YYYY-MM'
+        format: "yyyy-mm",
+        startView: 1,
+        minViewMode: 1,
+        startDate : date,
+        container: '#cred_modal',
+        autoclose: true
     });
 }
 
@@ -177,10 +183,23 @@ $(function(){
     datetimepicker_month('from_month');
     datetimepicker_month('to_month');
 
-    $('#from_month').on('dp.update', function(e){
-        $('#from_month').datepicker('remove');
-        datetimepicker_month('from_month');
+    $('#from_month').on('change',function(){
+        date = new Date($(this).val());
+        // console.log(date);
+        $('#to_month').datepicker('setStartDate' , date);
     });
+
+
+    $('#to_month').on('change',function(){
+        date = new Date($(this).val());
+        // console.log(date);
+        $('#from_month').datepicker('setEndDate', date);
+    });
+
+    // $('#from_month').on('dp.update', function(e){
+    //     $('#from_month').datepicker('remove');
+    //     datetimepicker_month('from_month');
+    // });
 
 
     // $('.edit_but').on('click', function(e){
@@ -206,6 +225,18 @@ $(function(){
         if(val !== undefined && val !== null && val !== 0 && val !== ''){
             $('#series_id').prop('disabled', false);
             $('#member_mob').prop('disabled', false);
+            if ($('#member_mob').hasClass("select2-hidden-accessible")) {
+                $('#member_mob').select2('destroy');
+                $('#member_mob').select2({
+                    dropdownParent: $('#changable_div'),
+                    minimumInputLength : '1',
+                });
+            } else{
+                $('#member_mob').select2({
+                    dropdownParent: $('#changable_div'),
+                    minimumInputLength : '1',
+                });
+            }
             series_select(val);
         } else{
             $('#series_id').val('');
@@ -214,7 +245,13 @@ $(function(){
             $('#next_number').closest('.form-group-multi-input').find('label').html('Series<span class="req"></span>');
             $('#series_id').prop('disabled', true);
             $('#member_mob').prop('disabled', true);
+            if ($('#member_mob').hasClass("select2-hidden-accessible")) {
+                $('#member_mob').select2('destroy');
+            }
         }
+        $('#series_id').val('');
+        $('#member_mob').val('');
+        $('#next_number').val('');
     });
 
     $(document).on('click', '#back_date', function(){
@@ -241,22 +278,39 @@ $(function(){
         }
     });
 
-    $(document).on('input', '#member_mob', function(){
+    $(document).on('click input', '#member_mob', function(){
         $('#member_id').val('');
         // console.log(1);
-        this.setCustomValidity('Choose a valid member');
+        // this.setCustomValidity('Choose a valid member');
         org_id = $('#organization_id').val();
-        $(this).autoComplete({
-            resolverSettings : {
+        console.log(org_id);
+        $(this).select2({
+            dropdownParent: $('#changable_div'),
+            minimumInputLength : '1',
+            ajax: {
                 url : "{{ route('supanel.journal_entry.ajax_member') }}?org_id="+org_id,
-            },
-            minLength : 1,
-            appendTo : ".modal-body",
-            select : function( event, ui ) {
-                $('#member_id').val(ui.item.id);
-                this.setCustomValidity('');
+                // data:'json',
+                processResults: function(data) {
+                  // Transforms the top-level key of the response object from 'items' to 'results'
+                  return {
+                    results: data
+                  };
+                }
             }
         });
+        // $(this).autoComplete({
+        //     resolverSettings : {
+        //         url : "{{ route('supanel.journal_entry.ajax_member') }}?org_id="+org_id,
+        //     },
+        //     minLength : 1,
+        //     // appendTo : ".modal-body",
+        //     select:function ( el, item ) {
+        //         alert('1');
+        //         console.log(item);
+        //         $('#member_id').val(item);
+        //         this.setCustomValidity('');
+        //     }
+        // });
         
     });
 
@@ -488,7 +542,7 @@ $(function(){
         </div>
     </div>
 </form>
-<div class="modal fade" id="cred_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="cred_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-focus="false" role="dialog">
     <div class="modal-dialog modal-lg">
         {!! Form::open(['id'=>'form_id', 'method'=>$method, 'class'=>'needs-validation', 'novalidate']) !!}
             <div class="modal-content">
@@ -498,7 +552,7 @@ $(function(){
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="overflow:hidden;">
                     <div class="row" id="changable_div">
                         @include($module['main_view'].'.form_include',['bsmodal'=>true, 'module'=>$module])
                     </div>

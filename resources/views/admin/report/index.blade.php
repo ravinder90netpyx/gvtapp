@@ -13,9 +13,12 @@
 @endsection
 
 @section('scripts')
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
 <script type="text/javascript">
-    
-function datetimepicker_month(id){
+
+
+/*function datetimepicker_month(id){
     $('#'+id).datetimepicker({
         showClear : true,
         viewMode : 'years',
@@ -28,7 +31,20 @@ function datetimepicker_month(id){
             close : 'fa fa-remove'
         }
     });
+}*/
+
+function datetimepicker_month(id){
+    $('#'+id).datepicker({
+        format: "yyyy-mm",
+        startView: 2,
+        minViewMode: 1,
+        endDate: "+1y", 
+        // container: '.modal-body',
+        autoclose: true
+
+    });
 }
+
 
     $(function(){
         fromid = 'from_date';

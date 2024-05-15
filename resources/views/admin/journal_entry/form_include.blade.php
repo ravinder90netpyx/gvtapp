@@ -61,7 +61,9 @@
         @php $current_field = 'member_mob';
 
         @endphp
-        {!! Form::bsInput('search', $current_field, __('Search Member'), $form_data->$current_field ?? '', ['required', 'disabled'], ['vertical'=>true ]); !!}
+        {{-- {!! Form::bsInput('search', $current_field, __('Search Member'), $form_data->$current_field ?? '', ['required', 'disabled'], ['vertical'=>true ]); !!} --}}
+        {!! Form::bsSelect($current_field, __('Search Member'), [], $form_data->$current_field ?? '', ['required', $disable], ['vertical'=>true]); !!}
+
     @else
         @php $current_field = 'member_id';
             $row_data=[];
