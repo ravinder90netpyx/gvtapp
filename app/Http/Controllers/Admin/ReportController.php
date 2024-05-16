@@ -111,10 +111,10 @@ class ReportController extends Controller{
  
         foreach($form_data as $value){
            
-                $new_arr[$value['id']] = [
-                    'from_month' => $value['from_month'],
-                    'to_month' => $value['to_month'],
-                ];            
+            $new_arr[$value['member_id']] = [
+                'from_month' => $value['from_month'],
+                'to_month' => $value['to_month'],
+            ];            
         }
         dd($new_arr);
         

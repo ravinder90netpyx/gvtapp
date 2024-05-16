@@ -284,6 +284,7 @@ $(function(){
         // this.setCustomValidity('Choose a valid member');
         org_id = $('#organization_id').val();
         console.log(org_id);
+        $(this).select2('destroy');
         $(this).select2({
             dropdownParent: $('#changable_div'),
             minimumInputLength : '1',
