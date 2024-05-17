@@ -87,20 +87,24 @@ class MembersController extends Controller{
         $auth_user = \Illuminate\Support\Facades\Auth::user();
         $roles = $auth_user->roles()->pluck('id')->toArray();
         $module = $this->module;
-        //dd($request->input());
+        // dd($request->input());
         $request->validate([
             'name' => 'required|regex:/^[a-zA-Z\s]+$/',
             'unit_number' => 'required|integer||between:1,9999',
             'mobile_number' => 'required|unique:members,mobile_number',
             'charges_id' => 'required',
             'organization_id' =>in_array(1,$roles)? 'required':'nullable',
-            'alternate_name'=> 'required',
+            'alternate_name_1'=> 'required',
+            // 'alternate_name_2'=> 'required',
             'sublet_name'=> 'required',
             'alternate_number'=> 'required|unique:members,alternate_number'
         ]);
 
         if(!in_array(1,$roles)){
             $request->organization_id = $auth_user->organization_id;
+        }
+        if(!in_array(1, $roles)){
+            $request->merge([ 'organization_id' => $auth_user->organization_id ]);
         }
 
         $model->create($request->all());
@@ -129,7 +133,7 @@ class MembersController extends Controller{
             'mobile_number' => 'required|unique:members,mobile_number,'.$id,
             'charges_id' => 'required',
             'alternate_name'=> 'required',
-            'sublet_name'=> 'required',
+            'sublet_name_1'=> 'required',
             'alternate_number'=> 'required|unique:members,alternate_number'
         ]);
 

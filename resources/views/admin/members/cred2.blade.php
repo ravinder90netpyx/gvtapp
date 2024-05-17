@@ -45,7 +45,6 @@ $(function(){
 
     $('#mobile_number').on('input', function(){
         // abc=$(this).getValidationError();
-
         is_valid=$('#mobile_number').intlTelInput('isValidNumber');
         country_data=$('#mobile_number').intlTelInput('getSelectedCountryData');
         dial_code= country_data.dialCode;
@@ -60,14 +59,13 @@ $(function(){
             $(this).addClass('is-invalid');
             $(this).removeClass('is-valid');
         }
-
         // alert(this.checkValidity());
     });
 
     $('#alternate_number').on('input', function(){
         // abc=$(this).getValidationError();
-        is_valid=$('#mobile_number').intlTelInput('isValidNumber');
-        country_data=$('#mobile_number').intlTelInput('getSelectedCountryData');
+        is_valid=$('#alternate_number').intlTelInput('isValidNumber');
+        country_data=$('#alternate_number').intlTelInput('getSelectedCountryData');
         dial_code= country_data.dialCode;
         //console.log(is_valid);
         if(is_valid && dial_code==91){
@@ -152,8 +150,13 @@ $(function(){
                         @endif
 
                         <div class="col-md-6">
-                             @php $current_field = 'alternate_name'; @endphp
-                            {!! Form::bsText($current_field, __('Alternate Name'), $form_data->$current_field ?? '', ['required', 'pattern' => '[a-zA-Z\s]+'], ['vertical'=>true ]); !!}
+                             @php $current_field = 'alternate_name_1'; @endphp
+                            {!! Form::bsText($current_field, __('Alternate Name 1'), $form_data->$current_field ?? '', ['required'], ['vertical'=>true ]); !!}
+                        </div>
+
+                        <div class="col-md-6">
+                             @php $current_field = 'alternate_name_2'; @endphp
+                            {!! Form::bsText($current_field, __('Alternate Name 2'), $form_data->$current_field ?? '', [''], ['vertical'=>true ]); !!}
                         </div>
 
                         <div class="col-md-6">

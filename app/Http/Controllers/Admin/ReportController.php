@@ -89,7 +89,7 @@ class ReportController extends Controller{
 
         //$users = User::whereIn(‘name’,[‘John’,’Peter’])->orWhereIn(‘id’,[1,5])->get();
         
-        //dd($data);
+        //dd($memberIds);
         
         $all_dates = [];
         foreach($data as $jr){
@@ -105,29 +105,29 @@ class ReportController extends Controller{
 
         $new_arr = [];
         //$data = $journalEntryModel->select('from_month','to_month')->whereIn('member_id',[3,4])->get();
-        $form_data = $journalEntryModel->whereIn('member_id', $memberIds)->whereIn('from_month',$inter)->orWhereIn('to_month',$inter)->get()->toArray();
+        $form_data = $journalEntryModel->whereIn('member_id', $memberIds)->get()->toArray();
 
         //echo count($form_data);
- 
+        //dd($form_data);
         foreach($form_data as $value){
-           
-            $new_arr[$value['member_id']] = [
-                'from_month' => $value['from_month'],
-                'to_month' => $value['to_month'],
-            ];            
+            $temp_arr=[];
+           $temp_arr = $helpers->get_financial_month_year($value['from_month'],$value['to_month'], 'Y-m');
+           // $temp_arr['count'] = count($temp_arr);
+           if(!isset($new_arr[$value['member_id']])){
+                $new_arr[$value['member_id']] =$temp_arr;
+                $new_arr[$value['member_id']]['count'] = array(count($temp_arr));
+                // $new_arr[$value['member_id']]['count']] = [];
+
+           } else{
+                $new_arr[$value['member_id']]= array_merge($new_arr[$value['member_id']],$temp_arr);
+                $new_arr[$value['member_id']]['count'] = array_merge($new_arr[$value['member_id']]['count'],array(count($temp_arr)));                
+           }
+                        
         }
-        dd($new_arr);
+        //dd($new_arr);
         
-
-        //var_dump($new_arr);
-        
-
-       /*foreach($form_data as $jr2){
-            var_dump($jr2['member_id']);
-       }*/
-
        if($request->ajax()) {
-            $html_data = view($module['main_view'].'.ajax_reports', compact(['form_data', 'module',
+            $html_data = view($module['main_view'].'.ajax_reports', compact(['new_arr', 'module',
                 'month_arr','carbon','helpers']))->render();
             $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown, ]);
             return $response;

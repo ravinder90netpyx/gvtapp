@@ -21,7 +21,8 @@ class CreateMembersTable extends Migration
             $table->unsignedInteger('unit_number');
             $table->string('mobile_number')->unique();
             $table->unsignedBigInteger('charges_id');
-            $table->string('alternate_name');
+            $table->string('alternate_name_1');
+            $table->string('alternate_name_2')->nullable();
             $table->string('sublet_name');
             $table->string('alternate_number')->unique();
             

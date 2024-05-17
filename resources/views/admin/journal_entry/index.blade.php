@@ -1,3 +1,7 @@
+@php
+$auth_user = \Illuminate\Support\Facades\Auth::user();
+$roles = $auth_user->roles()->pluck('id')->toArray();
+@endphp
 @extends($folder['folder_name'].'.layouts.master')
 
 @section('title') {{ __('admin.text_html_title', ['module_name'=>$folder['module_name'], 'title'=>$title_shown]) }} @endsection
@@ -22,7 +26,7 @@ function form_submit(id = null){
     var organization_id = $('#organization_id').val();
     // var back_date= $('#back_date').val();
     // var member_mob= $('#member_mob').val();
-    var member_id= $('#member_id').val();
+    var member_id= $('#member_mob').val();
     var paid = $('#charge').val();
     var from_month = $('#from_month').val();
     var to_month = $('#to_month').val();
@@ -50,8 +54,8 @@ function form_submit(id = null){
         method: method,
         data: {'_token': '{!! csrf_token() !!}', 'series_id' : series_id, 'entry_date' : entry_date, 'entry_year' : entry_year, 'member_id' : member_id, 'organization_id' : organization_id, 'paid_money' : paid, 'from_month' : from_month, 'to_month': to_month, 'payment_mode':payment_mode},
         success: function(response){
-            $('#cred_modal').modal('hide');
-            location.reload();
+            // $('#cred_modal').modal('hide');
+            // location.reload();
         },
         error: function(error) {
             var msg = JSON.parse(error.responseText);
@@ -104,6 +108,10 @@ function ajax_show(id){
             $('#changable_div').html(response.html);
             $('#exampleModalLabel').text(response.title_shown);
             // console.log(action, method);
+            @if(!in_array(1, $roles))
+                $('#series_id').prop('disabled',false);
+                $('#member_mob').prop('disabled',false);
+            @endif
         },
         error: function(error) {
             console.error('Error fetching folder content:', error);
@@ -154,6 +162,26 @@ function datetimepicker_month(id){
     });
 }
 
+function autocomplete_trigger(org_id){
+    if ($('#member_mob').hasClass("select2-hidden-accessible")) {
+       $('#member_mob').select2('destroy');
+    }
+    $("#member_mob").select2({
+        dropdownParent: $('#changable_div'),
+        minimumInputLength : '1',
+        ajax: {
+            url : "{{ route('supanel.journal_entry.ajax_member') }}?org_id="+org_id,
+            // data:'json',
+            processResults: function(data) {
+              // Transforms the top-level key of the response object from 'items' to 'results'
+              return {
+                results: data
+              };
+            }
+        }
+    });
+}
+
 $(function(){
 
     $("#add_but").on('click',function(e){
@@ -163,8 +191,10 @@ $(function(){
         $('#changable_div input[type=text], input[type=search], input[type=hidden], input[type=number], input[type=date], input[type=radio], select').val('');
         $('#changable_div input[type=text], input[type=search], input[type=hidden], input[type=number], input[type=date], input[type=radio], select').prop('disabled', false);
         $('#next_number').prop('disabled',true);
+        @if($mode =='show' && in_array(1,$roles))
         $('#series_id').prop('disabled', true);
         $('#member_mob').prop('disabled', true);
+        @endif
         $('#charge').prop('disabled', true);
         @php
             $form_data=[];
@@ -225,18 +255,7 @@ $(function(){
         if(val !== undefined && val !== null && val !== 0 && val !== ''){
             $('#series_id').prop('disabled', false);
             $('#member_mob').prop('disabled', false);
-            if ($('#member_mob').hasClass("select2-hidden-accessible")) {
-                $('#member_mob').select2('destroy');
-                $('#member_mob').select2({
-                    dropdownParent: $('#changable_div'),
-                    minimumInputLength : '1',
-                });
-            } else{
-                $('#member_mob').select2({
-                    dropdownParent: $('#changable_div'),
-                    minimumInputLength : '1',
-                });
-            }
+            autocomplete_trigger(val);
             series_select(val);
         } else{
             $('#series_id').val('');
@@ -279,39 +298,27 @@ $(function(){
     });
 
     $(document).on('click input', '#member_mob', function(){
-        $('#member_id').val('');
-        // console.log(1);
-        // this.setCustomValidity('Choose a valid member');
-        org_id = $('#organization_id').val();
-        console.log(org_id);
-        $(this).select2('destroy');
-        $(this).select2({
-            dropdownParent: $('#changable_div'),
-            minimumInputLength : '1',
-            ajax: {
-                url : "{{ route('supanel.journal_entry.ajax_member') }}?org_id="+org_id,
-                // data:'json',
-                processResults: function(data) {
-                  // Transforms the top-level key of the response object from 'items' to 'results'
-                  return {
-                    results: data
-                  };
-                }
-            }
-        });
-        // $(this).autoComplete({
-        //     resolverSettings : {
-        //         url : "{{ route('supanel.journal_entry.ajax_member') }}?org_id="+org_id,
-        //     },
-        //     minLength : 1,
-        //     // appendTo : ".modal-body",
-        //     select:function ( el, item ) {
-        //         alert('1');
-        //         console.log(item);
-        //         $('#member_id').val(item);
-        //         this.setCustomValidity('');
-        //     }
-        // });
+        alert($(this).val());
+    //     $('#member_id').val('');
+    //     // console.log(1);
+    //     // this.setCustomValidity('Choose a valid member');
+    //     org_id = $('#organization_id').val();
+    //     alert(org_id);
+    //     console.log(org_id);
+    //     // autocomplete_trigger
+    //     // $(this).autoComplete({
+    //     //     resolverSettings : {
+    //     //         url : "{{ route('supanel.journal_entry.ajax_member') }}?org_id="+org_id,
+    //     //     },
+    //     //     minLength : 1,
+    //     //     // appendTo : ".modal-body",
+    //     //     select:function ( el, item ) {
+    //     //         alert('1');
+    //     //         console.log(item);
+    //     //         $('#member_id').val(item);
+    //     //         this.setCustomValidity('');
+    //     //     }
+    //     // });
         
     });
 

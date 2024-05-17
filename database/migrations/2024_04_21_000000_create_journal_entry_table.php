@@ -41,6 +41,7 @@ return new class extends Migration
             $table->string('to_month')->nullable();
             $table->enum('payment_mode', ['online', 'cash']);
             $table->unsignedInteger('charge')->nullable();
+            $table->enum('partial', ['0', '1'])->default('0');
             
             $table->enum('status', ['0', '1'])->default('1');
             $table->enum('delstatus', ['0', '1'])->default('0');

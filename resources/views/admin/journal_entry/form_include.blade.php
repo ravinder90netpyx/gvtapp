@@ -5,7 +5,7 @@
     $auth_user = Auth::user();  
     $roles = $auth_user->roles()->pluck('name','id')->toArray();
     if(in_array('1', array_keys($roles))){
- @endphp  
+ @endphp
 <div class="col-md-6">
     @php 
     $current_field = 'organization_id';
@@ -59,10 +59,13 @@
 <div class="col-md-6">
     @if($bsmodal==true)
         @php $current_field = 'member_mob';
-
+            $row_data = [];
+            if($mode =="show"){
+                $row_data[$form_data->$current_field] = $form_data['member_val'];
+            }
         @endphp
         {{-- {!! Form::bsInput('search', $current_field, __('Search Member'), $form_data->$current_field ?? '', ['required', 'disabled'], ['vertical'=>true ]); !!} --}}
-        {!! Form::bsSelect($current_field, __('Search Member'), [], $form_data->$current_field ?? '', ['required', $disable], ['vertical'=>true]); !!}
+        {!! Form::bsSelect($current_field, __('Search Member'), $row_data, $form_data->$current_field ?? '', ['required', $disable], ['vertical'=>true]); !!}
 
     @else
         @php $current_field = 'member_id';

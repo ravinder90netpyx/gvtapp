@@ -32,7 +32,8 @@ class Members extends Base_Model{
         'mobile_number',
         'charges_id',
         'organization_id',
-        'alternate_name',
+        'alternate_name_1',
+        'alternate_name_2',
         'sublet_name',
         'alternate_number'
     ];

@@ -37,6 +37,21 @@
                         </tr>
 
                         <tr>
+                            <td scope="row" class="text-left" style="width: 150px;">From Date</td>
+                            <td>{{ $from_month }}</td>
+                        </tr>
+
+                        <tr>
+                            <td scope="row" class="text-left" style="width: 150px;">To Date</td>
+                            <td>{{ $to_month }}</td>
+                        </tr>
+
+                        <tr>
+                            <td scope="row" class="text-left" style="width: 150px;">Mode of Transaction</td>
+                            <td>{{ $mode }}</td>
+                        </tr>
+
+                        <tr>
                             <td scope="row" class="text-left" style="width: 150px;">Serial Number</td>
                             <td>{{ $series }}</td>
                         </tr>

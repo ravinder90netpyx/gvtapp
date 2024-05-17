@@ -90,6 +90,7 @@ class JournalEntryController extends Controller{
     }
 
     public function store(Request $request, DefaultModel $model, helpers $helpers){
+        // dd($request->input());
         $module = $this->module;
         $auth_user = Auth::user();  
         $roles = $auth_user->roles()->pluck('name','id')->toArray();
@@ -110,40 +111,64 @@ class JournalEntryController extends Controller{
         }
         $from_month = $request->input('from_month');
         $to_month = $request->input('to_month');
-        if($to_month > $from_month){
-            $month_no = count($helpers->get_financial_month_year($from_month, $to_month ,'Y M'));
-            if($month_no>3) $validator->errors()->add('to_month',"Interval should be within the 3 month between From and To Month");
-        } else $validator->errors()->add('from_month',"From Month should not be ahead of To Month");
+        $member_je = $model->where([['member_id','=',$request->input('member_id')],['delstatus','<', '1'], ['status', '>', '0']])->get();
+        $mon_arr=[];
+        foreach($member_je as $je){
+            $temp_arr=[];
+            $temp_arr = $helpers->get_financial_month_year($je['from_month'], $je['to_month'],'Y-m');
+            $mon_arr = empty($temp_arr) ? $temp_arr : array_merge($mon_arr , $temp_arr);
+        }
+        $mont_arr = $helpers->get_financial_month_year($request->input('from_month'),$request->input('to_month'),'Y-m');
+        foreach($mont_arr as $mt){
+            if(in_array($mt,$mon_arr)){
+                // dump(1);
+                $validator->errors()->add('to_month','The money has already paid, please choose other month');
+                break;
+            }
+        }
+        // dd($mont_arr); exit();
+        if($to_month < $from_month) $validator->errors()->add('from_month',"From Month should not be ahead of To Month");
         $check = \App\Models\Members::where('id',$request->input('member_id'))->count();
         
         $series_number = \App\Models\Series::find($request->input('series_id'));
         // if(empty($check)) $validator->errors()->add('member_id',"Choose a valid Member");
         if(empty($series_number->count)) $validator->errors()->add('series_id',"Choose a valid Series");
+        
         $request->validate($rules);
+        $request_data = $request->input();
+
         $member = \App\Models\Members::find($request->input('member_id'));
         $charge = \App\Models\Charges::find($member->charges_id)->rate;
         $paid = $request->input('paid_money');
-        $count=0;
-        while($paid > 0){
-            if($paid>=$charge){
-                $paid = $paid - $charge;
-            } else{
-                $paid =0;
-            }
-            $count++;
-        }
         $month_arr = $helpers->get_financial_month_year($request->input('from_month'), $request->input('to_month'));
+        if(!empty($paid)){
+            $count=0;
+            $count =ceil($paid/$charge);
+            // $month_arr = $helpers->get_financial_month_year($request->input('from_month'), $request->input('to_month'));
+            if($count<count($month_arr)){
+                $actu_month = array_slice( $month_arr , 0, $count);
+                // dump($count);
+                // dd($actu_month);
+                $request_data['from_month'] = $actu_month[0];
+                $request_data['to_month'] = $actu_month[$count-1];
+            }
+        } else{
+            $request->paid_money = count($month_arr)*$charge;
+        }
         // $mouth_arr
         $name = $model->where('organization_id',$request->input('organization_id'))->orderBy('entry_date','DESC')->first();
         $date = $request->input('entry_date');
         $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
         if(strtotime($date) > strtotime($pre_date)){
             $series_num =$series_number->name.$series_number->number_separator.str_pad($series_number->next_number,$series_number->min_length,'0', STR_PAD_LEFT);
-            $charge = empty($request->input('paid_money')) ? $charge : $request->input('paid_money');
+            $charge = $request->paid_money;
             $next_number = $series_number->next_number;
             $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
-            $request->merge([ 'series_number' => $series_num, 'series_next_number' => $next_number, 'charge' => $charge ]);
-            $fetch_data = $model->create($request->all());
+            $request_data['charge'] = $charge;
+            $request_data['series_next_number'] = $next_number;
+            $request_data['series_number'] = $series_num;
+            // $request->merge([ 'series_number' => $series_num, 'series_next_number' => $next_number, 'charge' => $charge ]);
+            $fetch_data = $model->create($request_data);
             $now=Carbon::now();
             $store_path = "upload/pdf_files/";
             $pdfFilePath = "upload/pdf_files/";
@@ -154,6 +179,9 @@ class JournalEntryController extends Controller{
                 'mobile_number' => $member->mobile_number,
                 'charge' => $charge,
                 'series' => $series_num,
+                'from_month' => $fetch_data->from_month,
+                'to_month' => $fetch_data->to_month,
+                'mode' => $fetch_data->payment_mode,
                 'date' => $request->input('entry_date'),
                 'year' => $request->input('entry_year')
             ];
@@ -170,7 +198,9 @@ class JournalEntryController extends Controller{
         $module = $this->module;
         $folder = $this->folder;
         $form_data = $model->find($id);
-        $form_data['member_mob'] = \App\Models\Members::find($form_data->member_id)->mobile_number;
+        $form_data['member_mob'] = $form_data['member_id'];
+        $member_data = \App\Models\Members::find($form_data['member_id']);
+        $form_data['member_val'] = 'Name:'.$member_data['name'].' Unit Number:'.$member_data['unit_number'];
         $title_shown = 'Show '.$module['main_heading'];
         $mode = 'show';
         $financial_years = $helpers->get_financial_years($module['start_date'], null);
@@ -283,7 +313,7 @@ class JournalEntryController extends Controller{
         $org_id = $request->input('org_id');
         $arr=[];
         $models =new \App\Models\Members();
-        $name = $models->select('id', 'name', 'unit_number', 'mobile_number')->where([['delstatus', '<', '1'],['status', '>', '0'], ['organization_id', '=', $org_id]])->where(DB::raw("CONCAT_WS(' ', name, unit_number, mobile_number, alternate_name, alternate_number, sublet_name)"), 'like', '%'.$input.'%')
+        $name = $models->select('id', 'name', 'unit_number', 'mobile_number')->where([['delstatus', '<', '1'],['status', '>', '0'], ['organization_id', '=', $org_id]])->where(DB::raw("CONCAT_WS(' ', name, unit_number, mobile_number, alternate_name_1, alternate_name_2, alternate_number, sublet_name)"), 'like', '%'.$input.'%')
             ->get()->toArray();
         $count=0;
         foreach($name as $nm){
@@ -293,6 +323,7 @@ class JournalEntryController extends Controller{
             $count++;
         }
         return $arr;
+
     }
 
     public function series_select(Request $request) {
