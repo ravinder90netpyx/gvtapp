@@ -42,7 +42,8 @@ class Journal_Entry extends Base_Model{
         'charge',
         'from_month',
         'to_month',
-        'payment_mode'
+        'payment_mode',
+        'partial'
     ];
 
     public static function getPaymentMode(){

@@ -36,21 +36,43 @@
 function datetimepicker_month(id){
     $('#'+id).datepicker({
         format: "yyyy-mm",
-        startView: 2,
+        startView: 1,
+        numberOfMonths: 1,
         minViewMode: 1,
-        endDate: "+1y", 
+        startDate: '2021-01',
+    });
+}
+function datetimepicker_month2(id,from_date){
+    console.log("check d2");
+    $('#'+id).datepicker({
+        format: "yyyy-mm",
+        startView: 1,
+        numberOfMonths: 1,
+        minViewMode: 1,
+        startDate: '2023-02',
+        endDate: '2024-02',
         // container: '.modal-body',
         autoclose: true
 
     });
 }
+function check(){
+    console.log("check");
+}
+$("#from_date").change(function(){
+  var from_date = $(this).val();
+  console.log(from_date);
+  datetimepicker_month2('to_date',from_date);
 
+}); 
 
     $(function(){
         fromid = 'from_date';
         toid = 'to_date';
         datetimepicker_month(fromid);
-        datetimepicker_month(toid);
+        datetimepicker_month2(toid);
+
+
 
 
         /** Order By Date Start **/
@@ -207,6 +229,9 @@ function datetimepicker_month(id){
                             <th style="width:40px">{{ __('admin.text_idcheck') }}</th>
                             <th>{{ __('admin.text_name') }}</th>
                             <th>{{__('Mobile Number') }}</th>
+                            @foreach($month_arr as $mn)
+                                <th>{{ $mn }}</th>
+                            @endforeach
                             <th style="width:150px">{{ __('admin.text_date_created') }}</th>
                         </tr>
                     </thead>

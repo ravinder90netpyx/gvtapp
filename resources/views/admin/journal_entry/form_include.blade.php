@@ -70,7 +70,7 @@
     @else
         @php $current_field = 'member_id';
             $row_data=[];
-            $data_select=\App\Models\Members::where([['delstatus','<','1'],['status','>','0'], ['orga']])->get();
+            $data_select=\App\Models\Members::where([['delstatus','<','1'],['status','>','0'], ['organisation_id']])->get();
             foreach($data_select as $ds) $row_data[$ds->id]= $ds->name;
         @endphp
         {!! Form::bsSelect($current_field, __('Member'), $row_data, $form_data->$current_field ?? '', ['required', $disable], ['vertical'=>true]); !!}

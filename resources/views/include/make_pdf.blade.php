@@ -12,9 +12,56 @@
     </style>
 </head>
 <body>
-    <h2 class="text-center">Journal Entry</h2>
+
+    {{-- <div class="entry-section" style="text-align: center;">
+        <h2 class="text-center">Journal Entry</h2>
+            <p>Payment Receipt</p>
+            <p style="text-align: left;">Thank You for Paying Monthly Maintenance. Here is the payment receipt.</p>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <td>Name</td>
+                        <td>>{{ $name }}</td>
+                    </tr>
+                    <tr>
+                        <td>Contact Number</td>
+                        <td>{{ $mobile_number }}</td>
+                    </tr>
+                    <tr>
+                        <td>Charge</td>
+                        <td>xxxx</td>
+                    </tr>
+                    <tr>
+                        <td>xxxx</td>
+                        <td>xxxx</td>
+                    </tr>
+                    <tr>
+                        <td>xxxx</td>
+                        <td>xxxx</td>
+                    </tr>
+                    <tr>
+                        <td>xxxx</td>
+                        <td>xxxx</td>
+                    </tr>
+                    <tr>
+                        <td>xxxx</td>
+                        <td>xxxx</td>
+                    </tr>
+                    <tr>
+                        <td>xxxx</td>
+                        <td>xxxx</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p>xxxxxx</p>
+        <p>xxxxxx</p>
+        <p>xxxxxx</p>
+        <p>xxxxxx</p>
+    </div> --}}
  
-    <div class="row">
+    {{-- <div class="row">
         <div class="col">
             <div class="margin-top">
                 <p> Dear {{ $name }},</p>
@@ -70,7 +117,7 @@
                 </table>
             </div>
         </div>
-    </div>
+    </div> --}}
     <br>
     <br>
     <div class="footer margin-top">

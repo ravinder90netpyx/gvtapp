@@ -34,7 +34,7 @@ class ReportController extends Controller{
         $this->middleware('permission:'.$module['permission_group'].'.manage', ['only' => ['index']]); // .report after migration
     }
 
-    public function index(Request $request, DefaultModel $model, helpers $helpers){
+    public function index(Request $request, DefaultModel $model, helpers $helpers,JournalEntryModel $journalEntryModel){
         $carbon = new Carbon();
         $module = $this->module;
         $perpage = $request->perpage ?? $module['default_perpage'];
@@ -51,16 +51,22 @@ class ReportController extends Controller{
 
         $data = $model_get->paginate($perpage)->onEachSide(2);
 
+        $format = "Y-m";
+        $month_arr = [];
         $end_month = Carbon::now()->format('Y-m');
         $start_month = Carbon::now()->subMonth()->format('Y-m');
-        $format = "Y-m";
+
+        $month_arr = $helpers->get_financial_month_year($start_month, $end_month, $format);
+        $form_data = $journalEntryModel->where('from_month',$start_month)->get()->toArray();
+
+        
 
         // $month_arr = $helpers->get_financial_month_year($start_month, $end_month, $format);
 
         $title_shown = 'Manage '.$module['main_heading'].'s';
         $folder = $this->folder;
 
-        return view($module['main_view'].'.index', compact('data', 'model', 'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);
+        return view($module['main_view'].'.index', compact('data', 'model','month_arr' ,'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);
     }
 
     public function getReportByDate(Request $request, helpers $helpers,JournalEntryModel $journalEntryModel){

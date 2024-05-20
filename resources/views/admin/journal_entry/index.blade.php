@@ -54,8 +54,8 @@ function form_submit(id = null){
         method: method,
         data: {'_token': '{!! csrf_token() !!}', 'series_id' : series_id, 'entry_date' : entry_date, 'entry_year' : entry_year, 'member_id' : member_id, 'organization_id' : organization_id, 'paid_money' : paid, 'from_month' : from_month, 'to_month': to_month, 'payment_mode':payment_mode},
         success: function(response){
-            // $('#cred_modal').modal('hide');
-            // location.reload();
+            $('#cred_modal').modal('hide');
+            location.reload();
         },
         error: function(error) {
             var msg = JSON.parse(error.responseText);
@@ -77,7 +77,6 @@ function form_submit(id = null){
                     $('#member_mob').closest('div').find('.invalid-feedback').text("Choose a valid Member");
                 }
             }
-            // console.log(err);
             console.error('Error fetching folder content:', error);
         }
     });
@@ -215,14 +214,12 @@ $(function(){
 
     $('#from_month').on('change',function(){
         date = new Date($(this).val());
-        // console.log(date);
         $('#to_month').datepicker('setStartDate' , date);
     });
 
 
     $('#to_month').on('change',function(){
         date = new Date($(this).val());
-        // console.log(date);
         $('#from_month').datepicker('setEndDate', date);
     });
 
@@ -297,8 +294,7 @@ $(function(){
         }
     });
 
-    $(document).on('click input', '#member_mob', function(){
-        alert($(this).val());
+    // $(document).on('click input', '#member_mob', function(){
     //     $('#member_id').val('');
     //     // console.log(1);
     //     // this.setCustomValidity('Choose a valid member');
@@ -320,14 +316,13 @@ $(function(){
     //     //     }
     //     // });
         
-    });
+    // });
 
     $(document).on('change','#member_mob', function(){
         if(this.validationMessage === ''){
             $('.charge').show();
         } else{
             $('.charge').hide();
-            // alert(2);
         }
     });
 
@@ -346,7 +341,12 @@ $(function(){
             $('#charge').prop('disabled', false);
         } else{
             $('#charge').prop('disabled', true);
+            $('#charge').val('');
         }
+    });
+
+    $('#charge').on('change', function(){
+        
     });
 
     $('#entry_year').on('change',function(){
@@ -567,7 +567,8 @@ $(function(){
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
-                    <button type="submit" id="form_btn_submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" id="form_btn_submit" value="submit" class="btn btn-primary">Submit</button>
+                    <!-- <button type="submit" id="form_btn_save_submit" value = "save_submit" class="btn btn-primary">Save & Submit</button> -->
                 </div>
             </div>
         {!! Form::close() !!}

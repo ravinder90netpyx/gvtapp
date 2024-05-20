@@ -90,7 +90,7 @@ class JournalEntryController extends Controller{
     }
 
     public function store(Request $request, DefaultModel $model, helpers $helpers){
-        // dd($request->input());
+        // dd($request);
         $module = $this->module;
         $auth_user = Auth::user();  
         $roles = $auth_user->roles()->pluck('name','id')->toArray();
@@ -106,6 +106,7 @@ class JournalEntryController extends Controller{
             'to_month' => 'required'
         ];
         $validator=\Illuminate\Support\Facades\Validator::make([], []);
+        $report_last_month = $report_model->where([['member_id','=',$request_data['member_id']],['delstatus','<','1'], ['status','>','0']])->orderBy('id', 'DESC')->first();
         if(in_array('1', array_keys($roles))){
             $rules['organization_id'] = 'required|numeric';
         }
@@ -113,13 +114,15 @@ class JournalEntryController extends Controller{
         $to_month = $request->input('to_month');
         $member_je = $model->where([['member_id','=',$request->input('member_id')],['delstatus','<', '1'], ['status', '>', '0']])->get();
         $mon_arr=[];
+        $last_month = $report_last_month->month;
+        if($from_month != $last_month) $validator->errors()->add('from_month','The money of previous month is not paid kindly pay the previous month money before paying this month');
         foreach($member_je as $je){
             $temp_arr=[];
             $temp_arr = $helpers->get_financial_month_year($je['from_month'], $je['to_month'],'Y-m');
             $mon_arr = empty($temp_arr) ? $temp_arr : array_merge($mon_arr , $temp_arr);
         }
-        $mont_arr = $helpers->get_financial_month_year($request->input('from_month'),$request->input('to_month'),'Y-m');
-        foreach($mont_arr as $mt){
+        $month_arr = $helpers->get_financial_month_year($from_month,$to_month,'Y-m');
+        foreach($month_arr as $mt){
             if(in_array($mt,$mon_arr)){
                 // dump(1);
                 $validator->errors()->add('to_month','The money has already paid, please choose other month');
@@ -136,12 +139,33 @@ class JournalEntryController extends Controller{
         
         $request->validate($rules);
         $request_data = $request->input();
+        $report_data = [];
 
         $member = \App\Models\Members::find($request->input('member_id'));
         $charge = \App\Models\Charges::find($member->charges_id)->rate;
         $paid = $request->input('paid_money');
-        $month_arr = $helpers->get_financial_month_year($request->input('from_month'), $request->input('to_month'));
+        // $month_arr = $helpers->get_financial_month_year($request->input('from_month'), $request->input('to_month'));
+        $report_model = new \App\Models\Report();
+        $paid_m = empty($paid) ? $charge*count($month_arr) : $paid;
+        $pending_mon = $report_last_month['money_pending'];
+        $paid_m = $paid_m - $pending_mon;
+        foreach($month_arr as $mt){
+            $report_data['month'] = $mt;
+            $report_data['member_id'] = $request_data['member_id'];
+            if($charge <= $paid_m){
+                $request_data['money_paid'] = $charge;
+                $request_data['money_pending'] = 0;
+                $paid_m = $paid_m - $charge;
+            } else{
+                $request_data['money_paid'] = $paid_m;
+                $request_data['money_pending'] = $charge - $paid_m;
+                $paid_m = 0;
+            }
+            $upd_rep = $report_model->create($request_data);
+            $request_data =[];
+        }
         if(!empty($paid)){
+            $request_data['partial'] = ($paid%$charge > 0)? '1':'0';
             $count=0;
             $count =ceil($paid/$charge);
             // $month_arr = $helpers->get_financial_month_year($request->input('from_month'), $request->input('to_month'));
@@ -185,6 +209,7 @@ class JournalEntryController extends Controller{
                 'date' => $request->input('entry_date'),
                 'year' => $request->input('entry_year')
             ];
+
             $pdf = PDF::loadView('include.make_pdf', $data);
             // Storage::put('upload/pdf_files/'.$file_name.'.pdf');
             $pdf->save(public_path("upload/pdf_files/{$file_name}.pdf"));
