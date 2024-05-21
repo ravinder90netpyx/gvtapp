@@ -28,7 +28,7 @@ return new class extends Migration
         Schema::create('report', function (Blueprint $table) {
             $table->id();
 
-            $table->unsignedBigInteger('month');
+            $table->string('month');
             $table->unsignedBigInteger('member_id');
             // $table->unsignedBigInteger('rate');
             $table->unsignedBigInteger('money_paid')->nullable();

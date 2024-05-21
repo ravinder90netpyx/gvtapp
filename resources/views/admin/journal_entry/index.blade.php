@@ -190,7 +190,8 @@ $(function(){
         $('#changable_div input[type=text], input[type=search], input[type=hidden], input[type=number], input[type=date], input[type=radio], select').val('');
         $('#changable_div input[type=text], input[type=search], input[type=hidden], input[type=number], input[type=date], input[type=radio], select').prop('disabled', false);
         $('#next_number').prop('disabled',true);
-        @if($mode =='show' && in_array(1,$roles))
+        // $('.charge').hide();
+        @if($mode =='show' || in_array(1,$roles))
         $('#series_id').prop('disabled', true);
         $('#member_mob').prop('disabled', true);
         @endif

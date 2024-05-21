@@ -42,15 +42,17 @@ function datetimepicker_month(id){
         startDate: '2021-01',
     });
 }
-function datetimepicker_month2(id,from_date){
-    console.log("check d2");
+function datetimepicker_month2(id,from_date,to_date){
+    console.log("in func=> "+to_date)
+    console.log("from func=> "+from_date)
+
     $('#'+id).datepicker({
         format: "yyyy-mm",
         startView: 1,
         numberOfMonths: 1,
         minViewMode: 1,
-        startDate: '2023-02',
-        endDate: '2024-02',
+        startDate: from_date,
+        endDate: to_date,
         // container: '.modal-body',
         autoclose: true
 
@@ -61,18 +63,29 @@ function check(){
 }
 $("#from_date").change(function(){
   var from_date = $(this).val();
-  console.log(from_date);
-  datetimepicker_month2('to_date',from_date);
+  var value = $("#to_date").val();
+  console.log(value)
+  if(value){
+    $('#to_date').val('');
+  }
+  console.log($("#to_date").val())
+   var myDate = new Date(from_date);
+   var newdt =  myDate.setFullYear(myDate.getFullYear() + 1)
+   var to_date = myDate.getFullYear()+'-'+myDate.getMonth();
+
+   console.log("to =>> "+to_date);
+   // console.log("work");
+   datetimepicker_month2('to_date',from_date,to_date);
 
 }); 
+
 
     $(function(){
         fromid = 'from_date';
         toid = 'to_date';
         datetimepicker_month(fromid);
-        datetimepicker_month2(toid);
-
-
+        //datetimepicker_month2(toid);
+        
 
 
         /** Order By Date Start **/

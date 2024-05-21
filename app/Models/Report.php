@@ -5,7 +5,7 @@ use App\Models\Base_Model;
 #use Illuminate\Support\Facades\DB;
 
 class Report extends Base_Model{
-    protected $table = 'report_table';
+    protected $table = 'report';
     #protected $columnPrefix = '';
     protected $primaryKey = 'id';
     protected $nameColumn = 'month';
