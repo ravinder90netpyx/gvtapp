@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Members as DefaultModel;
 use App\Models\Journal_Entry as JournalEntryModel;
+use App\Models\Report as ReportModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
@@ -69,7 +70,7 @@ class ReportController extends Controller{
         return view($module['main_view'].'.index', compact('data', 'model','month_arr' ,'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);
     }
 
-    public function getReportByDate(Request $request, helpers $helpers,JournalEntryModel $journalEntryModel){
+    public function getReportByDate(Request $request, DefaultModel $memberModel ,helpers $helpers,JournalEntryModel $journalEntryModel,ReportModel $reportModel){
         $carbon = new Carbon();
         $module = $this->module;
         $title_shown = 'Manage '.$module['main_heading'].'s';
@@ -79,61 +80,11 @@ class ReportController extends Controller{
         $member_modal = new \App\Models\Members(); 
         $format = "Y-m";
         $month_arr = $helpers->get_financial_month_year($from_date, $to_date, $format);
-        /*$format = "M Y";
-        $month_arr2 = $helpers->get_financial_month_year($start_date, $end_date, $format);*/
-        //var_dump($month_arr);
-        
-        $journalEntries = [];
-        //$journalEntries = $journalEntryModel->whereIn('member_id', [3,4])->whereIn('from_month',$month_arr)->orWhereIn('to_month',$month_arr)->get();
-        $member_data= 
-        $data =[];
-        $data = $journalEntryModel->select('from_month','to_month')->whereIn('member_id',$memberIds)->get();
-
-
-        
-        //$data2 = $models->select('id', 'name')->where('organization_id',$input)->get()->toArray();
-
-        //$users = User::whereIn(‘name’,[‘John’,’Peter’])->orWhereIn(‘id’,[1,5])->get();
-        
-        //dd($memberIds);
-        
-        $all_dates = [];
-        foreach($data as $jr){
-            array_push($all_dates,$jr['from_month']);
-            array_push($all_dates,$jr['to_month']);
-        }
-
-        //dd($all_dates);
-
-        $inter = [];
-        $inter = array_intersect($month_arr, $all_dates);
-        //var_dump($inter);
-
-        $new_arr = [];
-        //$data = $journalEntryModel->select('from_month','to_month')->whereIn('member_id',[3,4])->get();
-        $form_data = $journalEntryModel->whereIn('member_id', $memberIds)->get()->toArray();
-
-        //echo count($form_data);
-        //dd($form_data);
-        foreach($form_data as $value){
-            $temp_arr=[];
-           $temp_arr = $helpers->get_financial_month_year($value['from_month'],$value['to_month'], 'Y-m');
-           // $temp_arr['count'] = count($temp_arr);
-           if(!isset($new_arr[$value['member_id']])){
-                $new_arr[$value['member_id']] =$temp_arr;
-                $new_arr[$value['member_id']]['count'] = array(count($temp_arr));
-                // $new_arr[$value['member_id']]['count']] = [];
-
-           } else{
-                $new_arr[$value['member_id']]= array_merge($new_arr[$value['member_id']],$temp_arr);
-                $new_arr[$value['member_id']]['count'] = array_merge($new_arr[$value['member_id']]['count'],array(count($temp_arr)));                
-           }
-                        
-        }
-        //dd($new_arr);
+        $report = $reportModel->whereIn('member_id',$memberIds)->get();
+        $members = $memberModel->whereIn('id',$memberIds)->get();
         
        if($request->ajax()) {
-            $html_data = view($module['main_view'].'.ajax_reports', compact(['new_arr', 'module',
+            $html_data = view($module['main_view'].'.ajax_reports', compact(['report','members','module',
                 'month_arr','carbon','helpers']))->render();
             $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown, ]);
             return $response;

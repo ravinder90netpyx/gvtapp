@@ -119,19 +119,45 @@ class JournalEntryController extends Controller{
                 function($attribute, $value, $fail){
                     $request = Request();
                     // dd($value);
-                    $report_model = \App\Models\Report::where([['month','=',$value],['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('id', 'DESC')->first();
-                    dd($report_model);
+                    $report_model = \App\Models\Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','=', '0']])->orderBy('id', 'DESC')->first();
+                    $report_model2 = \App\Models\Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('id', 'ASC')->first();
+                    // dd($report_model2);
                     $last_month = $report_model->month ?? '0000-00';
+                    $act_from_mon = $report_model2->month ?? '9999-12';
                     $to_month = $request->input('to_month');
                     if($value <= $last_month){
-                        $fail('The money of previous month is not paid kindly pay the previous month money before paying this month');
+                        $fail('The money for further month is paid kindly select the next month to pay the money');
+                    }
+                    if($value>$act_from_mon){
+                        $fail('The money of previous month is not paid please select previous month to pay');
                     }
                     if($to_month < $value){
                         $fail('From Month should not be ahead of To Month');
                     }
                 }
             ],
-            'to_month' => 'required'
+            'to_month' =>
+            [
+                'required',
+                function($attribute, $value, $fail){
+                    $hlp = new helpers;
+                    $request = Request();
+                    $member = \App\Models\Members::find($request->input('member_id'));
+                    $charge = \App\Models\Charges::find($member->charges_id)->rate;
+                    $mon_arr = $hlp->get_financial_month_year($request->from_month, $value,'Y-m');
+                    // $mon_arr = $helpers->get_financial_month_year($request->from_month, $value);
+                    $report_model2 = \App\Models\Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('id', 'ASC')->first();
+                    $pending_money = $report_model2->money_pending ?? 0;
+                    $count= count($mon_arr);
+                    if(!empty($report_model2->money_pending)) $count =$count-1;
+                    if(!empty($request->paid_money)){
+                        if($count !=ceil(($request->paid_money-$pending_money)/$charge)){
+                            $fail('Amount Paid and selected month are not proportional kindly adjust the value or month');
+                        }
+                    }
+
+                }
+            ]
         ];
         $validator=\Illuminate\Support\Facades\Validator::make([], []);
         $report_model = new \App\Models\Report();
@@ -151,21 +177,21 @@ class JournalEntryController extends Controller{
             $temp_arr = $helpers->get_financial_month_year($je['from_month'], $je['to_month'],'Y-m');
             $mon_arr = empty($temp_arr) ? $temp_arr : array_merge($mon_arr , $temp_arr);
         }
-        if($from_month <= $last_month) $validator->errors()->add('to_month', 'The money is already paid for that month kindly choose any further month');
+        // if($from_month <= $last_month) $validator->errors()->add('to_month', 'The money is already paid for that month kindly choose any further month');
         $month_arr = $helpers->get_financial_month_year($from_month,$to_month,'Y-m');
         foreach($month_arr as $mt){
             if(in_array($mt,$mon_arr)){
-                $validator->errors()->add('to_month','The money has already paid, please choose other month');
+                // $validator->errors()->add('to_month','The money has already paid, please choose other month');
                 break;
             }
         }
         // dd($mont_arr); exit();
-        if($to_month < $from_month) $validator->errors()->add('from_month',"From Month should not be ahead of To Month");
+        // if($to_month < $from_month) $validator->errors()->add('from_month',"From Month should not be ahead of To Month");
         $check = \App\Models\Members::where('id',$request->input('member_id'))->count();
         
         $series_number = \App\Models\Series::find($request->input('series_id'));
         // if(empty($check)) $validator->errors()->add('member_id',"Choose a valid Member");
-        if(empty($series_number->count)) $validator->errors()->add('series_id',"Choose a valid Series");
+        // if(empty($series_number->count)) $validator->errors()->add('series_id',"Choose a valid Series");
         
         $request->validate($rules);
         $request_data = $request->input();
@@ -176,13 +202,15 @@ class JournalEntryController extends Controller{
         $paid = $request->input('paid_money');
         // $month_arr = $helpers->get_financial_month_year($request->input('from_month'), $request->input('to_month'));
         $paid_m = empty($paid) ? $charge*count($month_arr) : $paid;
-        $pending_mon = $report_last_month['money_pending'] ?? 0;
-        $paid_m = $paid_m - $pending_mon;
+        // $pending_mon = $report_last_month['money_pending'] ?? 0;
+        $paid_m = $paid_m;
 
         // dd($month_arr);
+        // $tempe_arr = [];
         foreach($month_arr as $mt){
             // dd($mt);
             $report_models = $report_model->where([['month', '=',$mt], ['member_id','=',$request_data['member_id']], ['delstatus','<','1'],['status','>','0']])->first();
+            // $tempe_arr[] = $report_models->id;
             if(empty($report_models)){
                 $report_data['month'] = $mt;
 
@@ -201,19 +229,20 @@ class JournalEntryController extends Controller{
                 $money = $report_models->money_pending;
                 if(!empty($money)){
                     if($money <= $paid_m){
-                        $report_data['money_paid'] = $money;
+                        $report_data['money_paid'] = $charge;
                         $report_data['money_pending'] = 0;
                         $paid_m = $paid_m - $money;
                     } else{
-                        $report_data['money_paid'] = $paid_m;
+                        $report_data['money_paid'] = $paid_m + $report_models->money_paid;
                         $report_data['money_pending'] = $money - $paid_m;
                         $paid_m = 0;
                     }
-                    $report_models->update($report_data);
+                    $report_model->where('id','=',$report_models->id)->update($report_data);
                 }
             }
             $report_data =[];
         }
+        // dd($tempe_arr);
         if(!empty($paid)){
             $request_data['partial'] = ($paid%$charge > 0)? '1':'0';
             $count=0;
@@ -223,8 +252,8 @@ class JournalEntryController extends Controller{
                 $actu_month = array_slice( $month_arr , 0, $count);
                 // dump($count);
                 // dd($actu_month);
-                $request_data['from_month'] = $actu_month[0];
-                $request_data['to_month'] = $actu_month[$count-1];
+                // $request_data['from_month'] = $actu_month[0];
+                // $request_data['to_month'] = $actu_month[$count-1];
             }
         } else{
             $request->paid_money = count($month_arr)*$charge;

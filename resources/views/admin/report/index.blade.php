@@ -45,6 +45,11 @@ function datetimepicker_month(id){
 function datetimepicker_month2(id,from_date,to_date){
     console.log("in func=> "+to_date)
     console.log("from func=> "+from_date)
+    var value = $("#to_date").val();
+    if(value){
+        $('#to_date').datepicker('update', '');
+        $('#to_date').val('');
+    }
 
     $('#'+id).datepicker({
         format: "yyyy-mm",
@@ -54,28 +59,35 @@ function datetimepicker_month2(id,from_date,to_date){
         startDate: from_date,
         endDate: to_date,
         // container: '.modal-body',
-        autoclose: true
+        autoclose: true,
 
     });
 }
-function check(){
-    console.log("check");
-}
+
+
 $("#from_date").change(function(){
   var from_date = $(this).val();
   var value = $("#to_date").val();
-  console.log(value)
-  if(value){
-    $('#to_date').val('');
-  }
-  console.log($("#to_date").val())
-   var myDate = new Date(from_date);
-   var newdt =  myDate.setFullYear(myDate.getFullYear() + 1)
-   var to_date = myDate.getFullYear()+'-'+myDate.getMonth();
+  console.log("value=>><> "+value);
+  // if(value){
+  //   $('#to_date').datepicker('update', '');
+  //   $('#to_date').val('');
+  // }
 
-   console.log("to =>> "+to_date);
-   // console.log("work");
-   datetimepicker_month2('to_date',from_date,to_date);
+   var myDate = new Date(from_date);
+
+   var newdt =  myDate.setFullYear(myDate.getFullYear() + 1);
+   var month = myDate.getMonth();
+   if(month>9){
+        var to_date = myDate.getFullYear()+'-'+month; 
+   } else{
+        var to_date = myDate.getFullYear()+'-0'+month;
+   }   
+   var date = new Date(to_date);
+$('#to_date').datepicker('setEndDate' , date);
+$('#to_date').datepicker('setStartDate' , from_date);
+
+   //datetimepicker_month2('to_date',from_date,to_date);
 
 }); 
 
@@ -84,7 +96,7 @@ $("#from_date").change(function(){
         fromid = 'from_date';
         toid = 'to_date';
         datetimepicker_month(fromid);
-        //datetimepicker_month2(toid);
+        datetimepicker_month(toid);
         
 
 
@@ -267,6 +279,30 @@ $("#from_date").change(function(){
 
                                     <td>{{ $item['name'] }}</td>
                                     <td>{{ $item['mobile_number'] }}</td>
+                                    @php
+                                    $report=\App\Models\Report::where('member_id',$item['id'])->get();
+                                    $match = 'N/A';
+                                    $mm = [];
+                                    $money = []; 
+                                    foreach($report as $rp){
+                                        $mm[] = $rp['month'];
+                                        $money[] = $rp['money_paid'];
+                                    }
+
+                                    foreach($month_arr as $k => $v) {
+                                        foreach($report as $ke => $rpt){
+                                            if(in_array($v,$mm)) {
+                                                if($rpt['month'] == $v){
+                                                    $match = $rpt['money_paid'];
+                                                }
+                                            }else {
+                                                $match = "N/A";
+                                            }
+                                    }
+                            @endphp
+                                <td>{{ $match }}</td>
+                        @php
+                        $match = 'N/A'; } @endphp
                                     <td>{{ $row_time }}</td>
                                 </tr>
                             @endforeach
