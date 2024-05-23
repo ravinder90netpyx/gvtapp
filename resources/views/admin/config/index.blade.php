@@ -36,7 +36,7 @@ $conf_config = $model->getGroup('config');
                         @method("POST")
 
                         <div class="col-md-6">
-                            @php $current_field = 'scheduler[frequency_minute]'; @endphp
+                            @php $current_field = 'scheduler[source_number]'; @endphp
                             {!! Form::bsInput('number', $current_field, __('Job Frequency(In Minutes)'), $conf_scheduler['frequency_minute'] ?? '1', ['required', 'min'=>'1', 'max'=>'1000', 'step'=>'1'], ['vertical'=>true]); !!}
                         </div>
 

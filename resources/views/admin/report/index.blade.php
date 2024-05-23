@@ -172,7 +172,7 @@ $(function(){
     </div>
 </div>
 
-<form id="cf-form"> 
+<form id="cf-form" autocomplete="off"> 
     @csrf
     @method('HEAD')
     <div class="card card-listing">
@@ -206,6 +206,11 @@ $(function(){
                                     @foreach($data_select as $ds)
                                         <option value="{!! $ds->id !!}">{!! $ds->name !!}</option>
                                     @endforeach
+                                </select>
+
+                                <select name="report_type" id="report_type"  class="custom-select">
+                                        <option value="report">Reports</option>
+                                        <option value="report_pending">Pending Reports</option>
                                 </select>
                             </div>
                         </div>
