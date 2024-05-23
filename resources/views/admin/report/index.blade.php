@@ -42,116 +42,120 @@ function datetimepicker_month(id){
         startDate: '2021-01',
     });
 }
-function datetimepicker_month2(id,from_date,to_date){
-    console.log("in func=> "+to_date)
-    console.log("from func=> "+from_date)
-    var value = $("#to_date").val();
-    if(value){
-        $('#to_date').datepicker('update', '');
-        $('#to_date').val('');
-    }
+// function datetimepicker_month2(id,from_date,to_date){
+//     console.log("in func=> "+to_date)
+//     console.log("from func=> "+from_date)
+//     var value = $("#to_date").val();
+//     if(value){
+//         $('#to_date').datepicker('update', '');
+//         $('#to_date').val('');
+//     }
 
-    $('#'+id).datepicker({
-        format: "yyyy-mm",
-        startView: 1,
-        numberOfMonths: 1,
-        minViewMode: 1,
-        startDate: from_date,
-        endDate: to_date,
-        // container: '.modal-body',
-        autoclose: true,
+//     $('#'+id).datepicker({
+//         format: "yyyy-mm",
+//         startView: 1,
+//         numberOfMonths: 1,
+//         minViewMode: 1,
+//         startDate: from_date,
+//         endDate: to_date,
+//         // container: '.modal-body',
+//         autoclose: true,
 
-    });
-}
+//     });
+// }
 
 
 $("#from_date").change(function(){
-  var from_date = $(this).val();
-  var value = $("#to_date").val();
-  console.log("value=>><> "+value);
-  // if(value){
-  //   $('#to_date').datepicker('update', '');
-  //   $('#to_date').val('');
-  // }
+    var from_date = $(this).val();
+    var value = $("#to_date").val();
 
-   var myDate = new Date(from_date);
+    var myDate = new Date(from_date);
 
-   var newdt =  myDate.setFullYear(myDate.getFullYear() + 1);
-   var month = myDate.getMonth();
-   if(month>9){
+    var month = myDate.getMonth();
+    if(month > 0){
+        var newdt =  myDate.setFullYear(myDate.getFullYear() + 1);
+    } else{
+        var newdt = myDate.setFullYear(myDate.getFullYear());
+        month = 12;
+    }
+    if(month>9){
         var to_date = myDate.getFullYear()+'-'+month; 
-   } else{
+    } else{
         var to_date = myDate.getFullYear()+'-0'+month;
-   }   
-   var date = new Date(to_date);
-$('#to_date').datepicker('setEndDate' , date);
-$('#to_date').datepicker('setStartDate' , from_date);
+    }
+    // console.log(to_date);
+    var date = new Date(to_date);
+    $('#to_date').datepicker('setEndDate' , date);
+    $('#to_date').datepicker('setStartDate' , from_date);
 
-   //datetimepicker_month2('to_date',from_date,to_date);
+    // datetimepicker_month2('to_date',from_date,to_date);
 
 }); 
 
 
-    $(function(){
-        fromid = 'from_date';
-        toid = 'to_date';
-        datetimepicker_month(fromid);
-        datetimepicker_month(toid);
-        
+$(function(){
+    fromid = 'from_date';
+    toid = 'to_date';
+    datetimepicker_month(fromid);
+    datetimepicker_month(toid);
+    
+    $('#member_id').on('change',function(){
+        // console.log($(this).val().length);
+        if($(this).val().length>9){
+            alert('This many members can cause load on system');
+        }
+    });
 
+    /** Order By Date Start **/
+    $('#cf-form').submit(function(e) {
+        e.preventDefault();
+       var formData = {
+            from_date: $("#from_date").val(),
+            to_date: $("#to_date").val(),
+            memberIds: $("#member_id").val(),
+        };
 
-        /** Order By Date Start **/
-        $('#cf-form').submit(function(e) {
-            e.preventDefault();
-           var formData = {
-                from_date: $("#from_date").val(),
-                to_date: $("#to_date").val(),
-                memberIds: $("#member_id").val(),
-            };
-
-            // Send an AJAX request
-            $.ajax({
-                type: 'POST',
-                url: '{!! route($module['main_route'].'.report_by_date') !!}',
-                data: {'_token': '{!! csrf_token() !!}',formData},
-                dataType: 'json',
-                success: function(response) {
-                    //console.log(response);
-                    $('#table-responsive2').html(response.html);
-                },
-                error: function(xhr, status, error) {
-                    // Handle errors if needed
-                    console.error(xhr.responseText);
-                }
-            });
-        });
-        /** Order By Date End **/
-
-
-        $('#from_date').show();
-        $('#to_date').show();
-
-        $('#select_all_member').on('click', function(){
-            val = $(this).prop('checked');
-            if(val){
-                $(this).closest('.input-group').find('select').select2('destroy').find('option').prop('selected', $(this).prop('checked')).end().select2();
-   
-                    $('[data-toggle="select-multiple"]').select2({
-                        allowClear: true,
-                        closeOnSelect: false,
-                        templateSelection: function(selected, container) {
-                            if (selected.id !== '') {
-                                $(container).text(selected.text);
-                            }
-                            return container;
-                        }
-                    });
-  
-            } else{
-                $(this).closest('.input-group').find('select').select2('destroy').find('option').prop('selected', $(this).prop('checked')).end().select2();
+        // Send an AJAX request
+        $.ajax({
+            type: 'POST',
+            url: '{!! route($module['main_route'].'.report_by_date') !!}',
+            data: {'_token': '{!! csrf_token() !!}',formData},
+            dataType: 'json',
+            success: function(response) {
+                //console.log(response);
+                $('#table-responsive2').html(response.html);
+            },
+            error: function(xhr, status, error) {
+                // Handle errors if needed
+                console.error(xhr.responseText);
             }
         });
     });
+    /** Order By Date End **/
+
+
+    $('#from_date').show();
+    $('#to_date').show();
+
+    $('#select_all_member').on('click', function(){
+        val = $(this).prop('checked');
+        if(val){
+            $(this).closest('.input-group').find('select').select2('destroy').find('option').prop('selected', $(this).prop('checked')).end().select2();
+            $('[data-toggle="select-multiple"]').select2({
+                allowClear: true,
+                closeOnSelect: false,
+                templateSelection: function(selected, container) {
+                    if (selected.id !== '') {
+                        $(container).text(selected.text);
+                    }
+                    return container;
+                }
+            });
+        } else{
+            $(this).closest('.input-group').find('select').select2('destroy').find('option').prop('selected', $(this).prop('checked')).end().select2();
+        }
+    });
+});
 </script>
 @endsection
 <style type="text/css">
@@ -257,7 +261,6 @@ $('#to_date').datepicker('setStartDate' , from_date);
                             @foreach($month_arr as $mn)
                                 <th>{{ $mn }}</th>
                             @endforeach
-                            <th style="width:150px">{{ __('admin.text_date_created') }}</th>
                         </tr>
                     </thead>
 
@@ -274,7 +277,7 @@ $('#to_date').datepicker('setStartDate' , from_date);
                                         <div class="custom-checkbox custom-control">
                                             <input class="custom-control-input data-checkboxes" type="checkbox" name="row_check[]" id="row_check_{{ $row_id }}" value="{{ $row_id }}">
                                             <label class="custom-control-label" for="row_check_{{ $row_id }}"></label>
-                                        </div>                  
+                                        </div>
                                     </td> 
 
                                     <td>{{ $item['name'] }}</td>
@@ -303,7 +306,7 @@ $('#to_date').datepicker('setStartDate' , from_date);
                                 <td>{{ $match }}</td>
                         @php
                         $match = 'N/A'; } @endphp
-                                    <td>{{ $row_time }}</td>
+                                    
                                 </tr>
                             @endforeach
                         </tbody>

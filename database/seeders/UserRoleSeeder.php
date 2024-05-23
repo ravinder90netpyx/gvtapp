@@ -27,6 +27,9 @@ class UserRoleSeeder extends Seeder
             [ 'name' => 'organization.delete' ],
             [ 'name' => 'organization.status' ],
 
+            [ 'name' => 'general_settings.manage_organization_config'],
+            [ 'name' => 'general_settings.manage_config'],
+
             [ 'name' => 'user_roles.manage' ],
             [ 'name' => 'user_roles.add' ],
             [ 'name' => 'user_roles.edit' ],
@@ -56,6 +59,7 @@ class UserRoleSeeder extends Seeder
             [ 'name' => 'series.edit' ],
             [ 'name' => 'series.delete' ],
             [ 'name' => 'series.status' ],
+
 
             
             [ 'name' => 'journal_entry.manage' ],

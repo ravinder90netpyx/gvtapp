@@ -13,6 +13,7 @@ use App\Helpers\helpers;
 use Illuminate\Support\Facades\Auth;
 use PDF;
 use Illuminate\Support\Facades\Storage;
+use GuzzleHttp\Client;
 
 class JournalEntryController extends Controller{
     public $module = array(
@@ -21,7 +22,8 @@ class JournalEntryController extends Controller{
         'permission_group' => 'journal_entry',
         'main_heading' => 'Journal Entries',
         'start_date' => null,
-        'default_perpage' => 10
+        'default_perpage' => 10,
+        'source' => '919041362511'
     );
 
     public function __construct(Request $request){
@@ -73,6 +75,8 @@ class JournalEntryController extends Controller{
 
         $title_shown = 'Manage '.$module['main_heading'];
         $folder = $this->folder;
+
+        
 
         return view($module['main_view'].'.index', compact('data', 'action', 'method', 'act', 'model', 'mode', 'carbon', 'module', 'perpage', 'folder', 'title_shown', 'title_showns', 'query', 'financial_years'))->with('i', ($request->input('page', 1) - 1) * $perpage);
     }
@@ -294,6 +298,17 @@ class JournalEntryController extends Controller{
             $pdf->save(public_path("upload/pdf_files/{$file_name}.pdf"));
             $models=$model->find($fetch_data->id);
             $models->update(['file_name'=> $file_name]);
+            
+            /* 
+            $messageWithpdf = array(
+                'type' => 'document',
+                'document' => array(
+                    'link' => 'https://www.princexml.com/samples/invoice/invoicesample.pdf'
+                )
+            );
+            $messageWithpdfjson = json_encode($messageWithpdf,true);
+            $this->sendPdfToWhatsapp($destination,$messageWithpdfjson);
+             */
             return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
         }
     }
@@ -308,7 +323,7 @@ class JournalEntryController extends Controller{
         $title_shown = 'Show '.$module['main_heading'];
         $mode = 'show';
         $financial_years = $helpers->get_financial_years($module['start_date'], null);
-        
+        // $message = 
         if($request->ajax()) {
             $html_data = view($module['main_view'].'.form_include', compact(['form_data','id', 'module', 'mode', 'financial_years']))->render();
             $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown, 'mode'=>$mode, 'id'=>$id]);
@@ -455,6 +470,58 @@ class JournalEntryController extends Controller{
         $next_num = $models->next_number;
         $response = response()->json(['serial_no'=>$series_num, 'next_num' =>$next_num]);
         return $response;
+    }
+
+    // public function myapidev(){
+    // 	$client = new Client();
+    // 	$url = 'https://api.gupshup.io/wa/api/v1/msg';
+
+    // 	$headers = [
+    // 		'Content-Type' => 'application/x-www-form-urlencoded',
+    // 		'apikey' => '4ssd1jldzf7mhiprkmwt5iwff6iuafqv'
+    //     ];
+
+    //     $data = [
+    //         'source' => '919041362511',
+    //         'destination' => '917479735912',
+    //     	'message' => "{'type':'document','document':{'link':'https://www.princexml.com/samples/invoice/invoicesample.pdf'}}",
+    //     	'channel' => 'whatsapp'
+    //     ];
+
+    //     $postResponse = $client->post($url, [
+    //         'headers' => $headers,
+    //         'x-www-form-urlencoded' => $data,
+    //     ]);
+
+    //     $responseCode = $postResponse->getStatusCode();
+    //     dd($responseCode);
+    //     //return response()->json(['response_code' => $responseCode]);
+    // }
+
+    public function sendPdfToWhatsapp($destination,$message){
+        $module = $this->module;
+        $curl = curl_init();
+
+curl_setopt_array($curl, array(
+  CURLOPT_URL => 'https://api.gupshup.io/wa/api/v1/template/msg',
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_ENCODING => '',
+  CURLOPT_MAXREDIRS => 10,
+  CURLOPT_TIMEOUT => 0,
+  CURLOPT_FOLLOWLOCATION => true,
+  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+  CURLOPT_CUSTOMREQUEST => 'POST',
+  CURLOPT_POSTFIELDS => 'source='.$module['source'].'&destination='.$destination.'&message='.$message,
+  CURLOPT_HTTPHEADER => array(
+    'Content-Type: application/x-www-form-urlencoded',
+    'Apikey: 4ssd1jldzf7mhiprkmwt5iwff6iuafqv'
+  ),
+));
+
+$response = curl_exec($curl);
+
+curl_close($curl);
+echo $response;
     }
 
 }

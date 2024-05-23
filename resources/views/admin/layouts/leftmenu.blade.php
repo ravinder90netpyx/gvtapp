@@ -107,6 +107,15 @@ $dropbox_token = config('filesystems.disks.dropbox.token');
               </li>
               @endcan
 
+              @can('organization.manage')
+              <li class="nav-item">
+                <a href="{{route($folder['route_folder_name'].'.organization.index')}}" class="nav-link{{ Str::contains(url()->current(), array('organization')) ? ' active' : '' }}">
+                  <span class="sidenav-mini-icon"> OS </span>
+                  <span class="sidenav-normal"> Organization Settings </span>
+                </a>
+              </li>
+              @endcan
+
               @can('user_roles.manage')
               <li class="nav-item">
                 <a href="{{route($folder['route_folder_name'].'.user_roles.index')}}" class="nav-link{{ Str::contains(url()->current(), array('user_roles')) ? ' active' : '' }}">

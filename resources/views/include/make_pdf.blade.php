@@ -13,53 +13,53 @@
 </head>
 <body>
 
-    {{-- <div class="entry-section" style="text-align: center;">
+    <div class="entry-section" style="text-align: center;">
         <h2 class="text-center">Journal Entry</h2>
             <p>Payment Receipt</p>
             <p style="text-align: left;">Thank You for Paying Monthly Maintenance. Here is the payment receipt.</p>
-        <div class="table-responsive">
+        <div class="table-responsive" style="text-align:center;">
             <table class="table table-bordered">
                 <tbody>
                     <tr>
-                        <td>Name</td>
-                        <td>>{{ $name }}</td>
+                        <td>Reciept No.</td>
+                        <td>>{{ $series }}</td>
                     </tr>
                     <tr>
-                        <td>Contact Number</td>
-                        <td>{{ $mobile_number }}</td>
+                        <td>Receipt Date</td>
+                        <td>{{ $date }}</td>
                     </tr>
                     <tr>
-                        <td>Charge</td>
-                        <td>xxxx</td>
+                        <td>Payment Date</td>
+                        <td>{{ $date }}</td>
                     </tr>
                     <tr>
-                        <td>xxxx</td>
-                        <td>xxxx</td>
+                        <td>Customer Name</td>
+                        <td>{{ $name }}</td>
                     </tr>
                     <tr>
-                        <td>xxxx</td>
-                        <td>xxxx</td>
+                        <td>Customer Number</td>
+                        <td>{{ $name }}</td>
                     </tr>
                     <tr>
-                        <td>xxxx</td>
-                        <td>xxxx</td>
+                        <td>Payment Mode</td>
+                        <td>{{ $mode }}</td>
                     </tr>
                     <tr>
-                        <td>xxxx</td>
-                        <td>xxxx</td>
+                        <td>Paid Amount</td>
+                        <td>&#8377;{{ $charge }}</td>
                     </tr>
                     <tr>
-                        <td>xxxx</td>
-                        <td>xxxx</td>
+                        <td>Month(s) Cleared</td>
+                        <td>{{ $from_month }} - {{ $to_month }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
         <p>xxxxxx</p>
         <p>xxxxxx</p>
+        <p>This is a system-generated receipt and does not require signature. Any unauthorized use, disclosure,dissemination or copying of this receipt is strictly prohibited and may be unlawful.</p>
         <p>xxxxxx</p>
-        <p>xxxxxx</p>
-    </div> --}}
+    </div>
  
     {{-- <div class="row">
         <div class="col">

@@ -36,6 +36,7 @@ class ReportController extends Controller{
     }
 
     public function index(Request $request, DefaultModel $model, helpers $helpers,JournalEntryModel $journalEntryModel){
+
         $carbon = new Carbon();
         $module = $this->module;
         $perpage = $request->perpage ?? $module['default_perpage'];
