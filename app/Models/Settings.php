@@ -33,6 +33,19 @@ class Settings extends Base_Model{
         'is_serialized'
     ];
 
+    public function getGroup($group){
+        $qry = $this->where([ ['group', '=', $group] ])->select(['key', 'value', 'is_serialized'])->get();
+        $data = [];
+        if(!empty($qry)){
+            foreach($qry as $itr){
+                if($itr->is_serialized=='1') $data[$itr->key] = unserialize($itr->value);
+                else $data[$itr->key] = $itr->value;
+            }
+        }
+
+        return $data;
+    }
+    
     public function getVal($group, $key){
         return $this->where([ ['group', '=', $group], ['key', '=', $key] ])->first()->value;
     }

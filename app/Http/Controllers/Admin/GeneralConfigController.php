@@ -7,13 +7,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use URL;
 
-class ConfigController extends Controller{
+class GeneralConfigController extends Controller{
     public $module = array(
-        'module_view' => 'config',
-        'module_route' => 'config',
+        'module_view' => 'general_configs',
+        'module_route' => 'general_configs',
         'permission_group' => 'general_settings',
-        'main_heading' => 'Config',
-        'table_name' => 'series_master',
+        'main_heading' => 'General Config',
+        'table_name' => 'settings',
         'default_perpage' => 10
     );
 
@@ -34,7 +34,7 @@ class ConfigController extends Controller{
 
         $this->module = $module;
 
-        $this->middleware('permission:'.$module['permission_group'].'.manage_config', ['only' => ['index', 'store']]);
+        $this->middleware('permission:'.$module['permission_group'].'.manage_general_config', ['only' => ['index', 'store']]);
     }
 
     public function index(Request $request, DefaultModel $model){

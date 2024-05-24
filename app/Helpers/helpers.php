@@ -27,4 +27,20 @@ class helpers{
         }
 		return $m_arr;
 	}
+
+	function get_api_key($key,$param){
+		$data = '';
+		switch ($key) {
+			case 'whatsapp':
+				if($param == 'apikey'){
+					$data = '4ssd1jldzf7mhiprkmwt5iwff6iuafqv';
+				}
+				break;
+			
+			default:
+				$data = "Not Found";
+				break;
+		}
+		return $data;
+	}
 }

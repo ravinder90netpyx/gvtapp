@@ -1,73 +1,53 @@
 <table class="table table-striped table-hover table-bordered table-sm mb-2 main-listing-table">
     <thead>
         <tr>
-            <th>{{__('#')}}</th>
+            
             <th style="width:120px">{{ __('Name') }}</th>
             <th style="width:120px">{{ __('Mobile Number') }}</th>
-            @foreach($month_arr as $mn)
-                <th>{{ $mn }}</th>
-            @endforeach
-           
-            
+            <th style="width:120px">{{ __('Total Amount') }}</th>
+            <th style="width:120px">{{ __('Total Paid') }}</th>
+            <th style="width:120px">{{ __('Pending Amount') }}</th>
+
         </tr>
     </thead>
-     @php 
-                
 
-                    
-
-                    @endphp
 
     @if($members)
         <tbody>
             @foreach($members as $key => $item)
                 @php 
                 $row_id = $key;
-                
-                $entries=\App\Models\Journal_Entry::where('member_id',$key)->get();
-                $paid = [];
-                foreach($entries as $ent){
-                    array_push($paid,$ent['charge']);
-                }
-
+               
                 @endphp
                 <tr>
-                    <td>
-                        <div class="custom-checkbox custom-control">
-                            <input class="custom-control-input data-checkboxes" type="checkbox" name="row_check[]" id="row_check_{{ $row_id }}" value="{{ $row_id }}">
-                            <label class="custom-control-label" for="row_check_{{ $row_id }}"></label>
-                        </div>                  
-                    </td> 
-                    
-                    @php 
-                    
-                   
-                    @endphp
-
                     <td>{{ $item['name'] }}</td>
                     <td>{{ $item['mobile_number'] }}</td>
-                        @php 
-                        $match = "";
-                        $report=\App\Models\Report::where('member_id',$item['id'])->get();
-                        $mm = [];
-                        $money = [];
-                        foreach($report as $rp){
-                            $mm[] = $rp['month'];
-                            $money[] = $rp['money_paid'];
-                        }
-                        foreach($month_arr as $k => $v) {
-                            foreach($report as $ke => $rpt){
-                                if(in_array($v,$mm)) {
-                                    if($rpt['month'] == $v){
-                                        $match = $rpt['money_paid'];
-                                    }
-                                }else {
-                                    $match = "N/A";
-                                }
-                            }
-                            @endphp
-                                <td>{{ $match }}</td>
-                        @php } @endphp
+
+                    @php 
+                    $match = '';
+                    $total_charge = '';
+                    $pending_money = ''; 
+                    $report=\App\Models\Report::where('member_id',$item['id'])->whereIn('month',$month_arr)->get();
+                    $charge=\App\Models\Charges::where('id',$item['charges_id'])->first()->rate;
+                    ;
+                    $mm = [];
+                    $money = [];
+                    foreach($report as $rp){
+                        $mm[] = $rp['month'];
+                        $money[] = $rp['money_paid'];
+                    }
+
+                    $total_money = array_sum($money);
+
+                
+                    $total_charge = count($month_arr) * $charge;
+                    $pending_money = $total_charge - $total_money;
+                    @endphp
+
+                    <td>{{ $total_charge }}</td>
+                    <td>{{ $total_money }}</td>
+                    <td>{{ $pending_money }}</td>
+
                 </tr>
             @endforeach
         </tbody>

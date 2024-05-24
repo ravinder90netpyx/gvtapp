@@ -94,6 +94,14 @@ $("#from_date").change(function(){
 
 
 $(function(){
+
+    $("#repo_id").DataTable({
+        "dom": "Bt",
+        "buttons": [
+            'csvHtml5',
+            'pdfHtml5'
+        ],
+    });
     fromid = 'from_date';
     toid = 'to_date';
     datetimepicker_month(fromid);
@@ -113,6 +121,7 @@ $(function(){
             from_date: $("#from_date").val(),
             to_date: $("#to_date").val(),
             memberIds: $("#member_id").val(),
+            report_type: $("#report_type").val(),
         };
 
         // Send an AJAX request
@@ -207,11 +216,6 @@ $(function(){
                                         <option value="{!! $ds->id !!}">{!! $ds->name !!}</option>
                                     @endforeach
                                 </select>
-
-                                <select name="report_type" id="report_type"  class="custom-select">
-                                        <option value="report">Reports</option>
-                                        <option value="report_pending">Pending Reports</option>
-                                </select>
                             </div>
                         </div>
                     </div>
@@ -234,7 +238,22 @@ $(function(){
                         </div>
                     </div>
 
-                    <div class="col-auto mt-1 mb-1">
+                    <div class="col-auto mt-1 mb-1 my-2" >
+                        <div class="form-group">
+                            <div class="input-group input-group-sm">
+                                <label for="report_type" class="combined_action_label mt-1 mr-3 d-none d-sm-block">{!! __('Report Type') !!}</label>
+                                <select name="report_type" id="report_type"  class="custom-select">
+                                        <option value="report">Reports</option>
+                                        <option value="report_pending">Pending Reports</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                   
+                </div>
+                <div class="row">
+                     <div class="col-auto mt-1 mb-1 my-2">
                         <div class="form-group">
                             <button id="submit_button" type="submit" class="btn btn-primary btn-add btn-sm" rel="tab" href="">{{ __('Submit') }}</button>
                         </div>
@@ -249,7 +268,7 @@ $(function(){
                 <div class="col pagination-wrap">
                     <div class="float-right">
                         <div class="row">
-                            <div class="col-auto mt-2"><span class="pagination-info">{{ __('admin.text_page_info', ['firstItem'=>$data->firstItem(), 'lastItem'=>$data->lastItem(), 'total'=>$data->total()]) }}</span></div>
+                             <div class="col-auto mt-2"><span class="pagination-info">{{ __('admin.text_page_info', ['firstItem'=>$data->firstItem(), 'lastItem'=>$data->lastItem(), 'total'=>$data->total()]) }}</span></div> 
                         </div>
                     </div>
                 </div>
@@ -257,7 +276,7 @@ $(function(){
 
             <div class="table-responsive" id="table-responsive2">
                 {{-- @include($module['main_view'].'.ajax_reports',['bsmodal'=>true, 'module'=>$module]) --}}
-                <table class="table table-striped table-hover table-bordered table-sm mb-2 main-listing-table">
+                <table class="table table-striped table-hover table-bordered table-sm mb-2 main-listing-table" id= "repo_id">
                     <thead>
                         <tr>
                             <th style="width:40px">{{ __('admin.text_idcheck') }}</th>

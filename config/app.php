@@ -201,6 +201,7 @@ return [
          * Custom Service Providers( Not included in installation )...
          */
         Spatie\Permission\PermissionServiceProvider::class,
+        Yajra\DataTables\DataTablesServiceProvider::class,
     ],
 
     /*

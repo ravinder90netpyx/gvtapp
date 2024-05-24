@@ -22,16 +22,19 @@ $authentic_username = ucwords($authentic_user->first_name.' '.$authentic_user->l
 <link href="{{ asset('dashboard/css/nucleo.css') }}" rel="stylesheet" />
 <link href="{{ asset('dashboard/css/fortawesome/css/all.min.css') }}" rel="stylesheet" />
 <link href="{{ asset('dashboard/css/argon.min.css') }}" rel="stylesheet" />
+
 <!-- CSS Files -->
 <link href="{{asset('dashboard/css/toastr.min.css')}}" rel="stylesheet">
 <link href="{{asset('dashboard/css/select2.min.css')}}" rel="stylesheet">
 <link href="{{ asset('dashboard/css/custom.css') }}" rel="stylesheet">
+<link href="{{ asset('dashboard/js/DataTables/datatables.min.css') }}" rel="stylesheet">
 @yield('css')
 
 <script src="{{ asset('dashboard/js/jquery.min.js') }}"></script>
 <script src="{{ asset('dashboard/js/moment.min.js') }}"></script>
 <script src="{{ asset('dashboard/js/bootstrap-datepicker.min.js') }}"></script>
 <script src="{{ asset('dashboard/js/bootstrap-datetimepicker.js') }}"></script>
+<script src="{{ asset('dashboard/js/DataTables/datatables.min.js') }}"></script>
 
 <link href="{{ asset('dashboard/js/bootstrap-treeview/bootstrap-treeview.min.css') }}" rel="stylesheet">
 <script src="{{ asset('dashboard/js/bootstrap-treeview/bootstrap-treeview.min.js') }}"></script>

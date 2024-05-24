@@ -14,7 +14,9 @@ use App\Http\Controllers\Admin\{
     ChargesController,
     SeriesController,
     JournalEntryController,
-    ReportController
+    ReportController,
+    GeneralConfigController,
+    OrganizationConfigController
 };
 
 use App\Http\Controllers\CronController;
@@ -58,6 +60,10 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
         Route::post('journal_entry/series_data', [JournalEntryController::class, 'series_data'])->name('journal_entry.series_data');
         Route::get('report/', [ReportController::class, 'index'])->name('report.index');
         Route::post('report/order_by_date', [ReportController::class, 'getReportByDate'])->name('report.report_by_date');
+        Route::get('organization_configs/', [OrganizationConfigController::class, 'index'])->name('organization_configs.index');
+        Route::post('organization_configs/', [OrganizationConfigController::class, 'store'])->name('organization_configs.store');
+        Route::get('general_configs/', [GeneralConfigController::class, 'index'])->name('general_configs.index');
+        Route::post('general_configs/', [GeneralConfigController::class, 'store'])->name('general_configs.store');
 
         $routes_arr = [
             'sample'=>'SampleController',

@@ -28,7 +28,7 @@ class UserRoleSeeder extends Seeder
             [ 'name' => 'organization.status' ],
 
             [ 'name' => 'general_settings.manage_organization_config'],
-            [ 'name' => 'general_settings.manage_config'],
+            [ 'name' => 'general_settings.manage_general_config'],
 
             [ 'name' => 'user_roles.manage' ],
             [ 'name' => 'user_roles.add' ],

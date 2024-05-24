@@ -89,16 +89,17 @@ $dropbox_token = config('filesystems.disks.dropbox.token');
         @endcan
         --}}
 
-        @canany([ 'user_roles.manage', 'users.manage', 'organization.manage' ])
+        @canany([ 'user_roles.manage', 'users.manage', 'organization.manage', 'organization.manage' ])
         <li class="nav-item">
-          <a {!! Str::contains(url()->current(), array('user_roles', 'users', 'organization')) ? 'class="nav-link active" aria-expanded="true"' : 'class="nav-link collapsed" aria-expanded="false"' !!} href="#user-management" data-toggle="collapse" role="button" aria-controls="user-management">
+          <a {!! Str::contains(url()->current(), array('user_roles', 'users', 'organization', 'organization_configs')) ? 'class="nav-link active" aria-expanded="true"' : 'class="nav-link collapsed" aria-expanded="false"' !!} href="#user-management" data-toggle="collapse" role="button" aria-controls="user-management">
             <i class="ni ni-single-02"></i>
             <span class="nav-link-text">Users Management</span>
           </a>
 
-          <div class="collapse{{ Str::contains(url()->current(), array('user_roles', 'users', 'organization')) ? ' show' : '' }}" id="user-management" style="">
+          <div class="collapse{{ Str::contains(url()->current(), array('user_roles', 'users', 'organization', 'organization_configs')) ? ' show' : '' }}" id="user-management" style="">
             <ul class="nav nav-sm flex-column">
               @can('organization.manage')
+
               <li class="nav-item">
                 <a href="{{route($folder['route_folder_name'].'.organization.index')}}" class="nav-link{{ Str::contains(url()->current(), array('organization')) ? ' active' : '' }}">
                   <span class="sidenav-mini-icon"> O </span>
@@ -107,11 +108,11 @@ $dropbox_token = config('filesystems.disks.dropbox.token');
               </li>
               @endcan
 
-              @can('organization.manage')
+              @can('general_settings.manage_organization_config')
               <li class="nav-item">
-                <a href="{{route($folder['route_folder_name'].'.organization.index')}}" class="nav-link{{ Str::contains(url()->current(), array('organization')) ? ' active' : '' }}">
-                  <span class="sidenav-mini-icon"> OS </span>
-                  <span class="sidenav-normal"> Organization Settings </span>
+                <a href="{{route($folder['route_folder_name'].'.organization_configs.index')}}" class="nav-link{{ Str::contains(url()->current(), array('organization_configs')) ? ' active' : '' }}">
+                  <span class="sidenav-mini-icon"> OC </span>
+                  <span class="sidenav-normal"> Organization Configs </span>
                 </a>
               </li>
               @endcan

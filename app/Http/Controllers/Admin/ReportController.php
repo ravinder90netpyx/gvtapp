@@ -78,6 +78,8 @@ class ReportController extends Controller{
         $from_date = $request->formData['from_date'];
         $to_date = $request->formData['to_date'];
         $memberIds = $request->formData['memberIds'];
+        $report_type = $request->formData['report_type'];
+        
         $member_modal = new \App\Models\Members(); 
         $format = "Y-m";
         $month_arr = $helpers->get_financial_month_year($from_date, $to_date, $format);
@@ -85,9 +87,15 @@ class ReportController extends Controller{
         $members = $memberModel->whereIn('id',$memberIds)->get();
         
        if($request->ajax()) {
+        if($report_type == 'report_pending'){
+            $html_data = view($module['main_view'].'.ajax_pending_reports', compact(['report','members','module',
+                'month_arr','carbon','helpers']))->render();
+            $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown, ]);
+        }else{
             $html_data = view($module['main_view'].'.ajax_reports', compact(['report','members','module',
                 'month_arr','carbon','helpers']))->render();
             $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown, ]);
+            }
             return $response;
         } else{
             return view($module['main_view'].'.cred2', compact('form_data', 'financial_years', 'model', 'module', 'folder', 'title_shown', 'mode', 'id'));
