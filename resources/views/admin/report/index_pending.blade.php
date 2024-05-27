@@ -133,7 +133,7 @@ $(function(){
             from_date: $("#from_date").val(),
             to_date: $("#to_date").val(),
             memberIds: $("#member_id").val(),
-            report_type: 'report',
+            report_type: 'report_pending',
         };
 
         // Send an AJAX request
@@ -252,7 +252,8 @@ $(function(){
                             </div>
                         </div>
                     </div>
-               
+
+                   
                 </div>
                 <div class="row">
                      <div class="col-auto mt-1 mb-1 my-2">
@@ -283,9 +284,9 @@ $(function(){
                         <tr>
                             <th>{{ __('admin.text_name') }}</th>
                             <th>{{__('Mobile Number') }}</th>
-                            @foreach($month_arr as $mn)
-                                <th>{{ $mn }}</th>
-                            @endforeach
+                            <th style="width:120px">{{ __('Total Amount') }}</th>
+                            <th style="width:120px">{{ __('Total Paid') }}</th>
+                            <th style="width:120px">{{ __('Pending Amount') }}</th>
                         </tr>
                     </thead>
 
@@ -302,30 +303,31 @@ $(function(){
 
                                     <td>{{ $item['name'] }}</td>
                                     <td>{{ $item['mobile_number'] }}</td>
-                                    @php
-                                    $report=\App\Models\Report::where('member_id',$item['id'])->get();
-                                    $match = 'N/A';
-                                    $mm = [];
-                                    $money = []; 
-                                    foreach($report as $rp){
-                                        $mm[] = $rp['month'];
-                                        $money[] = $rp['money_paid'];
-                                    }
+                                    @php 
+                    $match = '';
+                    $total_charge = '';
+                    $pending_money = ''; 
+                    $report=\App\Models\Report::where('member_id',$item['id'])->whereIn('month',$month_arr)->get();
+                    $charge=\App\Models\Charges::where('id',$item['charges_id'])->first()->rate;
+                    ;
+                    $mm = [];
+                    $money = [];
+                    foreach($report as $rp){
+                        $mm[] = $rp['month'];
+                        $money[] = $rp['money_paid'];
+                    }
 
-                                    foreach($month_arr as $k => $v) {
-                                        foreach($report as $ke => $rpt){
-                                            if(in_array($v,$mm)) {
-                                                if($rpt['month'] == $v){
-                                                    $match = $rpt['money_paid'];
-                                                }
-                                            }else {
-                                                $match = "N/A";
-                                            }
-                                    }
-                            @endphp
-                                <td>{{ $match }}</td>
-                        @php
-                        $match = 'N/A'; } @endphp
+                    $total_money = array_sum($money);
+
+                
+                    $total_charge = count($month_arr) * $charge;
+                    $pending_money = $total_charge - $total_money;
+                    @endphp
+                    
+                    <td>{{ $total_charge }}</td>
+                    <td>{{ $total_money }}</td>
+                    <td>{{ $pending_money }}</td>
+                        
                                     
                                 </tr>
                             @endforeach

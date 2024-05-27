@@ -100,8 +100,41 @@ class ReportController extends Controller{
         } else{
             return view($module['main_view'].'.cred2', compact('form_data', 'financial_years', 'model', 'module', 'folder', 'title_shown', 'mode', 'id'));
         }
+    }
 
+    public function getPendingReport(Request $request, DefaultModel $model ,helpers $helpers,JournalEntryModel $journalEntryModel,ReportModel $reportModel){
+        $carbon = new Carbon();
+        $module = $this->module;
+        $perpage = $request->perpage ?? $module['default_perpage'];
+        if(!$request->perpage && !empty($request->cookie('perpage'))) $perpage = $request->cookie('perpage');
+        
+        $model_get = $model;
+        if($model->getDelStatusColumn()) $model_get = $model_get->where($model->getDelStatusColumn(), '<', '1');
+        
+        if($model->getSortOrderColumn()) $model_get = $model_get->orderBy($model->getSortOrderColumn(), 'ASC');
+        else $model_get = $model_get->latest();
+        
+        $query = $request->get('query') ?? '';
+        if($query!='') $model_get = $model_get->where('name', 'LIKE', '%'.$query.'%'); 
 
+        $data = $model_get->paginate($perpage)->onEachSide(2);
+
+        $format = "Y-m";
+        $month_arr = [];
+        $end_month = Carbon::now()->format('Y-m');
+        $start_month = Carbon::now()->subMonth()->format('Y-m');
+
+        $month_arr = $helpers->get_financial_month_year($start_month, $end_month, $format);
+        $form_data = $journalEntryModel->where('from_month',$start_month)->get()->toArray();
+
+        
+
+        // $month_arr = $helpers->get_financial_month_year($start_month, $end_month, $format);
+
+        $title_shown = 'Manage Pending '.$module['main_heading'].'s';
+        $folder = $this->folder;
+
+        return view($module['main_view'].'.index_pending', compact('data', 'model','month_arr' ,'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);
     }
 
    

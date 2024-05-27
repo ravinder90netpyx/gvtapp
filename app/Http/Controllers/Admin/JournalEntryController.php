@@ -23,7 +23,8 @@ class JournalEntryController extends Controller{
         'main_heading' => 'Journal Entries',
         'start_date' => null,
         'default_perpage' => 10,
-        'source' => '919041362511'
+        'source' => '919041362511',
+        'group' => 'whatsapp_settings'
     );
 
     public function __construct(Request $request){
@@ -96,7 +97,7 @@ class JournalEntryController extends Controller{
     public function store(Request $request, DefaultModel $model, helpers $helpers){
         // dd($request->input());
         $module = $this->module;
-        $auth_user = Auth::user();  
+        $auth_user = Auth::user();
         $roles = $auth_user->roles()->pluck('name','id')->toArray();
         // dd($request->input());
         $rules= [
@@ -189,7 +190,6 @@ class JournalEntryController extends Controller{
                 break;
             }
         }
-        // dd($mont_arr); exit();
         // if($to_month < $from_month) $validator->errors()->add('from_month',"From Month should not be ahead of To Month");
         $check = \App\Models\Members::where('id',$request->input('member_id'))->count();
         
@@ -260,7 +260,10 @@ class JournalEntryController extends Controller{
                 // $request_data['to_month'] = $actu_month[$count-1];
             }
         } else{
-            $request->paid_money = count($month_arr)*$charge;
+            $report_model_last_mon = $report_model->where([['month', '=', $from_month], ['member_id', '=', $request_data['member_id']], ['delstatus','<','1'], ['status','>', '0']])->orderBy('id','DESC')->first();
+            $dedt_amt=0;
+            if(!empty($report_model_last_mon)) $dedt_amt = $report_model_last_mon->money_paid;
+            $request_data['paid_money'] = count($month_arr)*$charge - $dedt_amt;
         }
         // $mouth_arr
         $name = $model->where('organization_id',$request->input('organization_id'))->orderBy('entry_date','DESC')->first();
@@ -303,7 +306,7 @@ class JournalEntryController extends Controller{
             $messageWithpdf = array(
                 'type' => 'document',
                 'document' => array(
-                    'link' => 'https://www.princexml.com/samples/invoice/invoicesample.pdf'
+                    'link' => '/upload/pdf_files/'.$file_name.'.pdf'
                 )
             );
             $messageWithpdfjson = json_encode($messageWithpdf,true);
@@ -500,6 +503,12 @@ class JournalEntryController extends Controller{
 
     public function sendPdfToWhatsapp($destination,$message){
         $module = $this->module;
+        $auth_user = Auth::user();
+        $model = new \App\Models\Organization_Settings();
+        $src_no = $model->getVal($module['group'], 'source_number',$auth_user->organization_id);
+        $api_key = $model->getVal($module['group'], 'api_key',$auth_user->organization_id);
+        $templ_id = $model->getVal($module['group'], 'template_id',$auth_user->organization_id);
+
         $curl = curl_init();
 
 curl_setopt_array($curl, array(
@@ -511,10 +520,10 @@ curl_setopt_array($curl, array(
   CURLOPT_FOLLOWLOCATION => true,
   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
   CURLOPT_CUSTOMREQUEST => 'POST',
-  CURLOPT_POSTFIELDS => 'source='.$module['source'].'&destination='.$destination.'&message='.$message,
+  CURLOPT_POSTFIELDS => 'source='.$src_no.'&destination='.$destination.'&message='.$message,
   CURLOPT_HTTPHEADER => array(
     'Content-Type: application/x-www-form-urlencoded',
-    'Apikey: 4ssd1jldzf7mhiprkmwt5iwff6iuafqv'
+    'Apikey: '.$api_key
   ),
 ));
 

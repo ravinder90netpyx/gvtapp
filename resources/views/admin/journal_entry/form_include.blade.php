@@ -88,13 +88,13 @@
 
 <div class="col-md-6">
     @php $current_field = 'from_month'; @endphp
-    {!! Form::bsInput('text', $current_field, __('From'), $form_data->$current_field ?? '', [ 'required', $disable ],  ['vertical'=>true]); !!}
+    {!! Form::bsInput('text', $current_field, __('From'), $form_data->$current_field ?? '', [ 'required', 'autocomplete'=>'off', $disable ],  ['vertical'=>true]); !!}
 </div>
 
 <div class="col-md-6">
     @php $current_field = 'to_month'; @endphp
     
-    {!! Form::bsInput('text', $current_field, __('To'), $form_data->$current_field ?? '', [ 'required', $disable ],  ['vertical'=>true]); !!}
+    {!! Form::bsInput('text', $current_field, __('To'), $form_data->$current_field ?? '', [ 'required', 'autocomplete'=>'off', $disable ],  ['vertical'=>true]); !!}
 </div>
 
 

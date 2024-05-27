@@ -1,7 +1,6 @@
-<table class="table table-striped table-hover table-bordered table-sm mb-2 main-listing-table">
+
     <thead>
         <tr>
-            <th>{{__('#')}}</th>
             <th style="width:120px">{{ __('Name') }}</th>
             <th style="width:120px">{{ __('Mobile Number') }}</th>
             @foreach($month_arr as $mn)
@@ -32,17 +31,6 @@
 
                 @endphp
                 <tr>
-                    <td>
-                        <div class="custom-checkbox custom-control">
-                            <input class="custom-control-input data-checkboxes" type="checkbox" name="row_check[]" id="row_check_{{ $row_id }}" value="{{ $row_id }}">
-                            <label class="custom-control-label" for="row_check_{{ $row_id }}"></label>
-                        </div>                  
-                    </td> 
-                    
-                    @php 
-                    
-                   
-                    @endphp
 
                     <td>{{ $item['name'] }}</td>
                     <td>{{ $item['mobile_number'] }}</td>
@@ -72,4 +60,3 @@
             @endforeach
         </tbody>
     @endif
-</table>

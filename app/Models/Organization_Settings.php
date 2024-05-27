@@ -47,8 +47,8 @@ class Organization_Settings extends Base_Model{
         return $data;
     }
 
-    public function getVal($group, $key){
-        return $this->where([ ['group', '=', $group], ['key', '=', $key] ])->first()->value;
+    public function getVal($group, $key, $org_id){
+        return $this->where([ ['organization_id','=',$org_id], ['group', '=', $group], ['key', '=', $key] ])->first()->value;
     }
 
     public function insOrUpd($conditions=[], $data=[]){

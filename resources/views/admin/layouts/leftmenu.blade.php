@@ -192,6 +192,15 @@ $dropbox_token = config('filesystems.disks.dropbox.token');
                   </a>
                 </li>
                 @endcan
+
+                @can('journal_entry.report')
+                <li class="nav-item">
+                  <a href="{{route($folder['route_folder_name'].'.pending_report')}}" class="nav-link{{ Str::contains(url()->current(), array('report')) ? ' active' : '' }}">
+                    <span class="sidenav-mini-icon"> PR </span>
+                    <span class="sidenav-normal"> Pending Report </span>
+                  </a>
+                </li>
+                @endcan
               </ul>
             </div>
 
