@@ -47,8 +47,6 @@ function form_submit(id = null){
         method = "PUT";
         action="{{ $act }}"+id;
     }
-    // console.log(method, action);
-    // alert(1);
     $.ajax({
         url: action,
         method: method,

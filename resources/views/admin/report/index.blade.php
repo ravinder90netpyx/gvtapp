@@ -284,7 +284,7 @@ $(function(){
                             <th>{{ __('admin.text_name') }}</th>
                             <th>{{__('Mobile Number') }}</th>
                             @foreach($month_arr as $mn)
-                                <th>{{ $mn }}</th>
+                                <th>{{ date("Y M", strtotime($mn)) }}</th>
                             @endforeach
                         </tr>
                     </thead>

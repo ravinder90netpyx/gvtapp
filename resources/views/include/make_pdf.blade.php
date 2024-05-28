@@ -16,16 +16,16 @@
 </head>
 <body>
 
-    <div class="entry-section" style="text-align: center;">
+    <div class="entry-section" style="text-align: center; padding:10px;">
         <h2 class="text-center">Journal Entry</h2>
             <p>Payment Receipt</p>
             <p style="text-align: left;">Thank You for Paying Monthly Maintenance. Here is the payment receipt.</p>
         <div class="table-responsive" style="text-align:center;">
-            <table class="table table-bordered">
+            <table border="1" cellpadding="2" cellspacing="0" width="100%">
                 <tbody>
                     <tr>
-                        <td>Reciept No.</td>
-                        <td>{{ $series }}</td>
+                        <td style="width:50%">Reciept No.</td>
+                        <td style="width:50%">{{ $series }}</td>
                     </tr>
                     <tr>
                         <td>Receipt Date</td>
@@ -41,7 +41,7 @@
                     </tr>
                     <tr>
                         <td>Customer Number</td>
-                        <td>{{ $name }}</td>
+                        <td>{{ $mobile_number }}</td>
                     </tr>
                     <tr>
                         <td>Payment Mode</td>
@@ -51,17 +51,27 @@
                         <td>Paid Amount</td>
                         <td>&#8377;{{ $charge }}</td>
                     </tr>
-                    <tr>
+                    <tr>@php
+                        $single = 0;
+                        if($from_month == $to_month) $single =1;
+                        @endphp
                         <td>Month(s) Cleared</td>
-                        <td>{{ $from_month }} - {{ $to_month }}</td>
+                        <td>{{ date("M Y", strtotime($from_month)) }} @if($single == 0) - {{ date("M Y", strtotime($to_month)) }} @endif</td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        <p>xxxxxx</p>
-        <p>xxxxxx</p>
-        <p>This is a system-generated receipt and does not require signature. Any unauthorized use, disclosure,dissemination or copying of this receipt is strictly prohibited and may be unlawful.</p>
-        <p>xxxxxx</p>
+        <p style="text-align: left;">{!! $note !!}</p>
+        <hr>
+        <p style="font-size: 13px;">{!! $line1 !!}</p>
+        <hr>
+        <p style="text-align: left;">{!! $address !!}</p>
+        <br>
+        <br>
+        <div class="footer margin-top" style= "text-align: left;">
+            <div>Thank you</div>
+            <div>Journal Entry Team</div>
+        </div>
     </div>
  
     {{-- <div class="row">
@@ -121,11 +131,5 @@
             </div>
         </div>
     </div> --}}
-    <br>
-    <br>
-    <div class="footer margin-top">
-        <div>Thank you</div>
-        <div>Journal Entry Team</div>
-    </div>
 </body>
 </html>

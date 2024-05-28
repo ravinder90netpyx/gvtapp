@@ -14,7 +14,7 @@ class SettingsSeeder extends Seeder
     public function run(){
         $permissions = [
           [ 'group' => 'system', 'key' => 'starting_year', 'value' => '2020' ],
-          [ 'group' => 'pdf', 'key' => 'pdf_note', 'value' => 'Note: Overdue Account are subject to pay late fees of Rs. 50/day till the date of clearance.
+          [ 'group' => 'pdf', 'key' => 'pdf_note', 'value' => 'Note: Overdue Account are subject to pay late fees of &#8377;50/day till the date of clearance.
 
 If you found any discrepancy, please reach out to us.' ],
           [ 'group' => 'pdf', 'key' => 'line1', 'value' => 'This is a system-generated receipt and does not require signature. Any unauthorized use, disclosure,

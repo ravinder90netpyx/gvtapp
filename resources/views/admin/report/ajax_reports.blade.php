@@ -4,18 +4,12 @@
             <th style="width:120px">{{ __('Name') }}</th>
             <th style="width:120px">{{ __('Mobile Number') }}</th>
             @foreach($month_arr as $mn)
-                <th>{{ $mn }}</th>
+                <th>{{ date("Y M", strtotime($mn)) }}</th>
             @endforeach
            
             
         </tr>
     </thead>
-     @php 
-                
-
-                    
-
-                    @endphp
 
     @if($members)
         <tbody>

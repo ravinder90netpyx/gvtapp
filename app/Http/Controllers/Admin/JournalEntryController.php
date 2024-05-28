@@ -95,8 +95,9 @@ class JournalEntryController extends Controller{
     }
 
     public function store(Request $request, DefaultModel $model, helpers $helpers){
-        // dd($request->input());
         $module = $this->module;
+        // dd($request->input());
+        // $this->test_pdf();
         $auth_user = Auth::user();
         $roles = $auth_user->roles()->pluck('name','id')->toArray();
         // dd($request->input());
@@ -126,12 +127,11 @@ class JournalEntryController extends Controller{
                     // dd($value);
                     $report_model = \App\Models\Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','=', '0']])->orderBy('id', 'DESC')->first();
                     $report_model2 = \App\Models\Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('id', 'ASC')->first();
-                    // dd($report_model2);
                     $last_month = $report_model->month ?? '0000-00';
                     $act_from_mon = $report_model2->month ?? '9999-12';
                     $to_month = $request->input('to_month');
                     if($value <= $last_month){
-                        $fail('The money for further month is paid kindly select the next month to pay the money');
+                        $fail('The money for further month is already paid kindly select the next month to pay the money');
                     }
                     if($value>$act_from_mon){
                         $fail('The money of previous month is not paid please select previous month to pay');
@@ -160,14 +160,12 @@ class JournalEntryController extends Controller{
                             $fail('Amount Paid and selected month are not proportional kindly adjust the value or month');
                         }
                     }
-
                 }
             ]
         ];
         $validator=\Illuminate\Support\Facades\Validator::make([], []);
         $report_model = new \App\Models\Report();
         $report_last_month = $report_model->where([['member_id','=',$request->input('member_id')],['delstatus','<','1'], ['status','>','0']])->orderBy('id', 'DESC')->first();
-        // dd($report_last_month);
         if(in_array('1', array_keys($roles))){
             $rules['organization_id'] = 'required|numeric';
         }
@@ -184,12 +182,7 @@ class JournalEntryController extends Controller{
         }
         // if($from_month <= $last_month) $validator->errors()->add('to_month', 'The money is already paid for that month kindly choose any further month');
         $month_arr = $helpers->get_financial_month_year($from_month,$to_month,'Y-m');
-        foreach($month_arr as $mt){
-            if(in_array($mt,$mon_arr)){
-                // $validator->errors()->add('to_month','The money has already paid, please choose other month');
-                break;
-            }
-        }
+        
         // if($to_month < $from_month) $validator->errors()->add('from_month',"From Month should not be ahead of To Month");
         $check = \App\Models\Members::where('id',$request->input('member_id'))->count();
         
@@ -201,18 +194,31 @@ class JournalEntryController extends Controller{
         $request_data = $request->input();
         $report_data = [];
 
-        $member = \App\Models\Members::find($request->input('member_id'));
+        $member = \App\Models\Members::find($request_data['member_id']);
         $charge = \App\Models\Charges::find($member->charges_id)->rate;
-        $paid = $request->input('paid_money');
+        $paid = $request_data['paid_money'];
         // $month_arr = $helpers->get_financial_month_year($request->input('from_month'), $request->input('to_month'));
         $paid_m = empty($paid) ? $charge*count($month_arr) : $paid;
         // $pending_mon = $report_last_month['money_pending'] ?? 0;
         $paid_m = $paid_m;
-
-        // dd($month_arr);
-        // $tempe_arr = [];
+        
+        if(!empty($paid)){
+            $request_data['partial'] = ($paid%$charge > 0)? '1':'0';
+            $count=0;
+            $count =ceil($paid/$charge);
+            
+            if($count<count($month_arr)){
+                $actu_month = array_slice( $month_arr , 0, $count);
+                // $request_data['from_month'] = $actu_month[0];
+                // $request_data['to_month'] = $actu_month[$count-1];
+            }
+        } else{
+            $report_model_last_mon = $report_model->where([['month', '=', $from_month], ['member_id', '=', $request_data['member_id']], ['delstatus','<','1'], ['status','>', '0']])->orderBy('id','DESC')->first();
+            $dedt_amt=0;
+            if(!empty($report_model_last_mon)) $dedt_amt = $report_model_last_mon->money_paid;
+            $request_data['paid_money'] = count($month_arr)*$charge - $dedt_amt;
+        }
         foreach($month_arr as $mt){
-            // dd($mt);
             $report_models = $report_model->where([['month', '=',$mt], ['member_id','=',$request_data['member_id']], ['delstatus','<','1'],['status','>','0']])->first();
             // $tempe_arr[] = $report_models->id;
             if(empty($report_models)){
@@ -246,62 +252,46 @@ class JournalEntryController extends Controller{
             }
             $report_data =[];
         }
-        // dd($tempe_arr);
-        if(!empty($paid)){
-            $request_data['partial'] = ($paid%$charge > 0)? '1':'0';
-            $count=0;
-            $count =ceil($paid/$charge);
-            // $month_arr = $helpers->get_financial_month_year($request->input('from_month'), $request->input('to_month'));
-            if($count<count($month_arr)){
-                $actu_month = array_slice( $month_arr , 0, $count);
-                // dump($count);
-                // dd($actu_month);
-                // $request_data['from_month'] = $actu_month[0];
-                // $request_data['to_month'] = $actu_month[$count-1];
-            }
-        } else{
-            $report_model_last_mon = $report_model->where([['month', '=', $from_month], ['member_id', '=', $request_data['member_id']], ['delstatus','<','1'], ['status','>', '0']])->orderBy('id','DESC')->first();
-            $dedt_amt=0;
-            if(!empty($report_model_last_mon)) $dedt_amt = $report_model_last_mon->money_paid;
-            $request_data['paid_money'] = count($month_arr)*$charge - $dedt_amt;
-        }
-        // $mouth_arr
-        $name = $model->where('organization_id',$request->input('organization_id'))->orderBy('entry_date','DESC')->first();
-        $date = $request->input('entry_date');
+        
+        $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
+        $date = $request_data['entry_date'];
         $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
+        // dd($request_data);
         if(strtotime($date) > strtotime($pre_date)){
             $series_num =$series_number->name.$series_number->number_separator.str_pad($series_number->next_number,$series_number->min_length,'0', STR_PAD_LEFT);
-            $charge = $request->paid_money;
             $next_number = $series_number->next_number;
             $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
-            $request_data['charge'] = $charge;
+            $request_data['charge'] = $request_data['paid_money'];
             $request_data['series_next_number'] = $next_number;
             $request_data['series_number'] = $series_num;
-            // $request->merge([ 'series_number' => $series_num, 'series_next_number' => $next_number, 'charge' => $charge ]);
             $fetch_data = $model->create($request_data);
-            $now=Carbon::now();
-            $store_path = "upload/pdf_files/";
-            $pdfFilePath = "upload/pdf_files/";
-            $file_name = $fetch_data->id.'-'.$now->format('Y-m-d-H-i-s');
-            
-            $data = [
-                'name' => $member->name,
-                'mobile_number' => $member->mobile_number,
-                'charge' => $charge,
-                'series' => $series_num,
-                'from_month' => $fetch_data->from_month,
-                'to_month' => $fetch_data->to_month,
-                'mode' => $fetch_data->payment_mode,
-                'date' => $request->input('entry_date'),
-                'year' => $request->input('entry_year')
-            ];
+            // $now=Carbon::now();
+            // $file_name = $fetch_data->id.'-'.$now->format('Y-m-d-H-i-s');
+            $this->generate_pdf_file($member->id, $fetch_data->id);
+            // $setting_model = new \App\Models\Settings();
 
-            $pdf = PDF::loadView('include.make_pdf', $data);
-            // Storage::put('upload/pdf_files/'.$file_name.'.pdf');
-            $pdf->save(public_path("upload/pdf_files/{$file_name}.pdf"));
-            $models=$model->find($fetch_data->id);
-            $models->update(['file_name'=> $file_name]);
+            // $data = [
+            //     'note' => $setting_model->getVal('pdf', 'pdf_note'),
+            //     'line1' => $setting_model->getVal('pdf', 'line1'),
+            //     'address' => $setting_model->getVal('pdf', 'address'),
+            //     'name' => $member->name,
+            //     'mobile_number' => $member->mobile_number,
+            //     'charge' => $charge,
+            //     'series' => $series_num,
+            //     'from_month' => $fetch_data->from_month,
+            //     'to_month' => $fetch_data->to_month,
+            //     'mode' => $fetch_data->payment_mode,
+            //     'date' => $request->input('entry_date'),
+            //     'year' => $request->input('entry_year')
+            // ];
+
+            // $pdf = PDF::loadView('include.make_pdf', $data);
+            // // Storage::put('upload/pdf_files/'.$file_name.'.pdf');
+            // $pdf->save(public_path("upload/pdf_files/{$file_name}.pdf"));
+            // $models=$model->find($fetch_data->id);
+            // $models->update(['file_name'=> $file_name]);
             
+            //  api message function
             /* 
             $messageWithpdf = array(
                 'type' => 'document',
@@ -334,6 +324,63 @@ class JournalEntryController extends Controller{
         } else{
             return view($module['main_view'].'.cred2', compact('form_data', 'financial_years', 'model', 'module', 'folder', 'title_shown', 'mode', 'id'));
         }
+    }
+
+    public function generate_pdf_file($mem_id, $je_id){
+        $journal_model = new \App\Models\Journal_Entry();
+        $journal_entry = $journal_model->where([['id', '=', $je_id]])->first();
+        $member = \App\Models\Members::find($mem_id);
+        $setting_model = new \App\Models\Settings();
+        if($journal_entry->file_name && file_exists(public_path('upload/pdf_files/'.$journal_entry->file_name.'.pdf'))) {
+             unlink(public_path('upload/pdf_files/' . $journal_entry->file_name.'.pdf'));
+             $file_name = $journal_entry->file_name;
+        }
+        else{
+            $now=Carbon::now();
+            $file_name = $je_id.'-'.$now->format('Y-m-d-H-i-s');
+        }
+        $data = [
+            'note' => $setting_model->getVal('pdf', 'pdf_note'),
+            'line1' => $setting_model->getVal('pdf', 'line1'),
+            'address' => $setting_model->getVal('pdf', 'address'),
+            'name' => $member->name,
+            'mobile_number' => $member->mobile_number,
+            'charge' => $journal_entry->charge,
+            'series' => $journal_entry->series_number,
+            'from_month' => $journal_entry->from_month,
+            'to_month' => $journal_entry->from_month,
+            'mode' => $journal_entry->payment_mode,
+            'date' => $journal_entry->entry_date,
+            'year' => $journal_entry->entry_year
+        ];
+        $pdf = PDF::loadView('include.make_pdf', $data);
+        $pdf->save(public_path("upload/pdf_files/{$file_name}.pdf"));
+        // $models=$journal_entry->find($je_id);
+        $journal_model->where('id', '=', $je_id)->update(['file_name'=> $file_name]);
+    }
+
+    public function test_pdf($mem_id, $je_id){
+        $journal_entry = \App\Models\Journal_Entry::find($je_id);
+        $member = \App\Models\Members::find($mem_id);
+        $setting_model = new \App\Models\Settings();
+        $data = [
+            'note' => $setting_model->getVal('pdf', 'pdf_note'),
+            'line1' => $setting_model->getVal('pdf', 'line1'),
+            'address' => $setting_model->getVal('pdf', 'address'),
+            'name' => $member->name,
+            'mobile_number' => $member->mobile_number,
+            'charge' => $journal_entry->charge,
+            'series' => $journal_entry->series_number,
+            'from_month' => $journal_entry->from_month,
+            'to_month' => $journal_entry->from_month,
+            'mode' => $journal_entry->payment_mode,
+            'date' => $journal_entry->entry_date,
+            'year' => $journal_entry->entry_year
+        ];
+            $pdf = PDF::loadView('include.make_pdf',$data);
+            $pdf->stream();
+            // return view('include.make_pdf', $data);
+            // echo $pdf; exit();
     }
 
     // public function edit(Request $request, $id, DefaultModel $model, helpers $helpers){
@@ -534,3 +581,15 @@ echo $response;
     }
 
 }
+// sending messsage but not file
+// curl --location --request POST 'https://api.gupshup.io/wa/api/v1/template/msg' \
+// --header 'Cache-Control: no-cache' \
+// --header 'Content-Type: application/x-www-form-urlencoded' \
+// --header 'apikey: 4ssd1jldzf7mhiprkmwt5iwff6iuafqv' \
+// --header 'cache-control: no-cache' \
+// --data-urlencode 'channel=whatsapp' \
+// --data-urlencode 'source=919041362511' \
+// --data-urlencode 'destination=+91 96534 59799' \
+// --data-urlencode 'src.name=GVTGH9' \
+// --data-urlencode 'template={"id":"84595f48-e080-412c-82e2-be0c7217e336","params":[]}' \
+// --data-urlencode 'message={"type":"document","document":{"link":"https://www.princexml.com/samples/invoice/invoicesample.pdf", "filename": "Sample funtional resume"}}'
