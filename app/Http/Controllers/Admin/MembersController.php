@@ -90,7 +90,7 @@ class MembersController extends Controller{
         // dd($request->input());
         $request->validate([
             'name' => 'required|regex:/^[a-zA-Z\s]+$/',
-            'unit_number' => 'required|integer||between:1,9999',
+            'unit_number' => 'required|integer|between:1,9999',
             'mobile_number' => 'required|unique:members,mobile_number',
             'charges_id' => 'required',
             'organization_id' =>in_array(1,$roles)? 'required':'nullable',
@@ -129,12 +129,12 @@ class MembersController extends Controller{
         $modelfind = $model->find($id);
         $request->validate([
             'name' => 'required',
-            'unit_number' => 'required|integer||between:1,9999',
+            'unit_number' => 'required|integer|between:1,9999',
             'mobile_number' => 'required|unique:members,mobile_number,'.$id,
             'charges_id' => 'required',
             'alternate_name'=> 'required',
             'sublet_name_1'=> 'required',
-            'alternate_number'=> 'required|unique:members,alternate_number'
+            'alternate_number'=> 'required|unique:members,alternate_number,'.$id
         ]);
 
         $modelfind->update($request->all());

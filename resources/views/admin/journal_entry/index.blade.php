@@ -148,7 +148,6 @@ function series_data(ser_id){
 
 function datetimepicker_month(id){
     date = new Date('2020-01-01');
-    // console.log(date);
     $('#'+id).datepicker({
         format: "yyyy-mm",
         startView: 1,
@@ -177,6 +176,14 @@ function autocomplete_trigger(org_id){
             }
         }
     });
+}
+
+function download_file(id){
+    if(confirm("Are you sure to re-generate PDF?")){
+        document.location.href = "/supanel/journal_entry/"+id+"/make?redirect=1";
+    } else{
+        document.location.href = "/supanel/journal_entry/"+id+"/show";
+    }
 }
 
 $(function(){
@@ -248,6 +255,11 @@ $(function(){
 
     $(document).on('change', '#organization_id', function(){
         val = $(this).val();
+        $('#series_id').val('');
+        $('#member_mob').val('');
+        $('#next_number').val('');
+        $('#charge').val('');
+        $('.charge').hide();
         if(val !== undefined && val !== null && val !== 0 && val !== ''){
             $('#series_id').prop('disabled', false);
             $('#member_mob').prop('disabled', false);
@@ -264,9 +276,6 @@ $(function(){
                 $('#member_mob').select2('destroy');
             }
         }
-        $('#series_id').val('');
-        $('#member_mob').val('');
-        $('#next_number').val('');
     });
 
     $(document).on('click', '#back_date', function(){
@@ -277,16 +286,16 @@ $(function(){
                 showClose : true,
                 format : "YYYY-MM-DD HH:mm:ss",
                 icons:{
-                        time : "fa fa-clock",
-                        date : "fa fa-calendar-day",
-                        up : "fa fa-chevron-up",
-                        down : "fa fa-chevron-down",
-                        previous : 'fa fa-chevron-left',
-                        next :'fa fa-chevron-right',
-                        today :'fa fa-screenshot',
-                        clear : 'fa fa-trash',
-                        close : 'fa fa-remove'
-                    }
+                    time : "fa fa-clock",
+                    date : "fa fa-calendar-day",
+                    up : "fa fa-chevron-up",
+                    down : "fa fa-chevron-down",
+                    previous : 'fa fa-chevron-left',
+                    next :'fa fa-chevron-right',
+                    today :'fa fa-screenshot',
+                    clear : 'fa fa-trash',
+                    close : 'fa fa-remove'
+                }
             });
         } else{
             $('#entry_date').datetimepicker('destroy');
@@ -318,6 +327,9 @@ $(function(){
     // });
 
     $(document).on('change','#member_mob', function(){
+        $('#charge').val('');
+        check = $('#unpaid').prop('checked');
+        
         if(this.validationMessage === ''){
             $('.charge').show();
         } else{
@@ -377,10 +389,8 @@ $(function(){
     });
 
     $('#form_id').on('submit', function(e){
-        e.preventDefault()
+        e.preventDefault();
         if(this.checkValidity()=== true){
-            // id = $('#edit_it').val() ?? '';
-            // console.log(id);
             form_submit();
         }
     });
@@ -507,7 +517,7 @@ $(function(){
                                             <i class="{{ config('custom.icons.info') }}"></i>
                                         </a>
 
-                                        <a href="{!! asset('/upload/pdf_files/'.$item['file_name'].'.pdf') !!}" download="" rel="tab">
+                                        <a href="" onclick="download_file({{ $row_id }})" target="_blank" rel="tab">
                                             <i class="fa fa-download"></i>
                                         </a>
 

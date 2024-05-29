@@ -6,8 +6,6 @@
             @foreach($month_arr as $mn)
                 <th>{{ date("Y M", strtotime($mn)) }}</th>
             @endforeach
-           
-            
         </tr>
     </thead>
 
@@ -44,11 +42,11 @@
                                         $match = $rpt['money_paid'];
                                     }
                                 }else {
-                                    $match = "N/A";
+                                    $match = "0";
                                 }
                             }
                             @endphp
-                                <td>{{ $match }}</td>
+                                <td>&#8377;{{ $match }}</td>
                         @php } @endphp
                 </tr>
             @endforeach

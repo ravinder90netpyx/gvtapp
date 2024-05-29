@@ -44,9 +44,9 @@
                     $pending_money = $total_charge - $total_money;
                     @endphp
 
-                    <td>{{ $total_charge }}</td>
-                    <td>{{ $total_money }}</td>
-                    <td>{{ $pending_money }}</td>
+                    <td>&#8377;{{ $total_charge }}</td>
+                    <td>&#8377;{{ $total_money }}</td>
+                    <td>&#8377;{{ $pending_money }}</td>
 
                 </tr>
             @endforeach

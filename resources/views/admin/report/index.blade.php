@@ -304,7 +304,7 @@ $(function(){
                                     <td>{{ $item['mobile_number'] }}</td>
                                     @php
                                     $report=\App\Models\Report::where('member_id',$item['id'])->get();
-                                    $match = 'N/A';
+                                    $match = '0';
                                     $mm = [];
                                     $money = []; 
                                     foreach($report as $rp){
@@ -319,13 +319,13 @@ $(function(){
                                                     $match = $rpt['money_paid'];
                                                 }
                                             }else {
-                                                $match = "N/A";
+                                                $match = "0";
                                             }
                                     }
                             @endphp
-                                <td>{{ $match }}</td>
+                                <td>&#8377;{{ $match }}</td>
                         @php
-                        $match = 'N/A'; } @endphp
+                        $match = '0'; } @endphp
                                     
                                 </tr>
                             @endforeach

@@ -58,7 +58,7 @@ class JournalEntryController extends Controller{
         $mode = 'insert';
         $action = URL::route($module['main_route'].'.store');
         $act = URL::route($module['main_route'].'.store');
-        // dd($action);
+
         if(!$request->perpage && !empty($request->cookie('perpage'))) $perpage = $request->cookie('perpage');
 
         $financial_years = $helpers->get_financial_years($module['start_date'], null);
@@ -267,7 +267,7 @@ class JournalEntryController extends Controller{
             $fetch_data = $model->create($request_data);
             // $now=Carbon::now();
             // $file_name = $fetch_data->id.'-'.$now->format('Y-m-d-H-i-s');
-            $this->generate_pdf_file($member->id, $fetch_data->id);
+            $this->generate_pdf_file( $fetch_data->id);
             // $setting_model = new \App\Models\Settings();
 
             // $data = [
@@ -326,9 +326,12 @@ class JournalEntryController extends Controller{
         }
     }
 
-    public function generate_pdf_file($mem_id, $je_id){
+    public function generate_pdf_file($je_id,Request $request){
+        $module = $this->module;
+        // dd($je_id);
         $journal_model = new \App\Models\Journal_Entry();
         $journal_entry = $journal_model->where([['id', '=', $je_id]])->first();
+        $mem_id = $journal_entry->member_id;
         $member = \App\Models\Members::find($mem_id);
         $setting_model = new \App\Models\Settings();
         if($journal_entry->file_name && file_exists(public_path('upload/pdf_files/'.$journal_entry->file_name.'.pdf'))) {
@@ -348,7 +351,7 @@ class JournalEntryController extends Controller{
             'charge' => $journal_entry->charge,
             'series' => $journal_entry->series_number,
             'from_month' => $journal_entry->from_month,
-            'to_month' => $journal_entry->from_month,
+            'to_month' => $journal_entry->to_month,
             'mode' => $journal_entry->payment_mode,
             'date' => $journal_entry->entry_date,
             'year' => $journal_entry->entry_year
@@ -357,10 +360,14 @@ class JournalEntryController extends Controller{
         $pdf->save(public_path("upload/pdf_files/{$file_name}.pdf"));
         // $models=$journal_entry->find($je_id);
         $journal_model->where('id', '=', $je_id)->update(['file_name'=> $file_name]);
+        if(!empty($request->input('redirect'))){
+            return redirect()->route($module['main_route'].'.show_pdf', $je_id);
+        }
     }
 
-    public function test_pdf($mem_id, $je_id){
+    public function view_pdf($je_id){
         $journal_entry = \App\Models\Journal_Entry::find($je_id);
+        $mem_id = $journal_entry->member_id;
         $member = \App\Models\Members::find($mem_id);
         $setting_model = new \App\Models\Settings();
         $data = [
@@ -372,7 +379,7 @@ class JournalEntryController extends Controller{
             'charge' => $journal_entry->charge,
             'series' => $journal_entry->series_number,
             'from_month' => $journal_entry->from_month,
-            'to_month' => $journal_entry->from_month,
+            'to_month' => $journal_entry->to_month,
             'mode' => $journal_entry->payment_mode,
             'date' => $journal_entry->entry_date,
             'year' => $journal_entry->entry_year
@@ -381,6 +388,12 @@ class JournalEntryController extends Controller{
             $pdf->stream();
             // return view('include.make_pdf', $data);
             // echo $pdf; exit();
+    }
+
+    public function show_pdf($je_id){
+        $journal_entry = \App\Models\Journal_Entry::find($je_id);
+        $name = $journal_entry->file_name;
+        return view('include.show_pdf',compact('name'));
     }
 
     // public function edit(Request $request, $id, DefaultModel $model, helpers $helpers){
