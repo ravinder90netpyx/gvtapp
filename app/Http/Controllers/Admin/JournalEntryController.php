@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use PDF;
 use Illuminate\Support\Facades\Storage;
 use GuzzleHttp\Client;
+use Illuminate\Support\Arr;
 
 class JournalEntryController extends Controller{
     public $module = array(
@@ -25,6 +26,14 @@ class JournalEntryController extends Controller{
         'default_perpage' => 10,
         'source' => '919041362511',
         'group' => 'whatsapp_settings'
+    );
+
+    public $whatsapp_api = array(
+        'whatsapp_api_url' => 'https://api.gupshup.io/wa/api/v1/template/msg',
+        'channel' => 'whatsapp',
+        'src_name' => 'GVTGH9',
+        'type' => 'document',
+        'template_id' => 'c376f4e4-2743-4eb9-8cdb-2648f7457d22',
     );
 
     public function __construct(Request $request){
@@ -52,6 +61,29 @@ class JournalEntryController extends Controller{
     public function index(Request $request, DefaultModel $model, helpers $helpers){
         $carbon = new Carbon();
         $module = $this->module;
+        // $this->test_api();
+        // $api = $this->whatsapp_api;
+        // $org_id = '1';
+        // dd(url('upload/pdf_files/14-2024-05-29-09-49-42.pdf'));
+        // $destination = '+91 74797 35912';
+        // $message = array(
+        //         'type' => $api['type'],
+        //         $api['type'] => array(
+        //             'link' => 'https://www.adobe.com/support/products/enterprise/knowledgecenter/media/c4611_sample_explain.pdf',
+        //             'file_name' => 'journal Entry File'
+        //         )
+        //     );
+        // $date = '24-05-2024';
+        // $charge = '7000';
+        // $month = "2024-08-2024-11";
+        // $params = array(
+        //         $charge,
+        //         $month,
+        //         $date
+        //     );
+        // $message = json_encode($message, true);
+        // $this->sendPdfToWhatsapp($destination,$message, $org_id,$params);
+        // dd(1);
         $perpage = $request->perpage ?? $module['default_perpage'];
         $title_showns = 'Add '.$module['main_heading'];
         $method = 'POST';
@@ -96,11 +128,8 @@ class JournalEntryController extends Controller{
 
     public function store(Request $request, DefaultModel $model, helpers $helpers){
         $module = $this->module;
-        // dd($request->input());
-        // $this->test_pdf();
         $auth_user = Auth::user();
         $roles = $auth_user->roles()->pluck('name','id')->toArray();
-        // dd($request->input());
         $rules= [
             'series_id' => 
             [
@@ -108,7 +137,6 @@ class JournalEntryController extends Controller{
                 'numeric',
                 function($attribute, $value, $fail){
                     $series_number = \App\Models\Series::where('id',$value)->get();
-                    // dd($series_number);
                     if(empty($series_number->count())){
                         $fail('Choose a valid Series');
                     }
@@ -124,11 +152,15 @@ class JournalEntryController extends Controller{
                 'required',
                 function($attribute, $value, $fail){
                     $request = Request();
-                    // dd($value);
                     $report_model = \App\Models\Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','=', '0']])->orderBy('id', 'DESC')->first();
-                    $report_model2 = \App\Models\Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('id', 'ASC')->first();
+                    $report_model2 = \App\Models\Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orwhere([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0']])->orderBy('id', 'DESC')->first();
                     $last_month = $report_model->month ?? '0000-00';
                     $act_from_mon = $report_model2->month ?? '9999-12';
+                    if(empty($report_model2->money_pending)){
+                        $date = Carbon::createFromFormat('Y-m', $act_from_mon);
+                        $date->addMonth();
+                        $act_from_mon = $date->format('Y-m');
+                    }
                     $to_month = $request->input('to_month');
                     if($value <= $last_month){
                         $fail('The money for further month is already paid kindly select the next month to pay the money');
@@ -193,6 +225,7 @@ class JournalEntryController extends Controller{
         $request->validate($rules);
         $request_data = $request->input();
         $report_data = [];
+        if(empty($request_data['organization_id'])) $request_data['organization_id'] = $auth_user->organization_id;
 
         $member = \App\Models\Members::find($request_data['member_id']);
         $charge = \App\Models\Charges::find($member->charges_id)->rate;
@@ -256,7 +289,6 @@ class JournalEntryController extends Controller{
         $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
         $date = $request_data['entry_date'];
         $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
-        // dd($request_data);
         if(strtotime($date) > strtotime($pre_date)){
             $series_num =$series_number->name.$series_number->number_separator.str_pad($series_number->next_number,$series_number->min_length,'0', STR_PAD_LEFT);
             $next_number = $series_number->next_number;
@@ -267,41 +299,36 @@ class JournalEntryController extends Controller{
             $fetch_data = $model->create($request_data);
             // $now=Carbon::now();
             // $file_name = $fetch_data->id.'-'.$now->format('Y-m-d-H-i-s');
-            $this->generate_pdf_file( $fetch_data->id);
+            $this->generate_pdf_file($fetch_data->id);
             // $setting_model = new \App\Models\Settings();
 
-            // $data = [
-            //     'note' => $setting_model->getVal('pdf', 'pdf_note'),
-            //     'line1' => $setting_model->getVal('pdf', 'line1'),
-            //     'address' => $setting_model->getVal('pdf', 'address'),
-            //     'name' => $member->name,
-            //     'mobile_number' => $member->mobile_number,
-            //     'charge' => $charge,
-            //     'series' => $series_num,
-            //     'from_month' => $fetch_data->from_month,
-            //     'to_month' => $fetch_data->to_month,
-            //     'mode' => $fetch_data->payment_mode,
-            //     'date' => $request->input('entry_date'),
-            //     'year' => $request->input('entry_year')
-            // ];
-
-            // $pdf = PDF::loadView('include.make_pdf', $data);
-            // // Storage::put('upload/pdf_files/'.$file_name.'.pdf');
-            // $pdf->save(public_path("upload/pdf_files/{$file_name}.pdf"));
-            // $models=$model->find($fetch_data->id);
-            // $models->update(['file_name'=> $file_name]);
-            
+            $modl_find = $model->find($fetch_data->id);
+            $file_name = $modl_find->file_name;
+            $org_id = $modl_find->organization_id;
             //  api message function
-            /* 
-            $messageWithpdf = array(
-                'type' => 'document',
-                'document' => array(
-                    'link' => '/upload/pdf_files/'.$file_name.'.pdf'
+            $api = $this->whatsapp_api;
+            $message = array(
+                'type' => $api['type'],
+                $api['type'] => array(
+                    'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
+                    'file_name' => 'journal Entry File'
                 )
             );
-            $messageWithpdfjson = json_encode($messageWithpdf,true);
-            $this->sendPdfToWhatsapp($destination,$messageWithpdfjson);
-             */
+            $date_arr = explode(' ', $fetch_data->entry_date);
+            $date = Carbon::parse($date_arr[0])->format('d-M-Y');
+            $month = Carbon::parse($fetch_data->from_month)->format('M Y')."-".Carbon::parse($fetch_data->to_month)->format('M Y');
+            $params = array(
+                $fetch_data->charge,
+                $month,
+                $date
+            );
+            // $param_json = json_encode($params, true);
+            $member_id = $fetch_data->member_id;
+            $member = \App\Models\Members::find($member_id);
+            $destination = $member->mobile_number;
+            $message_json = json_encode($message,true);
+            $this->sendPdfToWhatsapp($destination,$message_json, $org_id, $params);
+             
             return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
         }
     }
@@ -316,7 +343,6 @@ class JournalEntryController extends Controller{
         $title_shown = 'Show '.$module['main_heading'];
         $mode = 'show';
         $financial_years = $helpers->get_financial_years($module['start_date'], null);
-        // $message = 
         if($request->ajax()) {
             $html_data = view($module['main_view'].'.form_include', compact(['form_data','id', 'module', 'mode', 'financial_years']))->render();
             $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown, 'mode'=>$mode, 'id'=>$id]);
@@ -326,9 +352,9 @@ class JournalEntryController extends Controller{
         }
     }
 
-    public function generate_pdf_file($je_id,Request $request){
+    public function generate_pdf_file($je_id){
         $module = $this->module;
-        // dd($je_id);
+        $request = Request();
         $journal_model = new \App\Models\Journal_Entry();
         $journal_entry = $journal_model->where([['id', '=', $je_id]])->first();
         $mem_id = $journal_entry->member_id;
@@ -384,10 +410,8 @@ class JournalEntryController extends Controller{
             'date' => $journal_entry->entry_date,
             'year' => $journal_entry->entry_year
         ];
-            $pdf = PDF::loadView('include.make_pdf',$data);
-            $pdf->stream();
-            // return view('include.make_pdf', $data);
-            // echo $pdf; exit();
+        $pdf = PDF::loadView('include.make_pdf',$data);
+        $pdf->stream();
     }
 
     public function show_pdf($je_id){
@@ -417,7 +441,6 @@ class JournalEntryController extends Controller{
 
     // public function update(Request $request, $id, DefaultModel $model){
     //     $module = $this->module;
-    //     dd($request);
     //     $request->validate([
     //         'series_id' => 'required|numeric',
     //         'entry_year' => 'required',
@@ -490,7 +513,6 @@ class JournalEntryController extends Controller{
     }
 
     public function ajax_member(Request $request) {
-        // dd($request->input());
         $input=$request->input('q');
         $org_id = $request->input('org_id');
         $arr=[];
@@ -500,16 +522,15 @@ class JournalEntryController extends Controller{
         $count=0;
         foreach($name as $nm){
             $arr[$count]['id']= $nm['id'];
-            $arr[$count]['text']="Name : ".$nm['name']."; Unit No : ".$nm['unit_number']."; Mob No : ".$nm['mobile_number'];            // $arr[$count]['name'] = $nm['name'];
+            $arr[$count]['text']="Name : ".$nm['name']."; Unit No : ".$nm['unit_number']."; Mob No : ".$nm['mobile_number'];
+            // $arr[$count]['name'] = $nm['name'];
             // $arr[$count]['desc']= $nm['unit_number'].$nm['name'].$nm['mobile_number'];
             $count++;
         }
         return $arr;
-
     }
 
     public function series_select(Request $request) {
-        // dd($request->input());
         $module = $this->module;
         $input=$request->input('org_id');
         $models =new \App\Models\Series();
@@ -525,7 +546,6 @@ class JournalEntryController extends Controller{
     }
 
     public function series_data(Request $request) {
-        // dd($request->input());
         $module = $this->module;
         $input=$request->input('ser_id');
         $models = \App\Models\Series::find($input);
@@ -561,48 +581,114 @@ class JournalEntryController extends Controller{
     //     //return response()->json(['response_code' => $responseCode]);
     // }
 
-    public function sendPdfToWhatsapp($destination,$message){
+    public function sendPdfToWhatsapp($destination,$message, $org_id, $params=[]){
         $module = $this->module;
-        $auth_user = Auth::user();
+        $api = $this->whatsapp_api;
         $model = new \App\Models\Organization_Settings();
-        $src_no = $model->getVal($module['group'], 'source_number',$auth_user->organization_id);
-        $api_key = $model->getVal($module['group'], 'api_key',$auth_user->organization_id);
-        $templ_id = $model->getVal($module['group'], 'template_id',$auth_user->organization_id);
-
+        $src_no = $model->getVal($module['group'], 'source_number',$org_id);
+        $api_key = $model->getVal($module['group'], 'api_key',$org_id);
+        $templ_id = $model->getVal($module['group'], 'template_id',$org_id);
         $curl = curl_init();
 
-curl_setopt_array($curl, array(
-  CURLOPT_URL => 'https://api.gupshup.io/wa/api/v1/template/msg',
-  CURLOPT_RETURNTRANSFER => true,
-  CURLOPT_ENCODING => '',
-  CURLOPT_MAXREDIRS => 10,
-  CURLOPT_TIMEOUT => 0,
-  CURLOPT_FOLLOWLOCATION => true,
-  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-  CURLOPT_CUSTOMREQUEST => 'POST',
-  CURLOPT_POSTFIELDS => 'source='.$src_no.'&destination='.$destination.'&message='.$message,
-  CURLOPT_HTTPHEADER => array(
-    'Content-Type: application/x-www-form-urlencoded',
-    'Apikey: '.$api_key
-  ),
-));
+// curl_setopt_array($curl, array(
+//   CURLOPT_URL => 'https://api.gupshup.io/wa/api/v1/template/msg',
+//   CURLOPT_RETURNTRANSFER => true,
+//   CURLOPT_ENCODING => '',
+//   CURLOPT_MAXREDIRS => 10,
+//   CURLOPT_TIMEOUT => 0,
+//   CURLOPT_FOLLOWLOCATION => true,
+//   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+//   CURLOPT_CUSTOMREQUEST => 'POST',
+//   CURLOPT_POSTFIELDS => 'source='.$src_no.'&destination='.$destination.'&message='.$message,
+//   CURLOPT_HTTPHEADER => array(
+//     'Content-Type: application/x-www-form-urlencoded',
+//     'Apikey: '.$api_key
+//   ),
+// ));
+        // $post_field = 'channel='.$api['channel'].'&source='.$src_no.'&destination='.$destination.'&src.name='.$api['src_name'].'&template={"id":"'.$templ_id.'","params":'.$params.'}&message='.$message;
+        // $post_field_encode = urlencode($post_field);
+        // dd($post_field_encode);
 
-$response = curl_exec($curl);
+        $post_data = [];
 
-curl_close($curl);
-echo $response;
+        $template_arr = [
+            'id'=>$templ_id,
+            'params'=>$params
+        ];
+
+        $post_data['channel'] = $api['channel'];
+        $post_data['source'] = $src_no;
+        $post_data['destination'] = $destination;
+        $post_data['src.name'] = $api['src_name'];
+        $post_data['template'] = json_encode($template_arr);
+        $post_data['message'] = $message;
+
+        // dd($post_data);
+        // dd($api['whatsapp_api_url']);
+        // dd($api_key);
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $api['whatsapp_api_url'],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => Arr::query($post_data),
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/x-www-form-urlencoded',
+                'Apikey:'.$api_key
+            ),
+        ));
+        $response = curl_exec($curl);
+        curl_close($curl);
+        echo $response;
     }
+    public function test_api(){
 
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => 'https://api.gupshup.io/wa/api/v1/template/msg',
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => '',
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 0,
+      CURLOPT_FOLLOWLOCATION => true,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_CUSTOMREQUEST => 'POST',
+      // code
+      CURLOPT_POSTFIELDS => 'channel%3Dwhatsapp%26source%3D919041362511%26destination%3D%2B91%2074797%2035912%26src.name%3DGVTGH9%26template%3D%7B%22id%22%3A%22c376f4e4-2743-4eb9-8cdb-2648f7457d22%22%2C%22params%22%3A%5B10000%2C%22April%202024%22%2C%222024-05-29%22%5D%7D%26message%3D%7B%22type%22%3A%22document%22%2C%22document%22%3A%7B%22link%22%3A%22http%3A%2F%2Fwww.pdf995.com%2Fsamples%2Fpdf.pdf%22%2C%22file_name%22%3A%22journal%20Entry%20File%22%7D%7D',
+
+
+      CURLOPT_HTTPHEADER => array(
+        'Content-Type: application/x-www-form-urlencoded',
+        'Apikey: 4ssd1jldzf7mhiprkmwt5iwff6iuafqv'
+      ),
+    ));
+    // expected code
+    $s='channel=whatsapp&source=919041362511&destination=%2B91%2074797%2035912&src.name=GVTGH9&template=%7B%22id%22%3A%22c376f4e4-2743-4eb9-8cdb-2648f7457d22%22%2C%22params%22%3A%5B%223000%22%2C%22April%202024%22%2C%2212-Apr-2024%22%5D%7D&message=%7B%22type%22%3A%22document%22%2C%22document%22%3A%7B%22link%22%3A%22http%3A%2F%2Fwww.pdf995.com%2Fsamples%2Fpdf.pdf%22%7D%7D';
+    // curl_setopt_array($curl, array(
+    //         CURLOPT_URL => 'https://api.gupshup.io/wa/api/v1/template/msg',
+    //         CURLOPT_RETURNTRANSFER => true,
+    //         CURLOPT_ENCODING => '',
+    //         CURLOPT_MAXREDIRS => 10,
+    //         CURLOPT_TIMEOUT => 0,
+    //         CURLOPT_FOLLOWLOCATION => true,
+    //         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    //         CURLOPT_CUSTOMREQUEST => 'POST',
+    //         CURLOPT_POSTFIELDS => 'channel=whatsapp&source=919041362511&destination=+91&src.name='.$api['src_name'].'&template={"id":"'.$templ_id.'","params":'.$params.'}&message='.$message.'{"type":"document","document":{"link":"https://vartesting.com/gvt_bill_receipt.pdf", "filename":"GVT Receipt"}}',
+    //         CURLOPT_HTTPHEADER => array(
+    //             'Content-Type: application/x-www-form-urlencoded',
+    //             'Apikey:'.$api_key
+    //         ),
+    //     ));
+
+    $response = curl_exec($curl);
+
+    curl_close($curl);
+    echo $response;
+
+    }
 }
-// sending messsage but not file
-// curl --location --request POST 'https://api.gupshup.io/wa/api/v1/template/msg' \
-// --header 'Cache-Control: no-cache' \
-// --header 'Content-Type: application/x-www-form-urlencoded' \
-// --header 'apikey: 4ssd1jldzf7mhiprkmwt5iwff6iuafqv' \
-// --header 'cache-control: no-cache' \
-// --data-urlencode 'channel=whatsapp' \
-// --data-urlencode 'source=919041362511' \
-// --data-urlencode 'destination=+91 96534 59799' \
-// --data-urlencode 'src.name=GVTGH9' \
-// --data-urlencode 'template={"id":"84595f48-e080-412c-82e2-be0c7217e336","params":[]}' \
-// --data-urlencode 'message={"type":"document","document":{"link":"https://www.princexml.com/samples/invoice/invoicesample.pdf", "filename": "Sample funtional resume"}}'

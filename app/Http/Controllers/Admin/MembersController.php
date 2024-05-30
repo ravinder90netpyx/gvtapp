@@ -132,10 +132,11 @@ class MembersController extends Controller{
             'unit_number' => 'required|integer|between:1,9999',
             'mobile_number' => 'required|unique:members,mobile_number,'.$id,
             'charges_id' => 'required',
-            'alternate_name'=> 'required',
-            'sublet_name_1'=> 'required',
+            'alternate_name_1'=> 'required',
+            'sublet_name'=> 'required',
             'alternate_number'=> 'required|unique:members,alternate_number,'.$id
         ]);
+        // dd($request->input());
 
         $modelfind->update($request->all());
     

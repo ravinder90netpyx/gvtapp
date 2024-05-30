@@ -180,9 +180,9 @@ function autocomplete_trigger(org_id){
 
 function download_file(id){
     if(confirm("Are you sure to re-generate PDF?")){
-        document.location.href = "/supanel/journal_entry/"+id+"/make?redirect=1";
+        window.open("/supanel/journal_entry/"+id+"/make?redirect=1");
     } else{
-        document.location.href = "/supanel/journal_entry/"+id+"/show";
+        window.open("/supanel/journal_entry/"+id+"/show");
     }
 }
 
@@ -304,10 +304,8 @@ $(function(){
 
     // $(document).on('click input', '#member_mob', function(){
     //     $('#member_id').val('');
-    //     // console.log(1);
     //     // this.setCustomValidity('Choose a valid member');
     //     org_id = $('#organization_id').val();
-    //     alert(org_id);
     //     console.log(org_id);
     //     // autocomplete_trigger
     //     // $(this).autoComplete({
@@ -317,8 +315,6 @@ $(function(){
     //     //     minLength : 1,
     //     //     // appendTo : ".modal-body",
     //     //     select:function ( el, item ) {
-    //     //         alert('1');
-    //     //         console.log(item);
     //     //         $('#member_id').val(item);
     //     //         this.setCustomValidity('');
     //     //     }
@@ -366,7 +362,6 @@ $(function(){
         var yr = arr[0];
         var time= yr+"-04-01 00:00:00";
         $('#entry_date').val(time);
-        // $('#member_id').
     });
 
     $('#entry_date').on('change', function(){
@@ -391,6 +386,14 @@ $(function(){
     $('#form_id').on('submit', function(e){
         e.preventDefault();
         if(this.checkValidity()=== true){
+            form_submit();
+        }
+    });
+
+    $('#form_btn_save_submit').on('click', function(e){
+        var form_je = document.getElementById('form_id');
+        e.preventDefault();
+        if(form_je.checkValidity()=== true){
             form_submit();
         }
     });
@@ -521,6 +524,10 @@ $(function(){
                                             <i class="fa fa-download"></i>
                                         </a>
 
+                                        <a href="" target="_blank" title="Send to Whatsapp" rel="tab">
+                                            <i class="fas fa-globe text-primary"></i>
+                                        </a>
+
                                         {{-- @can($module['permission_group'].'.edit')
                                         <a href="{{ route($module['main_route'].'.edit', $row_id) }}" data-id="{{ $row_id }}" class="edit_but" title="{{ __('admin.text_edit') }}" rel="tab">
                                             <i class="{{ config('custom.icons.edit') }}"></i>
@@ -576,8 +583,8 @@ $(function(){
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
-                    <button type="submit" id="form_btn_submit" value="submit" class="btn btn-primary">Submit</button>
-                    <!-- <button type="submit" id="form_btn_save_submit" value = "save_submit" class="btn btn-primary">Save & Submit</button> -->
+                    <button type="submit" id="form_btn_submit" value="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" id="form_btn_save_submit" value = "save_submit" class="btn btn-primary">Save & Send</button>
                 </div>
             </div>
         {!! Form::close() !!}
