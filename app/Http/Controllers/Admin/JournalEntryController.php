@@ -301,33 +301,43 @@ class JournalEntryController extends Controller{
             // $file_name = $fetch_data->id.'-'.$now->format('Y-m-d-H-i-s');
             $this->generate_pdf_file($fetch_data->id);
             // $setting_model = new \App\Models\Settings();
+            if(!empty($request_data['send'])){                
+                $modl_find = $model->find($fetch_data->id);
+                $file_name = $modl_find->file_name;
+                $org_id = $modl_find->organization_id;
+                //  api message function
+                $api = $this->whatsapp_api;
+                $message = array(
+                    'type' => $api['type'],
+                    $api['type'] => array(
+                        'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
+                        'file_name' => 'Reciept'
+                    )
+                );
+                $date_arr = explode(' ', $fetch_data->entry_date);
+                $date = Carbon::parse($date_arr[0])->format('d-M-Y');
+                $month = Carbon::parse($fetch_data->from_month)->format('M Y')."-".Carbon::parse($fetch_data->to_month)->format('M Y');
+                $params = array(
+                    $fetch_data->charge,
+                    $month,
+                    $date
+                );
 
-            $modl_find = $model->find($fetch_data->id);
-            $file_name = $modl_find->file_name;
-            $org_id = $modl_find->organization_id;
-            //  api message function
-            $api = $this->whatsapp_api;
-            $message = array(
-                'type' => $api['type'],
-                $api['type'] => array(
-                    'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
-                    'file_name' => 'journal Entry File'
-                )
-            );
-            $date_arr = explode(' ', $fetch_data->entry_date);
-            $date = Carbon::parse($date_arr[0])->format('d-M-Y');
-            $month = Carbon::parse($fetch_data->from_month)->format('M Y')."-".Carbon::parse($fetch_data->to_month)->format('M Y');
-            $params = array(
-                $fetch_data->charge,
-                $month,
-                $date
-            );
-            // $param_json = json_encode($params, true);
-            $member_id = $fetch_data->member_id;
-            $member = \App\Models\Members::find($member_id);
-            $destination = $member->mobile_number;
-            $message_json = json_encode($message,true);
-            $this->sendPdfToWhatsapp($destination,$message_json, $org_id, $params);
+                $templ_id = $model->getVal($module['group'], 'template_id',$modl_find->organization_id);
+
+                $template_arr = array(
+                    'id' => $templ_id,
+                    'params' => $params
+                );
+
+                $templ_json = json_encode($template_arr);
+                // $param_json = json_encode($params, true);
+                $member_id = $fetch_data->member_id;
+                $member = \App\Models\Members::find($member_id);
+                $destination = $member->mobile_number;
+                $message_json = json_encode($message,true);
+                $this->sendPdfToWhatsapp($destination,$message_json, $org_id, $templ_json);
+            }
              
             return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
         }
@@ -418,6 +428,73 @@ class JournalEntryController extends Controller{
         $journal_entry = \App\Models\Journal_Entry::find($je_id);
         $name = $journal_entry->file_name;
         return view('include.show_pdf',compact('name'));
+    }
+
+    public function send_msg($je_id){
+        $module = $this->module;
+        $api = $this->whatsapp_api;
+        $model = \App\Models\Journal_Entry::find($je_id);
+        $org_id = $model->organization_id;
+        $member = \App\Models\Members::find($model->member_id);
+        $dest_mob_no = $member->mobile_number;
+        $message = array(
+            'type' => $api['type'],
+            $api['type'] => array(
+                'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
+                'file_name' => 'Reciept'
+            )
+        );
+
+        $date_arr = explode(' ', $model->entry_date);
+        $date = Carbon::parse($date_arr[0])->format('d-M-Y');
+        $month = Carbon::parse($model->from_month)->format('M Y')."-".Carbon::parse($model->to_month)->format('M Y');
+        $params = array(
+            $model->charge,
+            $month,
+            $date
+        );
+
+        $templ_id = $model->getVal($module['group'], 'template_id',$modl_find->organization_id);
+
+        $template_arr = array(
+            'id' => $templ_id,
+            'params' => $params
+        );
+        $templ_json = json_encode($template_arr, true);
+        $message = json_encode($message, true);
+        $this->sendPdfToWhatsapp($dest_mob_no,$message, $org_id, $templ_json);
+
+        return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+    }
+
+    public function send_reminder($je_id){
+        $module = $this->module;
+        $api = $this->whatsapp_api;
+        $model = \App\Models\Journal_Entry::find($je_id);
+        $org_id = $model->organization_id;
+        $member = \App\Models\Members::find($model->member_id);
+        $dest_mob_no = $member->mobile_number;
+        $date_arr = explode(' ', $model->entry_date);
+        $date = Carbon::parse($date_arr[0])->format('d-M-Y');
+        $month = Carbon::parse($model->from_month)->format('M Y')."-".Carbon::parse($model->to_month)->format('M Y');
+        $params = array(
+            $model->charge,
+            $month,
+            $date
+        );
+
+        $org_model = new \App\Models\Organization_Settings();
+        $templ_id = $org_model->getVal('whatsapp_reminder', 'template_id',$org_id);
+
+        $template_arr = array(
+            'id' => $templ_id,
+            'params' => $params
+        );
+        $templ_json = json_encode($template_arr, true);
+        $message = '';
+        $message = json_encode($message, true);
+        $this->sendPdfToWhatsapp($dest_mob_no,$message, $org_id, $templ_json);
+        return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
     }
 
     // public function edit(Request $request, $id, DefaultModel $model, helpers $helpers){
@@ -581,13 +658,12 @@ class JournalEntryController extends Controller{
     //     //return response()->json(['response_code' => $responseCode]);
     // }
 
-    public function sendPdfToWhatsapp($destination,$message, $org_id, $params=[]){
+    public function sendPdfToWhatsapp($destination,$message, $org_id, $template){
         $module = $this->module;
         $api = $this->whatsapp_api;
         $model = new \App\Models\Organization_Settings();
         $src_no = $model->getVal($module['group'], 'source_number',$org_id);
         $api_key = $model->getVal($module['group'], 'api_key',$org_id);
-        $templ_id = $model->getVal($module['group'], 'template_id',$org_id);
         $curl = curl_init();
 
 // curl_setopt_array($curl, array(
@@ -611,16 +687,16 @@ class JournalEntryController extends Controller{
 
         $post_data = [];
 
-        $template_arr = [
-            'id'=>$templ_id,
-            'params'=>$params
-        ];
+        // $template_arr = [
+        //     'id'=>$templ_id,
+        //     'params'=>$params
+        // ];
 
         $post_data['channel'] = $api['channel'];
         $post_data['source'] = $src_no;
         $post_data['destination'] = $destination;
         $post_data['src.name'] = $api['src_name'];
-        $post_data['template'] = json_encode($template_arr);
+        $post_data['template'] = $template;
         $post_data['message'] = $message;
 
         // dd($post_data);

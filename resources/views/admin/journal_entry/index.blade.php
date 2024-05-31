@@ -19,7 +19,8 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap-autocomplete@2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
 <script type="text/javascript">
-function form_submit(id = null){
+
+function form_submit(send , id = null){
     var series_id= $('#series_id').val();
     var entry_year= $('#entry_year').val();
     var entry_date= $('#entry_date').val();
@@ -50,7 +51,7 @@ function form_submit(id = null){
     $.ajax({
         url: action,
         method: method,
-        data: {'_token': '{!! csrf_token() !!}', 'series_id' : series_id, 'entry_date' : entry_date, 'entry_year' : entry_year, 'member_id' : member_id, 'organization_id' : organization_id, 'paid_money' : paid, 'from_month' : from_month, 'to_month': to_month, 'payment_mode':payment_mode},
+        data: {'_token': '{!! csrf_token() !!}', 'series_id' : series_id, 'entry_date' : entry_date, 'entry_year' : entry_year, 'member_id' : member_id, 'organization_id' : organization_id, 'paid_money' : paid, 'from_month' : from_month, 'to_month': to_month, 'payment_mode':payment_mode, 'send' : send},
         success: function(response){
             $('#cred_modal').modal('hide');
             location.reload();
@@ -186,6 +187,14 @@ function download_file(id){
     }
 }
 
+function send_pdf(id){
+    document.location.href = "/supanel/journal_entry/"+id+"/send";
+}
+
+function send_reminder(id){
+    window.open("/supanel/journal_entry/"+id+"/reminder");
+}
+
 $(function(){
 
     $("#add_but").on('click',function(e){
@@ -251,6 +260,7 @@ $(function(){
         ajax_show(id);
         // $('#changable_div input[type=text], input[type=search], input[type=hidden], input[type=number], input[type=date], input[type=radio], select').prop('disabled', true);
         $('#form_btn_submit').hide();
+        $('#form_btn_save_submit').hide();
     });
 
     $(document).on('change', '#organization_id', function(){
@@ -383,18 +393,26 @@ $(function(){
         }
     });
 
-    $('#form_id').on('submit', function(e){
+    $('#form_btn_submit').on('click', function(e){
+        var form_je = document.getElementById('form_id');
         e.preventDefault();
-        if(this.checkValidity()=== true){
-            form_submit();
+        var send =0;
+        if(form_je.checkValidity()=== true){
+            form_submit(send);
+        } else{
+            form_je.classList.add('was-validated');
         }
     });
 
     $('#form_btn_save_submit').on('click', function(e){
         var form_je = document.getElementById('form_id');
         e.preventDefault();
+        var send = 1;
+        // form_je.reportValidity();
         if(form_je.checkValidity()=== true){
-            form_submit();
+            form_submit(send);
+        } else{
+            form_je.classList.add('was-validated');
         }
     });
 });
@@ -520,12 +538,16 @@ $(function(){
                                             <i class="{{ config('custom.icons.info') }}"></i>
                                         </a>
 
-                                        <a href="" onclick="download_file({{ $row_id }})" target="_blank" rel="tab">
+                                        <a href='' onclick="download_file({{ $row_id }})" title="Download Reciept" rel="tab">
                                             <i class="fa fa-download"></i>
                                         </a>
 
-                                        <a href="" target="_blank" title="Send to Whatsapp" rel="tab">
-                                            <i class="fas fa-globe text-primary"></i>
+                                        <a href='' onclick="send_pdf({{ $row_id }})" title="Send Reciept on Whatsapp" rel="tab">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </a>
+
+                                        <a href='' onclick="send_reminder({{ $row_id }})" title="Send Reminder on Whatsapp" rel="tab">
+                                            <i class="fas fa-bell"></i>
                                         </a>
 
                                         {{-- @can($module['permission_group'].'.edit')

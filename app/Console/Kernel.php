@@ -19,8 +19,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
-        $schedule->call(function () {
-            #Storage::append('custom.log', "testing123");
+        $schedule->call(function (){
             $apConModel = new API_Connections;
             $settingsModel = new settingsModel;
             $sch_count = $settingsModel->getVal('connection', 'schedule_hit_count');
@@ -45,7 +44,7 @@ class Kernel extends ConsoleKernel
 
                 $settingsModel->insOrUpd(['group'=>'connection', 'key'=>'schedule_hit_count'], ['value'=>$sch_count+1]);
             }
-        })/*->everyTenMinutes();*/->cron('* * * * *');
+        })/*->everyTenMinutes();*/->monthlyOn(12, '15:00');
     }
 
     /**
