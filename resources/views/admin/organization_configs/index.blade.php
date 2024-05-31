@@ -88,6 +88,21 @@
                             {!! Form::bsInput('text', $current_field, __('Api Key'), $conf_whatsapp_settings['api_key'] ?? '', ['required'], ['vertical'=>true]); !!}
                         </div>
 
+                        <div class="col-md-6">
+                            @php $current_field = 'whatsapp_settings[src_name]'; @endphp
+                            {!! Form::bsInput('text', $current_field, __('API Source Name'), $conf_whatsapp_settings['src_name'] ?? '', ['required'], ['vertical'=>true]); !!}
+                        </div>
+
+                        <div class="col-md-6">
+                            @php $current_field = 'whatsapp_settings[channel]'; @endphp
+                            {!! Form::bsInput('text', $current_field, __('Channel'), $conf_whatsapp_settings['channel'] ?? '', ['required'], ['vertical'=>true]); !!}
+                        </div>
+
+                        <div class="col-md-6">
+                            @php $current_field = 'whatsapp_settings[api_url]'; @endphp
+                            {!! Form::bsInput('text', $current_field, __('API Url'), $conf_whatsapp_settings['api_url'] ?? '', ['required'], ['vertical'=>true]); !!}
+                        </div>
+
                        {{-- <div class="col-md-6">
                             @php $current_field = 'config[admin_mail]'; @endphp
                             {!! Form::bsText($current_field, __('Admin Email Address'), $conf_config['admin_mail'] ?? '', ['required', 'data-toggle'=>'tags'], ['vertical'=>true]); !!}

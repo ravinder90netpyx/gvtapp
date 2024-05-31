@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission;
+use App\Jobs\WhatsappAPI;
 
 class MembersController extends Controller{
     public $module = array(
@@ -17,9 +18,9 @@ class MembersController extends Controller{
         'module_route' => 'members',
         'permission_group' => 'members',
         'main_heading' => 'Member',
-        'default_perpage' => 10
+        'default_perpage' => 10,
+        'group' => 'whatsapp_settings'
     );
-
     public function __construct(Request $request){
         $module = $this->module;
         $folder = $this->folder;
@@ -198,5 +199,27 @@ class MembersController extends Controller{
                 }
             }
         }
+    }
+
+    public function send_reminder($mem_id){
+        $module = $this->module;
+        $member = \App\Models\Members::find($mem_id);
+        $org_id = $member->organization_id;
+        $dest_mob_no = $member->mobile_number;
+
+        $params = [];
+
+        $org_model = new \App\Models\Organization_Settings();
+        $templ_id = $org_model->getVal('whatsapp_reminder', 'template_id',$org_id);
+
+        $template_arr = array(
+            'id' => $templ_id,
+            'params' => $params
+        );
+        $templ_json = json_encode($template_arr, true);
+        $message = '';
+        $message = json_encode($message, true);
+        dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
+        return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
     }
 }

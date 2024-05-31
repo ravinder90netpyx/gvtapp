@@ -112,7 +112,7 @@ $dropbox_token = config('filesystems.disks.dropbox.token');
               <li class="nav-item">
                 <a href="{{route($folder['route_folder_name'].'.organization_configs.index')}}" class="nav-link{{ Str::contains(url()->current(), array('organization_configs')) ? ' active' : '' }}">
                   <span class="sidenav-mini-icon"> OC </span>
-                  <span class="sidenav-normal"> Organization Configs </span>
+                  <span class="sidenav-normal"> Whatsapp Configs </span>
                 </a>
               </li>
               @endcan

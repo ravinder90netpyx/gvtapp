@@ -191,10 +191,6 @@ function send_pdf(id){
     document.location.href = "/supanel/journal_entry/"+id+"/send";
 }
 
-function send_reminder(id){
-    window.open("/supanel/journal_entry/"+id+"/reminder");
-}
-
 $(function(){
 
     $("#add_but").on('click',function(e){
@@ -544,10 +540,6 @@ $(function(){
 
                                         <a href='' onclick="send_pdf({{ $row_id }})" title="Send Reciept on Whatsapp" rel="tab">
                                             <i class="fas fa-external-link-alt"></i>
-                                        </a>
-
-                                        <a href='' onclick="send_reminder({{ $row_id }})" title="Send Reminder on Whatsapp" rel="tab">
-                                            <i class="fas fa-bell"></i>
                                         </a>
 
                                         {{-- @can($module['permission_group'].'.edit')

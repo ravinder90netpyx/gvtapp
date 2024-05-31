@@ -9,6 +9,11 @@
 @endsection
 
 @section('scripts')
+<script type="text/javascript">
+    function send_reminder(id){
+        document.location.href = "/supanel/members/"+id+"/reminder";
+    }
+</script>
 @endsection
 
 @section('content')
@@ -133,6 +138,10 @@
                                             <i class="{{ config('custom.icons.edit') }}"></i>
                                         </a>
                                         @endcan
+
+                                        <a href='' onclick="send_reminder({{ $row_id }})" title="Send Reminder on Whatsapp" rel="tab">
+                                            <i class="fas fa-bell"></i>
+                                        </a>
 
                                         @can($module['permission_group'].'.delete')
                                             <a href="{{ route($module['main_route'].'.action', ['mode'=>'delete', 'id'=>$row_id]) }}" onclick="return confirm('Are you sure to delete?');" title="{{ __('admin.text_delete') }}">
