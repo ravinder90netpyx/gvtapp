@@ -60,7 +60,7 @@ class WhatsappAPI implements ShouldQueue
         $curl = curl_init();
 
         $post_data = [];
-
+        // dd($message);
         $post_data['channel'] = $api['channel'];
         $post_data['source'] = $src_no;
         $post_data['destination'] = $destination;

@@ -89,14 +89,14 @@ $dropbox_token = config('filesystems.disks.dropbox.token');
         @endcan
         --}}
 
-        @canany([ 'user_roles.manage', 'users.manage', 'organization.manage', 'organization.manage' ])
+        @canany([ 'user_roles.manage', 'users.manage', 'organization.manage', 'organization.manage', 'templates.manage' ])
         <li class="nav-item">
-          <a {!! Str::contains(url()->current(), array('user_roles', 'users', 'organization', 'organization_configs')) ? 'class="nav-link active" aria-expanded="true"' : 'class="nav-link collapsed" aria-expanded="false"' !!} href="#user-management" data-toggle="collapse" role="button" aria-controls="user-management">
+          <a {!! Str::contains(url()->current(), array('user_roles', 'users', 'organization', 'organization_configs', 'templates')) ? 'class="nav-link active" aria-expanded="true"' : 'class="nav-link collapsed" aria-expanded="false"' !!} href="#user-management" data-toggle="collapse" role="button" aria-controls="user-management">
             <i class="ni ni-single-02"></i>
             <span class="nav-link-text">Users Management</span>
           </a>
 
-          <div class="collapse{{ Str::contains(url()->current(), array('user_roles', 'users', 'organization', 'organization_configs')) ? ' show' : '' }}" id="user-management" style="">
+          <div class="collapse{{ Str::contains(url()->current(), array('user_roles', 'users', 'organization', 'organization_configs', 'templates')) ? ' show' : '' }}" id="user-management" style="">
             <ul class="nav nav-sm flex-column">
               @can('organization.manage')
 
@@ -113,6 +113,15 @@ $dropbox_token = config('filesystems.disks.dropbox.token');
                 <a href="{{route($folder['route_folder_name'].'.organization_configs.index')}}" class="nav-link{{ Str::contains(url()->current(), array('organization_configs')) ? ' active' : '' }}">
                   <span class="sidenav-mini-icon"> OC </span>
                   <span class="sidenav-normal"> Whatsapp Configs </span>
+                </a>
+              </li>
+              @endcan
+
+              @can('templates.manage')
+              <li class="nav-item">
+                <a href="{{route($folder['route_folder_name'].'.templates.index')}}" class="nav-link{{ Str::contains(url()->current(), array('templates')) ? ' active' : '' }}">
+                  <span class="sidenav-mini-icon"> T </span>
+                  <span class="sidenav-normal"> Templates </span>
                 </a>
               </li>
               @endcan
