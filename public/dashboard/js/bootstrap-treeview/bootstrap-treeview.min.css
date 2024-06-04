@@ -1,0 +1,162 @@
+.treeview .list-group-item{cursor:pointer}.treeview span.indent{margin-left:10px;margin-right:10px}.treeview span.icon{width:12px;margin-right:5px}.treeview .node-disabled{color:silver;cursor:not-allowed}
+
+
+/*new custom chnages*/
+
+.bs-tree-wrap .select2-container.select2-container--open .select2-dropdown {
+    display: none;
+}
+.bs-tree-wrap .list-group-item .icon {
+    height: auto;
+}
+.bs-tree-wrap .treeview .list-group {
+    max-height: 320px;
+    overflow: auto;
+    position: absolute;
+    left: 0;
+    /*top:  var(--select-tree_height);*/
+    width: 100%;
+    z-index: 9;
+}
+.bs-tree-wrap .treeview .list-group-item .icon.node-icon {
+    margin: 0 8px 0 0px;
+}
+
+.bs-tree-wrap .treeview .list-group-item .icon.expand-icon {
+    position: relative;
+    z-index: 1;
+    background: #fff;
+    border-radius: 50%;
+}
+
+.bs-tree-wrap .treeview .list-group-item:after {
+    content: "";
+    border-left: 2px #ccc dotted;
+    position: absolute;
+    height: 100%;
+    top: 0px;
+    left: 13px;
+    z-index: 0;
+}
+
+.bs-tree-wrap .treeview .list-group-item:first-child:after {
+    height: 50%;
+    top: 50%;
+}
+.treeview .list-group-item span.icon:first-child {
+    min-width: 16px;
+    display: inline-block;
+    height: 16px;
+    margin-right: 2px;
+    position: relative;
+    z-index: 1;
+    background: transparent;
+    border-radius: 50%;
+}
+.bs-tree-wrap button.toggle_bstree {
+    position: absolute;
+    right: 1px;
+    top: 32px;
+    width: 50px;
+    height: calc(100% - 33px);
+    border: 1px solid transparent;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-left: 1px solid #aaa;
+    background: white;
+    font-size: 16px;
+}
+.bs-tree-wrap .select2.select2-container span.select2-selection {
+    padding-right: 60px;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    padding-left: 6px;
+    padding-right: 20px;
+    background: transparent;
+    border-radius: 20px;
+    border: 1px solid #5e72e4;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    right: 5px;
+    left: auto;
+    border: 0;
+    height: 100%;
+    line-height: 100%;
+    color: #4e4e4e;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__display {
+    font-size: 12px;
+}
+button:focus {
+    outline: 0px dotted;
+    outline: 0px auto -webkit-focus-ring-color;
+}
+.bs-tree-wrap .treeview .list-group .list-group-item {
+    padding: 3px 10px 3px 25px;
+    font-size: 13px;
+    border-bottom: 0;
+}
+.bs-tree-wrap .list-group-item span.icon.glyphicon {
+    min-width: 0;
+    width: 0;
+    margin: 0;
+}
+.bs-tree-wrap .treeview span.indent {
+    margin-left: 0px;
+    margin-right: 0px;
+    position: relative;
+    display: inline-block;
+}
+.bs-tree-wrap .treeview span.indent+span.indent {
+    margin-left: 9px;
+    margin-right: 9px;
+}
+.bs-tree-wrap .treeview .list-group .list-group-item > .icon.expand-icon {
+    position: absolute;
+    left: 8px;
+    top: 6px;
+    min-width: auto;
+    height: auto;
+}
+
+.bs-tree-wrap .treeview .list-group .list-group-item > span.indent + .icon.expand-icon {
+    position: relative;
+    left: 0;
+    top: 0;
+}
+
+.bs-tree-wrap .treeview .list-group .list-group-item span.indent:before {
+    content: "";
+    width: 15px;
+    position: absolute;
+    left: -10px;
+    border-bottom: 2px dotted #ccc;
+    top: calc(50% - 4px);
+    transform: translateY(-50%);
+}
+.bs-tree-wrap .list-group-item > span.icon:first-child:after {
+    content: "";
+    width: 10px;
+    position: absolute;
+    left: -10px;
+    border-bottom: 2px dotted #ccc;
+    top: 10px;
+}
+.bs-tree-wrap .list-group-item > span.icon.expand-icon:first-child:after {
+    width: 5px;
+    left: 13px;
+    border-bottom: 2px dotted #ccc;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.bs-tree-wrap .treeview .list-group .list-group-item .indent + span.expand-icon.fa-minus-circle:after {
+    content: "";
+    height: 19px;
+    border-left: 2px dotted #ccc;
+    position: absolute;
+    left: 5px;
+    top: 13px;
+    z-index: 9;
+    width: 10px;
+}
