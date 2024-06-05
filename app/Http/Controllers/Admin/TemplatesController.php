@@ -89,7 +89,9 @@ class TemplatesController extends Controller{
                     $roles = $auth_user->roles()->pluck('name','id')->toArray();
                     $org_id = empty($request->input('organization_id')) ? $auth_user->organization_id : $request->input('organization_id');
                     $models1 = \App\Models\Templates::where([['organization_id','=',$org_id], ['name', '=', $value], ['status', '>','0'], ['delstatus', '<', '1']])->first();
-
+                    if(!empty($models1)){
+                        $fail("Choose a different name");
+                    }
                 }
             ],
             'template_id' => 'required',
@@ -144,7 +146,20 @@ class TemplatesController extends Controller{
     public function update(Request $request, $id, DefaultModel $model){
         $module = $this->module;
         $request->validate([
-            'name' => 'required',
+            'name' => 
+            ['required',
+            function($attribute, $value, $fail){
+                    $request = Request();
+                    $auth_user = Auth::user();
+                    $roles = $auth_user->roles()->pluck('name','id')->toArray();
+                    $org_id = empty($request->input('organization_id')) ? $auth_user->organization_id : $request->input('organization_id');
+                    $models1 = \App\Models\Templates::where([['organization_id','=',$org_id], ['name', '=', $value], ['status', '>','0'], ['delstatus', '<', '1']])->first();
+                    if(!empty($models1)){
+                        $fail("Choose a different name");
+                    }
+                }
+
+            ],
             'template_id' => 'required'
         ]);
         $params = json_encode($request->input('params'));
