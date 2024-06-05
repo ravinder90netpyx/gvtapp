@@ -44,9 +44,10 @@ Route::pattern('mode', '(activate|deactivate|delete)+');
 
 
 Route::name('supanel.')->prefix('supanel')->group(function () { 
-    
+  
     Route::group(['middleware' => ['web']], function() {
         # guest actions
+
         Route::get('/', [UserController::class, 'login'])->name('login');
         #Route::get('login', [UserController::class, 'login'])->name('login');
         Route::post('loginpost', [UserController::class, 'loginPost'])->name('loginpost');
