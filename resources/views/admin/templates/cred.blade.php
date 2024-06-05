@@ -1,15 +1,13 @@
 @php
     $auth_user = Illuminate\Support\Facades\Auth::user();
     $roles = $auth_user->roles()->pluck('id')->toArray();
-        // dd($dataArray);
     Form::macro('variantData1', function($dataArray){
-        // dd($dataArray);
         $rowIndex = $dataArray['id'] ?? 0 ;
         $dataArray['name'] = $dataArray['name'] ?? '';
         $dataArray['position'] = $dataArray['position'] ?? '';
 
         return "<div class='row py-1 params[$rowIndex]'>
-        <div class='col-sm'>".Form::text('params['.$rowIndex.'][name]', $dataArray['name'] , ['class' => 'form-control label', 'placeholder' => "name"])."</div>
+        <div class='col-sm'>".Form::text('params['.$rowIndex.'][name]', $dataArray['name'] , ['class' => 'form-control label', 'placeholder' => "Name"])."</div>
         <div class='col-sm'>".Form::number('params['.$rowIndex.'][position]', $dataArray['position'] , ['class' => 'form-control label', 'placeholder' => "Position"])."</div>
             <div class='col-sm-auto pt-2'>
                 <i class='text-danger fa-lg fas fa-trash-alt del_row'></i>
@@ -18,15 +16,15 @@
     });
 
     $multi_data='';
-     if($mode=='insert'){
-     $multi_data=Form::variantData1([], 0);
+    if($mode=='insert'){
+        $multi_data=Form::variantData1([], 0);
     }
-     else{
+    else{
         if(isset($dataArray) && is_array($dataArray) && count($dataArray) > 0){
-        foreach($dataArray as $data){
-            $multi_data = $multi_data.Form::variantData1($data);
+            foreach($dataArray as $data){
+                $multi_data = $multi_data.Form::variantData1($data);
+            }
         }
-    }
 
     }
 
@@ -97,7 +95,7 @@ $('.temp1').on('click', '.del_row', function() {
                     $data_select = $model->template_name();
                     foreach($data_select as $k => $v) $row_data[$k] = $v;
                     @endphp
-                    {!! Form::bsSelect($current_field, __('name'), $row_data, $form_data->$current_field ?? '', ['required']); !!}
+                    {!! Form::bsSelect($current_field, __('Name'), $row_data, $form_data->$current_field ?? '', ['required']); !!}
                     
                     @if(in_array(1, $roles) && $mode!='edit')
                         @php 

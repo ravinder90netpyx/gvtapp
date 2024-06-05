@@ -80,7 +80,18 @@ class TemplatesController extends Controller{
         $roles = $auth_user->roles()->pluck('id')->toArray();
         $module = $this->module;
         $request->validate([
-            'name' => 'required',
+            'name' => 
+            [
+                'required',
+                function($attribute, $value, $fail){
+                    $request = Request();
+                    $auth_user = Auth::user();
+                    $roles = $auth_user->roles()->pluck('name','id')->toArray();
+                    $org_id = empty($request->input('organization_id')) ? $auth_user->organization_id : $request->input('organization_id');
+                    $models1 = \App\Models\Templates::where([['organization_id','=',$org_id], ['name', '=', $value], ['status', '>','0'], ['delstatus', '<', '1']])->first();
+
+                }
+            ],
             'template_id' => 'required',
             'organization_id' =>in_array(1,$roles)? 'required':'nullable'
         ]);
@@ -88,9 +99,9 @@ class TemplatesController extends Controller{
         if(!in_array(1, $roles)){
             $request->merge([ 'organization_id' => $auth_user->organization_id ] );
         }
-        $request->merge( ['params' => json_encode($request->input('params')) ]);
+        $params = json_encode($request->input('params'));
+        $request->merge( ['params' => $params ]);
 
-        // dd($request->input());
         $model->create($request->all());
 
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
@@ -136,8 +147,8 @@ class TemplatesController extends Controller{
             'name' => 'required',
             'template_id' => 'required'
         ]);
-        $request->merge( ['params' => json_encode($request->input('params')) ]);
-        // dd($request->input());
+        $params = json_encode($request->input('params'));
+        $request->merge( ['params' => $params ]);
         $modelfind = $model->find($id);
         $modelfind->update($request->all());
     

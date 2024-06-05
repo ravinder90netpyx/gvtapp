@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
 
             $table->unsignedBigInteger('organization_id');
-            $table->enum('name', ['reminder', 'reciept']);
+            $table->enum('name', ['reminder', 'reciept', 'welcome']);
             $table->string('template_id', 100);
             $table->text('params')->nullable();
 

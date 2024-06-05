@@ -11,6 +11,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission;
 use App\Jobs\WhatsappAPI;
+use App\Helpers\helpers;
 
 class MembersController extends Controller{
     public $module = array(
@@ -201,22 +202,22 @@ class MembersController extends Controller{
         }
     }
 
-    public function send_reminder($mem_id){
+    public function send_reminder($mem_id, helpers $helpers){
         $module = $this->module;
         $member = \App\Models\Members::find($mem_id);
         $org_id = $member->organization_id;
         $dest_mob_no = $member->mobile_number;
-
+        $charge = \App\Models\Charges::find($member->charges_id);
         $params = [];
 
-        $org_model = new \App\Models\Organization_Settings();
-        $templ_id = $org_model->getVal('whatsapp_reminder', 'template_id',$org_id);
-
-        $template_arr = array(
-            'id' => $templ_id,
-            'params' => $params
-        );
-        $templ_json = json_encode($template_arr, true);
+        $data = [
+            'name'=> $member->name,
+            'mobile_number' => $member->mobile_number,
+            'unit_no'=> $member->unit_number,
+            'charge' => $charge->rate
+        ];
+        $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+        $templ_json = $helpers->make_temp_json($temp->id, $data);
         $message = '';
         $message = json_encode($message, true);
         dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');

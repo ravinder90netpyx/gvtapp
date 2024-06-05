@@ -43,4 +43,30 @@ class helpers{
 		}
 		return $data;
 	}
+
+	function make_temp_json($id, $data){
+		$templ_model = \App\Models\Templates::find($id);
+		$params = json_decode($templ_model->params);
+		$par_ar = [];
+		$param_arr = [];
+		// dd($params);
+		foreach($params as $par){
+			if(!empty($par->name) && !empty($par->position)){
+				$par_ar[$par->position] = $data[$par->name];
+			}
+		}
+		if(!empty($par_ar)){
+			foreach($par_ar as $p){
+				$param_arr[] = $p;
+			}
+		}
+
+		$templ_id = $templ_model->template_id;
+		$templ_arr = [
+			'id' => $templ_id,
+			'params' => $param_arr
+		];
+		$templ_json = json_encode($templ_arr);
+		return $templ_json;
+	}
 }
