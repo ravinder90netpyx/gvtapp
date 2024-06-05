@@ -78,10 +78,10 @@
                             {!! Form::bsInput('tel', $current_field, __('Source Number'), $conf_whatsapp_settings['source_number'] ?? '', ['required'], ['vertical'=>true]); !!}
                         </div>
 
-                        <div class="col-md-6">
+                        {{--<div class="col-md-6">
                             @php $current_field = 'whatsapp_settings[template_id]'; @endphp
                             {!! Form::bsInput('text', $current_field, __('Template Id'), $conf_whatsapp_settings['template_id'] ?? '', ['required'], ['vertical'=>true]); !!}
-                        </div>
+                        </div> --}}
 
                         <div class="col-md-6">
                             @php $current_field = 'whatsapp_settings[api_key]'; @endphp

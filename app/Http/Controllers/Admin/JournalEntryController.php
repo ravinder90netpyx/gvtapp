@@ -334,6 +334,16 @@ class JournalEntryController extends Controller{
                 $date_arr = explode(' ', $fetch_data->entry_date);
                 $date = Carbon::parse($date_arr[0])->format('d-M-Y');
                 $month = Carbon::parse($fetch_data->from_month)->format('M Y')."-".Carbon::parse($fetch_data->to_month)->format('M Y');
+                $name = $member->name;
+                $data = [
+                    'name'=> $name,
+                    'date'=> $date,
+                    'charge' => $fetch_data->charge,
+                    'month' => $month,
+                    'serial_no' => $fetch_data->series_number,
+                    'mode' =>$fetch_data->payment_mode,
+                    'unit_no'=> $member->unit_number
+                ];
                 $params = array(
                     $fetch_data->charge,
                     $month,

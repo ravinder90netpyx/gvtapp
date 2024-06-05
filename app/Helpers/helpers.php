@@ -43,4 +43,20 @@ class helpers{
 		}
 		return $data;
 	}
+
+	function make_temp_json($id, $data){
+		$templ_model = \App\Models\Templates::find($id);
+		$params = json_decode($templ_model->params);
+		$par_ar = [];
+		foreach($params as $par){
+			$par_ar[$par['position']] = $data[$par['name']];
+		}
+		$templ_id = $templ_model->template_id;
+		$templ_arr = [
+			'id' => $templ_id,
+			'params' => $par_ar
+		];
+		$templ_json = json_encode($templ_arr);
+		return $$templ_json;
+	}
 }
