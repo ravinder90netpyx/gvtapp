@@ -74,6 +74,8 @@ class TemplatesController extends Controller{
     public function create(DefaultModel $model){
         $module = $this->module;
         $folder = $this->folder;
+        $auth_user = Auth::user();
+        $roles = $auth_user->roles()->pluck('id')->toArray();
         if(in_array(1, $roles)){
             return view($folder['folder_name'].'.dashboard', compact('folder'));
         } else{
