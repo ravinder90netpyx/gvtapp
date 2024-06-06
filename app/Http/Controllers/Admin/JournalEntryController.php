@@ -172,7 +172,7 @@ class JournalEntryController extends Controller{
                     $report_model = \App\Models\Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','=', '0']])->orderBy('id', 'DESC')->first();
                     $report_model2 = \App\Models\Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orwhere([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0']])->orderBy('id', 'DESC')->first();
                     $last_month = $report_model->month ?? '0000-00';
-                    $act_from_mon = $report_model2->month ?? '9999-12';
+                    $act_from_mon = $report_model2->month ?? '9999-11';
                     if(empty($report_model2->money_pending)){
                         $date = Carbon::createFromFormat('Y-m', $act_from_mon);
                         $date->addMonth();
@@ -229,15 +229,12 @@ class JournalEntryController extends Controller{
             $temp_arr = $helpers->get_financial_month_year($je['from_month'], $je['to_month'],'Y-m');
             $mon_arr = empty($temp_arr) ? $temp_arr : array_merge($mon_arr , $temp_arr);
         }
-        // if($from_month <= $last_month) $validator->errors()->add('to_month', 'The money is already paid for that month kindly choose any further month');
+        
         $month_arr = $helpers->get_financial_month_year($from_month,$to_month,'Y-m');
         
-        // if($to_month < $from_month) $validator->errors()->add('from_month',"From Month should not be ahead of To Month");
         $check = \App\Models\Members::where('id',$request->input('member_id'))->count();
         
         $series_number = \App\Models\Series::find($request->input('series_id'));
-        // if(empty($check)) $validator->errors()->add('member_id',"Choose a valid Member");
-        // if(empty($series_number->count)) $validator->errors()->add('series_id',"Choose a valid Series");
         
         $request->validate($rules);
         $request_data = $request->input();
@@ -328,41 +325,30 @@ class JournalEntryController extends Controller{
                     'type' => $api['type'],
                     $api['type'] => array(
                         'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
-                        'file_name' => 'Reciept'
+                        'filename' => 'Reciept'
                     )
                 );
                 $date_arr = explode(' ', $fetch_data->entry_date);
                 $date = Carbon::parse($date_arr[0])->format('d-M-Y');
                 $month = Carbon::parse($fetch_data->from_month)->format('M Y')."-".Carbon::parse($fetch_data->to_month)->format('M Y');
-                $name = $member->name;
                 $data = [
-                    'name'=> $name,
+                    'name'=> $member->name,
                     'date'=> $date,
+                    'year'=> $fetch_data->entry_year,
+                    'mobile_number' => $member->mobile_number,
                     'charge' => $fetch_data->charge,
                     'month' => $month,
                     'serial_no' => $fetch_data->series_number,
                     'mode' =>$fetch_data->payment_mode,
                     'unit_no'=> $member->unit_number
                 ];
-                $params = array(
-                    $fetch_data->charge,
-                    $month,
-                    $date
-                );
-                $model1 = new App\Models\Organization_Settings();
-                $templ_id = $model1->getVal($module['group'], 'template_id',$modl_find->organization_id);
-
-                $template_arr = array(
-                    'id' => $templ_id,
-                    'params' => $params
-                );
-
-                $templ_json = json_encode($template_arr);
-                // $param_json = json_encode($params, true);
+                
+                $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+                $templ_json = $helpers->make_temp_json($temp->id, $data);
                 $member_id = $fetch_data->member_id;
                 $member = \App\Models\Members::find($member_id);
                 $destination = $member->mobile_number;
-                $message_json = json_encode($message,true);
+                $message = json_encode($message,true);
                 dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
             }
              
@@ -457,18 +443,20 @@ class JournalEntryController extends Controller{
         return view('include.show_pdf',compact('name'));
     }
 
-    public function send_msg($je_id){
+    public function send_msg($je_id, helpers $helpers){
         $module = $this->module;
         $api = $this->whatsapp_api;
         $model = \App\Models\Journal_Entry::find($je_id);
         $org_id = $model->organization_id;
         $member = \App\Models\Members::find($model->member_id);
         $dest_mob_no = $member->mobile_number;
+        $file_name = $model->file_name;
+
         $message = array(
             'type' => $api['type'],
             $api['type'] => array(
                 'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
-                'file_name' => 'Reciept'
+                'filename' => 'Reciept'
             )
         );
 
@@ -476,24 +464,24 @@ class JournalEntryController extends Controller{
         $date = Carbon::parse($date_arr[0])->format('d-M-Y');
         $month = Carbon::parse($model->from_month)->format('M Y')."-".Carbon::parse($model->to_month)->format('M Y');
         // $a = 'charge';
-        $params = array(
-            $model->charge,
-            $month,
-            $date
-        );
-        $model1 = new \App\Models\Organization_Settings();
-
-        $templ_id = $model1->getVal($module['group'], 'template_id',$modl_find->organization_id);
-
-        $template_arr = array(
-            'id' => $templ_id,
-            'params' => $params
-        );
-        $templ_json = json_encode($template_arr, true);
+        $data = [
+            'name'=> $member->name,
+            'date'=> $date,
+            'year'=> $model->entry_year,
+            'mobile_number' => $member->mobile_number,
+            'charge' => $model->charge,
+            'month' => $month,
+            'serial_no' => $model->series_number,
+            'mode' =>$model->payment_mode,
+            'unit_no'=> $member->unit_number
+        ];
+        $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+        $templ_json = $helpers->make_temp_json($temp->id, $data);
+        // dd($templ_json);
         $message = json_encode($message, true);
         dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
 
-        return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+        // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
     }
 
     // public function edit(Request $request, $id, DefaultModel $model, helpers $helpers){

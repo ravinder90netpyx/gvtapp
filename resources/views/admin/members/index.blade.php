@@ -11,7 +11,8 @@
 @section('scripts')
 <script type="text/javascript">
     function send_reminder(id){
-        document.location.href = "/supanel/members/"+id+"/reminder";
+        // document.location.href = "/supanel/members/"+id+"/reminder";
+        window.open("/supanel/members/"+id+"/reminder");
     }
 </script>
 @endsection

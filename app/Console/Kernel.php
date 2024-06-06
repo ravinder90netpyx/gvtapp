@@ -36,19 +36,21 @@ class Kernel extends ConsoleKernel{
 
             $message = '';
             $message = json_encode($message, true);
-
+            $helpers = new \App\Helpers\helpers();
             foreach ($member_model as $val){
                 $send_notification = 1;
                 $org_model = new \App\Models\Organization_Settings();
                 $org_id = $val->organization_id;
-                $params = [];
-                $templ_id = $org_model->getVal('whatsapp_reminder', 'template_id',$org_id);
+                $charge = \App\Models\Charges::find($val->charges_id);
+                $data = [
+                    'name'=> $val->name,
+                    'mobile_number' => $val->mobile_number,
+                    'unit_no'=> $val->unit_number,
+                    'charge' => $charge->rate
+                ];
+                $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+                $templ_json = $helpers->make_temp_json($temp->id, $data);
 
-                $template_arr = array(
-                    'id' => $templ_id,
-                    'params' => $params
-                );
-                $templ_json = json_encode($template_arr, true);
                 $destination = $val->mobile_number;
                 $now = Carbon::now();
                 $month = $now->format('Y-m');
@@ -63,30 +65,7 @@ class Kernel extends ConsoleKernel{
                 }
             }
         
-            // $settingsModel = new settingsModel;
-            // $sch_count = $settingsModel->getVal('connection', 'schedule_hit_count');
-            // //echo "bbnvcnb";
-            // //Storage::append('custom.log', $sch_count);
-
-            // $apConGet = $apConModel->where([ ['delstatus', '<', '1'], ['status', '>', '0'], ['sync_enabled', '>', '0'] ])->select(['id'])->get();
-            // if(!empty($apConGet)){
-            //     foreach($apConGet as $acg){
-            //         $row_id = $acg->id;
-            //         #dispatch( new \App\Jobs\PutApiData($row_id, '') )->onConnection('redis');
-            //         $instModel = $apConModel->find($row_id);
-            //         $uidd = $instModel->user_id;
-            //         $freq_count = ($instModel->connection_sync_frequency)/10;
-                    
-            //         if(!empty($uidd) && $sch_count%$freq_count==0){
-            //             //Storage::append('custom.log', 'Record ID '.$row_id.' is executed at '.now().' interval '.$freq_count);
-            //             $logData = [ 'api_connection_id'=>$row_id, 'user_id'=>$uidd, 'created_by'=>NULL, 'user_agent'=>NULL, 'ip_address'=>NULL ];
-            //             dispatch( new \App\Jobs\PutApiData($row_id, '', $logData) )->onConnection('redis');
-            //         }
-            //     }
-
-            //     $settingsModel->insOrUpd(['group'=>'connection', 'key'=>'schedule_hit_count'], ['value'=>$sch_count+1]);
-            // }
-        })->everyMinute();/*->monthlyOn(12, '15:00');*/
+        })/*->everyMinute();*/->monthlyOn(12, '15:00');
     }
 
     /**

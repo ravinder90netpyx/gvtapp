@@ -68,6 +68,8 @@ class WhatsappAPI implements ShouldQueue
         $post_data['template'] = $template;
         $post_data['message'] = $message;
 
+        // dd($post_data);
+
         curl_setopt_array($curl, array(
             CURLOPT_URL => $api['whatsapp_api_url'],
             CURLOPT_RETURNTRANSFER => true,
@@ -85,6 +87,6 @@ class WhatsappAPI implements ShouldQueue
         ));
         $response = curl_exec($curl);
         curl_close($curl);
-        // echo $response;
+        echo $response;
     }
 }
