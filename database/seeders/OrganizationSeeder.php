@@ -11,7 +11,7 @@ class OrganizationSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('organization')->insert([
+        /* DB::table('organization')->insert([
             'id' => '1', 
             'name' => 'Test Organization',
             'description' => '',
@@ -29,6 +29,6 @@ class OrganizationSeeder extends Seeder
             'users_allowed' => '10',           
             'created_at' => now(),
             'updated_at' => now()
-        ]);
+        ]); */
     }
 }

@@ -27,7 +27,7 @@ class UserSeeder extends Seeder
             'updated_at' => now()
         ]);
 
-        DB::table('users')->insert([
+        /* DB::table('users')->insert([
             'id' => '2',
             'uuid'=>Str::uuid(),
             'uname' => 'test1',
@@ -40,6 +40,6 @@ class UserSeeder extends Seeder
             'password' => Hash::make('123456'),
             'created_at' => now(),
             'updated_at' => now()
-        ]);
+        ]); */
     }
 }

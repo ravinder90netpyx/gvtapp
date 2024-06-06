@@ -11,7 +11,7 @@ class OrganizationSettingsSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('organization_settings')->insert([
+        /* DB::table('organization_settings')->insert([
             'id' => '1', 
             'organization_id' => '1',
             'group' => 'whatsapp_settings',
@@ -40,6 +40,6 @@ class OrganizationSettingsSeeder extends Seeder
             'is_serialized' => '0',
             'created_at' => now(),
             'updated_at' => now()
-        ]);
+        ]); */
     }
 }
