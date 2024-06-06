@@ -330,7 +330,11 @@ class JournalEntryController extends Controller{
                 );
                 $date_arr = explode(' ', $fetch_data->entry_date);
                 $date = Carbon::parse($date_arr[0])->format('d-M-Y');
-                $month = Carbon::parse($fetch_data->from_month)->format('M Y')."-".Carbon::parse($fetch_data->to_month)->format('M Y');
+                if($fetch_data->from_month != $fetch_data->to_month){
+                    $month = Carbon::parse($fetch_data->from_month)->format('M Y')."-".Carbon::parse($fetch_data->to_month)->format('M Y');
+                } else{
+                    $month = Carbon::parse($fetch_data->from_month)->format('M Y');
+                }
                 $data = [
                     'name'=> $member->name,
                     'date'=> $date,
