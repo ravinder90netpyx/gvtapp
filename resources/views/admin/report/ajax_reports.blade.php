@@ -27,7 +27,7 @@
                     <td>{{ $item['name'] }}</td>
                     <td>{{ $item['mobile_number'] }}</td>
                         @php 
-                        $match = "";
+                        $match = 0;
                         $report=\App\Models\Report::where('member_id',$item['id'])->get();
                         $mm = [];
                         $money = [];
