@@ -1,5 +1,7 @@
 @php
 $dropbox_token = config('filesystems.disks.dropbox.token');
+$auth_user = Auth::user();
+$roles = $auth_user->roles()->pluck('id')->toArray();
 @endphp
 <div class="scrollbar-inner">
   <!-- Brand -->
@@ -108,15 +110,16 @@ $dropbox_token = config('filesystems.disks.dropbox.token');
               </li>
               @endcan
 
+              @if(!in_array(1, $roles))
               @can('general_settings.manage_organization_config')
               <li class="nav-item">
                 <a href="{{route($folder['route_folder_name'].'.organization_configs.index')}}" class="nav-link{{ Str::contains(url()->current(), array('organization_configs')) ? ' active' : '' }}">
-                  <span class="sidenav-mini-icon"> OC </span>
+                  <span class="sidenav-mini-icon"> WC </span>
                   <span class="sidenav-normal"> Whatsapp Configs </span>
                 </a>
               </li>
               @endcan
-
+              
               @can('templates.manage')
               <li class="nav-item">
                 <a href="{{route($folder['route_folder_name'].'.templates.index')}}" class="nav-link{{ Str::contains(url()->current(), array('templates')) ? ' active' : '' }}">
@@ -125,6 +128,7 @@ $dropbox_token = config('filesystems.disks.dropbox.token');
                 </a>
               </li>
               @endcan
+              @endif
 
               @can('user_roles.manage')
               <li class="nav-item">

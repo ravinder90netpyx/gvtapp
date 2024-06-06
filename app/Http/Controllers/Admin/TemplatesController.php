@@ -9,6 +9,7 @@ use URL;
 use Carbon\Carbon;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\Auth;
 
 class TemplatesController extends Controller{
     public $module = array(
@@ -42,38 +43,47 @@ class TemplatesController extends Controller{
     }
 
     public function index(Request $request, DefaultModel $model){
-        //testing git confliction
         $carbon = new Carbon();
         $module = $this->module;
-        $perpage = $request->perpage ?? $module['default_perpage'];
-        if(!$request->perpage && !empty($request->cookie('perpage'))) $perpage = $request->cookie('perpage');
-        
-        $model_get = $model;
-        if($model->getDelStatusColumn()) $model_get = $model_get->where($model->getDelStatusColumn(), '<', '1');
-        
-        if($model->getSortOrderColumn()) $model_get = $model_get->orderBy($model->getSortOrderColumn(), 'ASC');
-        else $model_get = $model_get->latest();
-        
-        $query = $request->get('query') ?? '';
-        if($query!='') $model_get = $model_get->where('name', 'LIKE', '%'.$query.'%'); 
+        $auth_user = Auth::user();
+        $roles = $auth_user->roles()->pluck('id')->toArray();
+        if(in_array(1, $roles)){
+            return view($folder['folder_name'].'.dashboard', compact('folder'));
+        } else{
+            $perpage = $request->perpage ?? $module['default_perpage'];
+            if(!$request->perpage && !empty($request->cookie('perpage'))) $perpage = $request->cookie('perpage');
+            
+            $model_get = $model;
+            if($model->getDelStatusColumn()) $model_get = $model_get->where($model->getDelStatusColumn(), '<', '1');
+            
+            if($model->getSortOrderColumn()) $model_get = $model_get->orderBy($model->getSortOrderColumn(), 'ASC');
+            else $model_get = $model_get->latest();
+            
+            $query = $request->get('query') ?? '';
+            if($query!='') $model_get = $model_get->where('name', 'LIKE', '%'.$query.'%'); 
 
-        $data = $model_get->paginate($perpage)->onEachSide(2);
+            $data = $model_get->paginate($perpage)->onEachSide(2);
 
-        $title_shown = 'Manage '.$module['main_heading'].'s';
-        $folder = $this->folder;
+            $title_shown = 'Manage '.$module['main_heading'].'s';
+            $folder = $this->folder;
 
-        return view($module['main_view'].'.index', compact('data', 'model', 'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);
+            return view($module['main_view'].'.index', compact('data', 'model', 'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);
+        }
     }
 
     public function create(DefaultModel $model){
         $module = $this->module;
         $folder = $this->folder;
-        $action = URL::route($module['main_route'].'.store');
-        $title_shown = 'Add '.$module['main_heading'];
-        $method = 'POST';
-        $mode = 'insert';
+        if(in_array(1, $roles)){
+            return view($folder['folder_name'].'.dashboard', compact('folder'));
+        } else{
+            $action = URL::route($module['main_route'].'.store');
+            $title_shown = 'Add '.$module['main_heading'];
+            $method = 'POST';
+            $mode = 'insert';
 
-        return view($module['main_view'].'.cred', compact('module', 'model', 'action', 'method', 'mode', 'folder', 'title_shown'));
+            return view($module['main_view'].'.cred', compact('module', 'model', 'action', 'method', 'mode', 'folder', 'title_shown'));
+        }
     }
 
     public function store(Request $request, DefaultModel $model){
@@ -90,9 +100,7 @@ class TemplatesController extends Controller{
                     $roles = $auth_user->roles()->pluck('name','id')->toArray();
                     $org_id = empty($request->input('organization_id')) ? $auth_user->organization_id : $request->input('organization_id');
                     $models1 = \App\Models\Templates::where([['organization_id','=',$org_id], ['name', '=', $value], ['status', '>','0'], ['delstatus', '<', '1']])->first();
-                    if(!empty($models1)){
-                        $fail("Choose a different name");
-                    }
+
                 }
             ],
             'template_id' => 'required',
@@ -123,44 +131,35 @@ class TemplatesController extends Controller{
     public function edit($id, DefaultModel $model){
         $module = $this->module;
         $folder = $this->folder;
-        $form_data = $model->find($id);
-        $action = URL::route($module['main_route'].'.update', $id);
-        $title_shown = 'Edit '.$module['main_heading'];
-        $dataArrays = json_decode($form_data->params);
-        $dataArray = [];
-        $count = 1;
-        $dataArray =[];
-        foreach($dataArrays as $dt){
-            $dataArray[] = [ 
-                'id' => $count,
-                'name' => $dt->name,
-                'position' => $dt->position
-            ];
-            $count++;
-        }
-        $method = 'PUT';
-        $mode = 'edit';
+        if(in_array(1, $roles)){
+            return view($folder['folder_name'].'.dashboard', compact('folder'));
+        } else{
+            $form_data = $model->find($id);
+            $action = URL::route($module['main_route'].'.update', $id);
+            $title_shown = 'Edit '.$module['main_heading'];
+            $dataArrays = json_decode($form_data->params);
+            $dataArray = [];
+            $count = 1;
+            $dataArray =[];
+            foreach($dataArrays as $dt){
+                $dataArray[] = [ 
+                    'id' => $count,
+                    'name' => $dt->name,
+                    'position' => $dt->position
+                ];
+                $count++;
+            }
+            $method = 'PUT';
+            $mode = 'edit';
 
-        return view($module['main_view'].'.cred')->with(compact('form_data', 'model', 'dataArray', 'module', 'action', 'method', 'mode', 'folder', 'title_shown', 'id'));
+            return view($module['main_view'].'.cred')->with(compact('form_data', 'model', 'dataArray', 'module', 'action', 'method', 'mode', 'folder', 'title_shown', 'id'));
+        }
     }
 
     public function update(Request $request, $id, DefaultModel $model){
         $module = $this->module;
         $request->validate([
-            'name' => 
-            ['required',
-            function($attribute, $value, $fail){
-                    $request = Request();
-                    $auth_user = Auth::user();
-                    $roles = $auth_user->roles()->pluck('name','id')->toArray();
-                    $org_id = empty($request->input('organization_id')) ? $auth_user->organization_id : $request->input('organization_id');
-                    $models1 = \App\Models\Templates::where([['organization_id','=',$org_id], ['name', '=', $value], ['status', '>','0'], ['delstatus', '<', '1']])->first();
-                    if(!empty($models1)){
-                        $fail("Choose a different name");
-                    }
-                }
-
-            ],
+            'name' => 'required',
             'template_id' => 'required'
         ]);
         $params = json_encode($request->input('params'));

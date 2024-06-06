@@ -5,6 +5,7 @@ use App\Models\Organization_Settings as DefaultModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Auth;
 use URL;
 
 class OrganizationConfigController extends Controller{
@@ -38,19 +39,30 @@ class OrganizationConfigController extends Controller{
     }
 
     public function index(Request $request, DefaultModel $model){
-        $module = $this->module;
+        $auth_user = Auth::user();
+        $roles = $auth_user->roles()->pluck('id')->toArray();
         $folder = $this->folder;
-        $title_shown = 'Manage Settings';
+        if(in_array(1, $roles)){
+            return view($folder['folder_name'].'.dashboard', compact('folder'));
+        } else{            
+            $module = $this->module;
+            $folder = $this->folder;
+            $title_shown = 'Manage Settings';
 
-        return view($module['main_view'].'.index', compact('module', 'folder', 'title_shown', 'model'));
+            return view($module['main_view'].'.index', compact('module', 'folder', 'title_shown', 'model'));
+        }
     }
 
     public function store(Request $request, DefaultModel $model){
         $module = $this->module;
+        $folder = $this->folder;
         $request->validate([
             'whatsapp_settings.source_number' => 'required',
-            'whatsapp_settings.template_id' => 'required',
-            'whatsapp_settings.api_key' => 'required'
+            'whatsapp_settings.api_key' => 'required',
+            'whatsapp_settings.src_name' => 'required',
+            'whatsapp_settings.channel' => 'required',
+            'whatsapp_settings.api_url' => 'required'
+
         ]);
 
         $auth_user = \Illuminate\Support\Facades\Auth::user();
@@ -74,5 +86,7 @@ class OrganizationConfigController extends Controller{
         #echo "<pre>"; print_r($request->input()); echo "<pre>"; exit;
     
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' updated successfully.');
+        // return view($folder['folder_name'].'.dashboard', compact('folder'))->with('success', $module['main_heading'].' changes successfully.');
+
     }
 }
