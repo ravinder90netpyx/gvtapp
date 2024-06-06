@@ -2,7 +2,7 @@
     // dd($model);
     $auth_user = Auth::user();  
     $roles = $auth_user->roles()->pluck('name','id')->toArray();
-    $conf_whatsapp_settings = $model->getGroup('whatsapp_setting', $auth_user->organization_id);
+    $conf_whatsapp_settings = $model->getGroup('whatsapp_settings', $auth_user->organization_id);
     // $conf_config = $model->getGroup('config');
 @endphp
 @extends($folder['folder_name'].'.layouts.master')
