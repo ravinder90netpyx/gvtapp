@@ -118,7 +118,7 @@ class TemplatesController extends Controller{
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
     }
 
-    public function show($id, DefaultModel $model){
+    /*public function show($id, DefaultModel $model){
         $module = $this->module;
         $folder = $this->folder;
         $form_data = $model->find($id);
@@ -126,11 +126,13 @@ class TemplatesController extends Controller{
         $mode = 'show';
         
         return view($module['main_view'].'.show', compact('form_data', 'model', 'module', 'folder', 'title_shown', 'mode', 'id'));
-    }
+    }*/
 
     public function edit($id, DefaultModel $model){
         $module = $this->module;
         $folder = $this->folder;
+        $auth_user = Auth::user();
+        $roles = $auth_user->roles()->pluck('id')->toArray();
         if(in_array(1, $roles)){
             return view($folder['folder_name'].'.dashboard', compact('folder'));
         } else{

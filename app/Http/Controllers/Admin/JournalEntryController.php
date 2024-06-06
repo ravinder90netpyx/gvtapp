@@ -365,10 +365,11 @@ class JournalEntryController extends Controller{
         $form_data['member_val'] = 'Name:'.$member_data['name'].' Unit Number:'.$member_data['unit_number'];
         $title_shown = 'Show '.$module['main_heading'];
         $mode = 'show';
+        $series_title = $form_data->series_number;
         $financial_years = $helpers->get_financial_years($module['start_date'], null);
         if($request->ajax()) {
             $html_data = view($module['main_view'].'.form_include', compact(['form_data','id', 'module', 'mode', 'financial_years']))->render();
-            $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown, 'mode'=>$mode, 'id'=>$id]);
+            $response = response()->json(['html'=>$html_data,'series_title'=>$series_title, 'title_shown'=>$title_shown, 'mode'=>$mode, 'id'=>$id]);
             return $response;
         } else{
             return view($module['main_view'].'.cred2', compact('form_data', 'financial_years', 'model', 'module', 'folder', 'title_shown', 'mode', 'id'));

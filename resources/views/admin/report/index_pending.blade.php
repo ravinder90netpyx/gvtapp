@@ -284,9 +284,9 @@ $(function(){
                         <tr>
                             <th>{{ __('admin.text_name') }}</th>
                             <th>{{__('Mobile Number') }}</th>
-                            <th style="width:120px">{{ __('Total Amount') }}</th>
-                            <th style="width:120px">{{ __('Total Paid') }}</th>
-                            <th style="width:120px">{{ __('Pending Amount') }}</th>
+                            <th>{{ __('Total Amount') }}</th>
+                            <th>{{ __('Amount Paid') }}</th>
+                            <th>{{ __('Pending Amount') }}</th>
                         </tr>
                     </thead>
 

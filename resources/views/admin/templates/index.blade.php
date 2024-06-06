@@ -126,8 +126,8 @@
                                             @endif
                                         @endcan
 
-                                        <a href="{{ route($module['main_route'].'.show', $row_id) }}" title="{{ __('admin.text_show') }}" rel="tab">
-                                            <i class="{{ config('custom.icons.info') }}"></i>
+                                        {{-- <a href="{{ route($module['main_route'].'.show', $row_id) }}" title="{{ __('admin.text_show') }}" rel="tab">
+                                            <i class="{{ config('custom.icons.info') }}"></i> --}}
                                         </a>
 
                                         @can($module['permission_group'].'.edit')

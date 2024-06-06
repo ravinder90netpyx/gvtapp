@@ -1,8 +1,8 @@
 
     <thead>
         <tr>
-            <th style="width:120px">{{ __('Name') }}</th>
-            <th style="width:120px">{{ __('Mobile Number') }}</th>
+            <th>{{ __('Name') }}</th>
+            <th >{{ __('Mobile Number') }}</th>
             @foreach($month_arr as $mn)
                 <th>{{ date("Y M", strtotime($mn)) }}</th>
             @endforeach

@@ -5,7 +5,7 @@
             <th style="width:120px">{{ __('Name') }}</th>
             <th style="width:120px">{{ __('Mobile Number') }}</th>
             <th style="width:120px">{{ __('Total Amount') }}</th>
-            <th style="width:120px">{{ __('Total Paid') }}</th>
+            <th style="width:120px">{{ __('Amount Paid') }}</th>
             <th style="width:120px">{{ __('Pending Amount') }}</th>
 
         </tr>

@@ -158,10 +158,12 @@
                                         }
                                         @endphp
                                     </td>
-                                    @endif      
-                               
+                                    @endif
+                                    @php
+                                        $module_list = $model->getModuleTypeList();
+                                    @endphp
                                     <td>{{ $result }}</td>
-                                    <td>{{ $item['type'] }}</td>
+                                    <td>{{ $module_list[$item['type']] }}</td>
                                     <td>{{ $row_time }}</td>  
                                 </tr>
                             @endforeach

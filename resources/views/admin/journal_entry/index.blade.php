@@ -106,10 +106,9 @@ function ajax_show(id){
             $('#changable_div').html(response.html);
             $('#exampleModalLabel').text(response.title_shown);
             // console.log(action, method);
-            @if(!in_array(1, $roles))
-                $('#series_id').prop('disabled',false);
-                $('#member_mob').prop('disabled',false);
-            @endif
+            $('#next_number').closest('.form-group-multi-input').find('label').append(' (S. NO.- '+response.series_title+')');
+                $('#series_id').prop('disabled',true);
+                $('#member_mob').prop('disabled',true);
         },
         error: function(error) {
             console.error('Error fetching folder content:', error);
@@ -205,6 +204,10 @@ $(function(){
         $('#series_id').prop('disabled', true);
         $('#member_mob').prop('disabled', true);
         @endif
+        @if(!in_array(1, $roles))
+            autocomplete_trigger('{{ $auth_user->organization_id}}');
+            series_select('{{ $auth_user->organization_id}}');
+        @endif
         $('#charge').prop('disabled', true);
         @php
             $form_data=[];
@@ -254,6 +257,7 @@ $(function(){
         $('#cred_modal').modal('show');
         $('#cred_modal').modal({ backdrop:false });
         ajax_show(id);
+
         // $('#changable_div input[type=text], input[type=search], input[type=hidden], input[type=number], input[type=date], input[type=radio], select').prop('disabled', true);
         $('#form_btn_submit').hide();
         $('#form_btn_save_submit').hide();
