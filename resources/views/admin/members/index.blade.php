@@ -140,9 +140,16 @@
                                         </a>
                                         @endcan
 
-                                        <a href='' onclick="send_reminder({{ $row_id }})" title="Send Reminder on Whatsapp" rel="tab">
-                                            <i class="fas fa-bell"></i>
-                                        </a>
+                                        @php
+                                            $org_id = $item['organization_id'];
+                                            $wht_model = \App\Models\Templates::where([['name','=','reminder'],['organization_id','=',$org_id]])->count();
+                                        @endphp
+
+                                        @if($wht_model>0)
+                                            <a href='' onclick="send_reminder({{ $row_id }})" title="Send Reminder on Whatsapp" rel="tab">
+                                                <i class="fas fa-bell"></i>
+                                            </a>
+                                        @endif
 
                                         @can($module['permission_group'].'.delete')
                                             <a href="{{ route($module['main_route'].'.action', ['mode'=>'delete', 'id'=>$row_id]) }}" onclick="return confirm('Are you sure to delete?');" title="{{ __('admin.text_delete') }}">

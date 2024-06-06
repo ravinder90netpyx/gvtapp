@@ -542,9 +542,16 @@ $(function(){
                                             <i class="fa fa-download"></i>
                                         </a>
 
+                                        @php
+                                            $org_id = $item['organization_id'];
+                                            $wht_model = \App\Models\Templates::where([['name','=','reciept'],['organization_id','=',$org_id]])->count();
+                                        @endphp
+
+                                        @if($wht_model>0)
                                         <a href='' onclick="send_pdf({{ $row_id }})" title="Send Reciept on Whatsapp" rel="tab">
                                             <i class="fas fa-external-link-alt"></i>
                                         </a>
+                                        @endif
 
                                         {{-- @can($module['permission_group'].'.edit')
                                         <a href="{{ route($module['main_route'].'.edit', $row_id) }}" data-id="{{ $row_id }}" class="edit_but" title="{{ __('admin.text_edit') }}" rel="tab">

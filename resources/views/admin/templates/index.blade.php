@@ -141,9 +141,12 @@
                                                 <i class="{{ config('custom.icons.delete') }}"></i>
                                             </a>
                                         @endcan
-                                    </td>       
+                                    </td>    
+                                    @php 
+                                        $templ_list = $model->template_name();
+                                    @endphp   
 
-                                    <td>{{ $item['name'] }}</td>
+                                    <td>{{ $templ_list[$item['name']] }}</td>
                                     <td>{{ $row_time }}</td>
                                 </tr>
                             @endforeach
