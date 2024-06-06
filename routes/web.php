@@ -29,7 +29,7 @@ use App\Http\Controllers\CronController;
 |
 | Here is where you can register web routes for your application. These
 | routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
+| contains the "web" middleware group. Now create something great! testing purpos
 |
 */
 
@@ -44,9 +44,10 @@ Route::pattern('mode', '(activate|deactivate|delete)+');
 
 
 Route::name('supanel.')->prefix('supanel')->group(function () { 
-    
+  
     Route::group(['middleware' => ['web']], function() {
         # guest actions
+
         Route::get('/', [UserController::class, 'login'])->name('login');
         #Route::get('login', [UserController::class, 'login'])->name('login');
         Route::post('loginpost', [UserController::class, 'loginPost'])->name('loginpost');
