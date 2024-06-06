@@ -15,7 +15,7 @@ class TemplatesController extends Controller{
     public $module = array(
         'module_view' => 'templates',
         'module_route' => 'templates',
-        'permission_group' => 'user_roles',
+        'permission_group' => 'templates',
         'main_heading' => 'Template',
         'default_perpage' => 10
     );
