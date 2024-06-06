@@ -42,6 +42,7 @@ class TemplatesController extends Controller{
     }
 
     public function index(Request $request, DefaultModel $model){
+        //testing git confliction
         $carbon = new Carbon();
         $module = $this->module;
         $perpage = $request->perpage ?? $module['default_perpage'];
