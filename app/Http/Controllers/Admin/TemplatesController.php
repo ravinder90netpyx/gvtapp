@@ -54,6 +54,8 @@ class TemplatesController extends Controller{
             if(!$request->perpage && !empty($request->cookie('perpage'))) $perpage = $request->cookie('perpage');
             
             $model_get = $model;
+            $organization_id = $auth_user->organization_id;
+            $model_get = $model_get->where('organization_id', $organization_id);
             if($model->getDelStatusColumn()) $model_get = $model_get->where($model->getDelStatusColumn(), '<', '1');
             
             if($model->getSortOrderColumn()) $model_get = $model_get->orderBy($model->getSortOrderColumn(), 'ASC');
