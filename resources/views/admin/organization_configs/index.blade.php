@@ -86,7 +86,7 @@
 
                         <div class="col-md-6">
                             @php $current_field = 'whatsapp_settings[api_key]'; @endphp
-                            {!! Form::bsInput('text', $current_field, __('Api Key'), $conf_whatsapp_settings['api_key'] ?? '', ['required'], ['vertical'=>true]); !!}
+                            {!! Form::bsInput('password', $current_field, __('Api Key'), $conf_whatsapp_settings['api_key'] ?? '', ['required'], ['vertical'=>true]); !!}
                         </div>
 
                         <div class="col-md-6">
