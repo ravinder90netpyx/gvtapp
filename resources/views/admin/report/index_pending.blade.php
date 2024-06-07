@@ -291,47 +291,48 @@ $(function(){
                     </thead>
 
                     @if($data->count())
-                        <tbody>
-                            @foreach($data as $item)
+                    <tbody>
+                        @foreach($data as $item)
+                            @php 
+                            $row_id = $item[$model->getKeyName()];
+                            $dt_str = $carbon->createFromFormat('Y-m-d H:i:s', $item[$model::CREATED_AT]);
+                            $row_time = $dt_str->format(config('custom.datetime_format'));
+                            $journal_entry = \App\Models\Journal_Entry::where([['member_id', '=', $item['id']],['delstatus', '<', '1'], ['status','>','0']])->count();
+                            @endphp
+                            @if($journal_entry>0)
+                            <tr>
+                                <td>{{ $item['name'] }}</td>
+                                <td>{{ $item['mobile_number'] }}</td>
                                 @php 
-                                $row_id = $item[$model->getKeyName()];
-                                $dt_str = $carbon->createFromFormat('Y-m-d H:i:s', $item[$model::CREATED_AT]);
-                                $row_time = $dt_str->format(config('custom.datetime_format'));
+                                $match = '';
+                                $total_charge = '';
+                                $pending_money = ''; 
+                                $report=\App\Models\Report::where('member_id',$item['id'])->whereIn('month',$month_arr)->get();
+                                $charge=\App\Models\Charges::where('id',$item['charges_id'])->first()->rate;
+                                ;
+                                $mm = [];
+                                $money = [];
+                                foreach($report as $rp){
+                                    $mm[] = $rp['month'];
+                                    $money[] = $rp['money_paid'];
+                                }
+
+                                $total_money = array_sum($money);
+
+                            
+                                $total_charge = count($month_arr) * $charge;
+                                $pending_money = $total_charge - $total_money;
                                 @endphp
-                                <tr>
-                                    
-
-                                    <td>{{ $item['name'] }}</td>
-                                    <td>{{ $item['mobile_number'] }}</td>
-                                    @php 
-                    $match = '';
-                    $total_charge = '';
-                    $pending_money = ''; 
-                    $report=\App\Models\Report::where('member_id',$item['id'])->whereIn('month',$month_arr)->get();
-                    $charge=\App\Models\Charges::where('id',$item['charges_id'])->first()->rate;
-                    ;
-                    $mm = [];
-                    $money = [];
-                    foreach($report as $rp){
-                        $mm[] = $rp['month'];
-                        $money[] = $rp['money_paid'];
-                    }
-
-                    $total_money = array_sum($money);
-
-                
-                    $total_charge = count($month_arr) * $charge;
-                    $pending_money = $total_charge - $total_money;
-                    @endphp
+                                
+                                <td>&#8377;{{ $total_charge }}</td>
+                                <td>&#8377;{{ $total_money }}</td>
+                                <td>&#8377;{{ $pending_money }}</td>
                     
-                    <td>&#8377;{{ $total_charge }}</td>
-                    <td>&#8377;{{ $total_money }}</td>
-                    <td>&#8377;{{ $pending_money }}</td>
-                        
-                                    
-                                </tr>
-                            @endforeach
-                        </tbody>
+                                
+                            </tr>
+                            @endif
+                        @endforeach
+                    </tbody>
                     @endif
                 </table>
             </div>

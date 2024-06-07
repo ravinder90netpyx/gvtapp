@@ -99,6 +99,7 @@
                             <th style="width:40px">{{ __('admin.text_idcheck') }}</th>
                             <th style="width:120px">{{ __('admin.text_actions') }}</th>
                             <th>{{ __('admin.text_name') }}</th>
+                            <th>{{ __('Unit Number') }}</th>
                             <th>{{__('Mobile Number') }}</th>
                             <th>{{ __('Charge') }}</th>
                             <th style="width:150px">{{ __('admin.text_date_created') }}</th>
@@ -160,6 +161,7 @@
 
                                     @php $charge=\App\Models\Charges::where('id',$item['charges_id'])->first()->name; @endphp
                                     <td>{{ $item['name'] }}</td>
+                                    <td>{{ $item['unit_number'] }}</td>
                                     <td>{{ $item['mobile_number'] }}</td>
                                     <td>{{ $charge }}</td>
                                     <td>{{ $row_time }}</td>

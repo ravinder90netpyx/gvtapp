@@ -68,7 +68,7 @@ class ReportController extends Controller{
         $month_arr = $helpers->get_financial_month_year($start_month, $end_month, $format);
         $form_data = $journalEntryModel->where('from_month',$start_month)->get()->toArray();
 
-        
+        // echo "<pre>"; print_r($data->toArray()); exit;
 
         // $month_arr = $helpers->get_financial_month_year($start_month, $end_month, $format);
 

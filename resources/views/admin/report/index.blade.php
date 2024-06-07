@@ -296,14 +296,15 @@ $(function(){
                                 $row_id = $item[$model->getKeyName()];
                                 $dt_str = $carbon->createFromFormat('Y-m-d H:i:s', $item[$model::CREATED_AT]);
                                 $row_time = $dt_str->format(config('custom.datetime_format'));
+                                $report=\App\Models\Report::where('member_id',$item['id'])->get();
                                 @endphp
+                                @if($report->count()>0)
                                 <tr>
                                     
 
                                     <td>{{ $item['name'] }}</td>
                                     <td>{{ $item['mobile_number'] }}</td>
                                     @php
-                                    $report=\App\Models\Report::where('member_id',$item['id'])->get();
                                     $match = '0';
                                     $mm = [];
                                     $money = []; 
@@ -328,6 +329,7 @@ $(function(){
                         $match = '0'; } @endphp
                                     
                                 </tr>
+                                @endif
                             @endforeach
                         </tbody>
                     @endif

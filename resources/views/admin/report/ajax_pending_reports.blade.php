@@ -29,7 +29,7 @@
                     $pending_money = ''; 
                     $report=\App\Models\Report::where('member_id',$item['id'])->whereIn('month',$month_arr)->get();
                     $charge=\App\Models\Charges::where('id',$item['charges_id'])->first()->rate;
-                    ;
+                    
                     $mm = [];
                     $money = [];
                     foreach($report as $rp){
