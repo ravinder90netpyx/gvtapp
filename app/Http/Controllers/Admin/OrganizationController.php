@@ -82,7 +82,8 @@ class OrganizationController extends Controller{
         $request->validate([
             'name' => 'required',
             'gst_number' => 'required|unique:'.$module['table_name'].',gst_number',
-            'description' => 'required'
+            'description' => 'required',
+            'address' => 'required'
         ]);
 
         $model->create($request->all());
@@ -107,7 +108,8 @@ class OrganizationController extends Controller{
         $request->validate([
             'name' => 'required',
             'gst_number' => 'required|unique:'.$module['table_name'].',gst_number,'.$id.','.$module['table_column_index'],
-            'description' => 'required'
+            'description' => 'required',
+            'address' => 'required'
         ]);
 
         $modelfind = $model->find($id);

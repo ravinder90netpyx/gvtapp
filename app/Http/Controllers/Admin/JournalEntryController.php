@@ -93,7 +93,6 @@ class JournalEntryController extends Controller{
         // $templ_json = json_encode($template_arr);
         // $message = json_encode($message, true);
         // $this->sendPdfToWhatsapp($destination,$message, $org_id,$params);
-        // dd(1);
         $perpage = $request->perpage ?? $module['default_perpage'];
         $title_showns = 'Add '.$module['main_heading'];
         $method = 'POST';
@@ -388,6 +387,8 @@ class JournalEntryController extends Controller{
         $mem_id = $journal_entry->member_id;
         $member = \App\Models\Members::find($mem_id);
         $setting_model = new \App\Models\Settings();
+        $organization = \App\Models\Organization::find($member->organization_id);
+        $name = $organization->name;
         if($journal_entry->file_name && file_exists(public_path('upload/pdf_files/'.$journal_entry->file_name.'.pdf'))) {
              unlink(public_path('upload/pdf_files/' . $journal_entry->file_name.'.pdf'));
              $file_name = $journal_entry->file_name;
@@ -397,9 +398,10 @@ class JournalEntryController extends Controller{
             $file_name = $je_id.'-'.$now->format('Y-m-d-H-i-s');
         }
         $data = [
+            'org_name' => $name,
             'note' => $setting_model->getVal('pdf', 'pdf_note'),
             'line1' => $setting_model->getVal('pdf', 'line1'),
-            'address' => $setting_model->getVal('pdf', 'address'),
+            'address' => $organization->address,
             'name' => $member->name,
             'mobile_number' => $member->mobile_number,
             'charge' => $journal_entry->charge,
@@ -713,50 +715,5 @@ class JournalEntryController extends Controller{
         $response = curl_exec($curl);
         curl_close($curl);
         echo $response;
-    }
-    public function test_api(){
-
-    $curl = curl_init();
-    curl_setopt_array($curl, array(
-      CURLOPT_URL => 'https://api.gupshup.io/wa/api/v1/template/msg',
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_ENCODING => '',
-      CURLOPT_MAXREDIRS => 10,
-      CURLOPT_TIMEOUT => 0,
-      CURLOPT_FOLLOWLOCATION => true,
-      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-      CURLOPT_CUSTOMREQUEST => 'POST',
-      // code
-      CURLOPT_POSTFIELDS => 'channel%3Dwhatsapp%26source%3D919041362511%26destination%3D%2B91%2074797%2035912%26src.name%3DGVTGH9%26template%3D%7B%22id%22%3A%22c376f4e4-2743-4eb9-8cdb-2648f7457d22%22%2C%22params%22%3A%5B10000%2C%22April%202024%22%2C%222024-05-29%22%5D%7D%26message%3D%7B%22type%22%3A%22document%22%2C%22document%22%3A%7B%22link%22%3A%22http%3A%2F%2Fwww.pdf995.com%2Fsamples%2Fpdf.pdf%22%2C%22file_name%22%3A%22journal%20Entry%20File%22%7D%7D',
-
-
-      CURLOPT_HTTPHEADER => array(
-        'Content-Type: application/x-www-form-urlencoded',
-        'Apikey: 4ssd1jldzf7mhiprkmwt5iwff6iuafqv'
-      ),
-    ));
-    // expected code
-    $s='channel=whatsapp&source=919041362511&destination=%2B91%2074797%2035912&src.name=GVTGH9&template=%7B%22id%22%3A%22c376f4e4-2743-4eb9-8cdb-2648f7457d22%22%2C%22params%22%3A%5B%223000%22%2C%22April%202024%22%2C%2212-Apr-2024%22%5D%7D&message=%7B%22type%22%3A%22document%22%2C%22document%22%3A%7B%22link%22%3A%22http%3A%2F%2Fwww.pdf995.com%2Fsamples%2Fpdf.pdf%22%7D%7D';
-    // curl_setopt_array($curl, array(
-    //         CURLOPT_URL => 'https://api.gupshup.io/wa/api/v1/template/msg',
-    //         CURLOPT_RETURNTRANSFER => true,
-    //         CURLOPT_ENCODING => '',
-    //         CURLOPT_MAXREDIRS => 10,
-    //         CURLOPT_TIMEOUT => 0,
-    //         CURLOPT_FOLLOWLOCATION => true,
-    //         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    //         CURLOPT_CUSTOMREQUEST => 'POST',
-    //         CURLOPT_POSTFIELDS => 'channel=whatsapp&source=919041362511&destination=+91&src.name='.$api['src_name'].'&template={"id":"'.$templ_id.'","params":'.$params.'}&message='.$message.'{"type":"document","document":{"link":"https://vartesting.com/gvt_bill_receipt.pdf", "filename":"GVT Receipt"}}',
-    //         CURLOPT_HTTPHEADER => array(
-    //             'Content-Type: application/x-www-form-urlencoded',
-    //             'Apikey:'.$api_key
-    //         ),
-    //     ));
-
-    $response = curl_exec($curl);
-
-    curl_close($curl);
-    echo $response;
-
     }
 }

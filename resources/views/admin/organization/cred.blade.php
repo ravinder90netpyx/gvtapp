@@ -34,6 +34,9 @@
                     @php $current_field = 'description'; @endphp
                     {!! Form::bsTextArea($current_field, __('Description'), $form_data->$current_field ?? '', ['required']); !!}
 
+                    @php $current_field = 'address'; @endphp
+                    {!! Form::bsTextArea($current_field, __('Address'), $form_data->$current_field ?? '', ['required']); !!}
+
                     @php 
                     $current_field = 'users_allowed';
                     $min_users = $form_data->$current_field ?? 1;

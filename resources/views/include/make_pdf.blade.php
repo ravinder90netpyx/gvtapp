@@ -12,12 +12,15 @@
         h2 {
             text-align: center;
         }
+        .entry-section table td{
+            height:35px;
+        }
     </style>
 </head>
 <body>
 
     <div class="entry-section" style="text-align: center; padding:10px;">
-        <h2 class="text-center">Journal Entry</h2>
+        <h2 class="text-center">{{ $org_name }}</h2>
             <p>Payment Receipt</p>
             <p style="text-align: left;">Thank You for Paying Monthly Maintenance. Here is the payment receipt.</p>
         <div class="table-responsive" style="text-align:center;">
@@ -63,15 +66,9 @@
         </div>
         <p style="text-align: left;">{!! $note !!}</p>
         <hr>
-        <p style="font-size: 13px;">{!! $line1 !!}</p>
+        <p style="font-size: 15px;"><i>{!! $line1 !!}</i></p>
         <hr>
         <p style="text-align: left;">{!! $address !!}</p>
-        <br>
-        <br>
-        <div class="footer margin-top" style= "text-align: left;">
-            <div>Thank you</div>
-            <div>Journal Entry Team</div>
-        </div>
     </div>
  
     {{-- <div class="row">

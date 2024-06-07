@@ -23,6 +23,7 @@ class Organization extends Base_Model{
         'name',
         'description',
         'gst_number',
-        'users_allowed'
+        'users_allowed',
+        'address'
     ];
 }
