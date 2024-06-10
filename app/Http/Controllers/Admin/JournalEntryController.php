@@ -302,7 +302,7 @@ class JournalEntryController extends Controller{
         $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
         $date = $request_data['entry_date'];
         $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
-        if(strtotime($date) > strtotime($pre_date)){
+        // if(strtotime($date) > strtotime($pre_date)){
             $series_num =$series_number->name.$series_number->number_separator.str_pad($series_number->next_number,$series_number->min_length,'0', STR_PAD_LEFT);
             $next_number = $series_number->next_number;
             $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
@@ -353,7 +353,7 @@ class JournalEntryController extends Controller{
                 $destination = $member->mobile_number;
                 $message = json_encode($message,true);
                 dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
-            }
+            // }
              
             return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
         }
