@@ -37,4 +37,8 @@ class Members extends Base_Model{
         'sublet_name',
         'alternate_number'
     ];
+
+    public function report(){
+        return $this->hasMany(Report::class, 'member_id', 'id');
+    }
 }

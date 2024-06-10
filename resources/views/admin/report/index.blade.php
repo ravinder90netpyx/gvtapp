@@ -298,7 +298,7 @@ $(function(){
                                 $row_time = $dt_str->format(config('custom.datetime_format'));
                                 $report=\App\Models\Report::where('member_id',$item['id'])->get();
                                 @endphp
-                                @if($report->count()>0)
+                               
                                 <tr>
                                     
 
@@ -329,13 +329,12 @@ $(function(){
                         $match = '0'; } @endphp
                                     
                                 </tr>
-                                @endif
+                               
                             @endforeach
                         </tbody>
                     @endif
                 </table>
             </div>
-
             <div class="row">
                 <div class="col pagination-wrap">
                     <div class="float-right">
@@ -345,6 +344,7 @@ $(function(){
                     </div>
                 </div>
             </div>
+
 
         </div>
     </div>
