@@ -59,7 +59,7 @@ class ReportController extends Controller{
 
         $data = $model_get->paginate($perpage)->onEachSide(2);
 
-        $model_get = $model_get->join('journal_entry', 'members.id', '=', 'journal_entry.member_id')->select('members.*')->distinct()->get(); 
+        // $model_get = $model_get->join('journal_entry', 'members.id', '=', 'journal_entry.member_id')->select('members.*')->distinct()->get(); 
         $format = "Y-m";
         $month_arr = [];
         $end_month = Carbon::now()->format('Y-m');
@@ -138,7 +138,8 @@ class ReportController extends Controller{
         $month_arr = $helpers->get_financial_month_year($start_month, $end_month, $format);
         $form_data = $journalEntryModel->where('from_month',$start_month)->get()->toArray();
 
-        
+        // $model_get = $model_get->join('journal_entry', 'members.id', '=', 'journal_entry.member_id')->select('members.*')->distinct()->get(); 
+                
 
         // $month_arr = $helpers->get_financial_month_year($start_month, $end_month, $format);
 
