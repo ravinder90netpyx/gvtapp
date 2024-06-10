@@ -12,6 +12,15 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
 @section('css')
 {{--<link rel="stylesheet" href="{!! asset('vendor/intl-tel-input/build/css/intlTelInput.css') !!}">--}}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
+
+<style type="text/css">
+    .iti--allow-dropdown input, .iti--allow-dropdown input[type=text], .iti--allow-dropdown input[type=tel], .iti--separate-dial-code input, .iti--separate-dial-code input[type=text], .iti--separate-dial-code input[type=tel] {
+        padding-right: 77px;
+        padding-left: 52px;
+        margin-left: 0;
+    }
+
+</style>
 @endsection
 
 @section('scripts')
