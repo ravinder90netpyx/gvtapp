@@ -10,14 +10,49 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
 @endsection
 
 @section('css')
-<link rel="stylesheet" href="{!! asset('vendor/intl-tel-input/build/css/intlTelInput.css') !!}">
+{{--<link rel="stylesheet" href="{!! asset('vendor/intl-tel-input/build/css/intlTelInput.css') !!}">--}}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
 @endsection
 
 @section('scripts')
-<script src="{!! asset('vendor/intl-tel-input/build/js/intlTelInput.min.js') !!}"></script>
+{{-- <script src="{!! asset('vendor/intl-tel-input/build/js/intlTelInput.min.js') !!}"></script> --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js"></script>
 
 <script type="text/javascript">
 $(function(){
+
+    var input = document.querySelector("#mobile_number");
+    var al_input = document.querySelector("#alternate_number");
+    var errorMap = ["Invalid number", "Invalid country code", "Too short", "Too long", "Invalid number"];
+    var iti = window.intlTelInput(input, {
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+        autoPlaceholder: 'polite',
+        nationalMode: false,
+        onlyCountries: ['in'],
+        initialCountry:'in'
+
+    });
+     iti.setNumber("+91");
+
+    var iti2 = window.intlTelInput(al_input, {
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+        autoPlaceholder: 'polite',
+        nationalMode: false,
+        onlyCountries: ['in'],
+        selectedCountry: 'in',
+    });
+     iti2.setNumber("+91");
+
+    /* input.addEventListener('blur', function() {
+        this.value = this.value.replace(/\D/g, '');
+        if (iti.isValidNumber()) {
+            console.log("Number is valid");
+        } else {
+            var errorCode = iti.getValidationError();
+            console.log("Number is invalid. Error: " + errorMap[errorCode]);
+        }
+    });*/
     // const abc=$('#mobile_number').intlTelInput({
     //     utilsScript: "{!! asset('vendor/intl-tel-input/lib/libphonenumber/build/utils2.js') !!}",
     //     autoPlaceholder: true,
@@ -27,29 +62,32 @@ $(function(){
     //     // preferredCountries: ['in'],
     //     allowDropdown: false
     // });
-    const abc=$('#mobile_number').intlTelInput({
-        utilsScript: "{!! asset('vendor/intl-tel-input/lib/libphonenumber/build/utils.js') !!}",
-        autoPlaceholder: true,
-        nationalMode: false,
-        onlyCountries: ['in'],
-        allowDropdown: false
-    });
+    // const abc=$('#mobile_number').intlTelInput({
+    //     utilsScript: "{!! asset('vendor/intl-tel-input/lib/libphonenumber/build/utils.js') !!}",
+    //     autoPlaceholder: true,
+    //     nationalMode: false,
+    //     onlyCountries: ['in'],
+    //     allowDropdown: false
+    // });
 
-    const abcd=$('#alternate_number').intlTelInput({
+    /* const abcd=$('#alternate_number').intlTelInput({
         utilsScript: "{!! asset('vendor/intl-tel-input/lib/libphonenumber/build/utils.js') !!}",
         autoPlaceholder: true,
         nationalMode: false,
         onlyCountries: ['in'],
         allowDropdown: false
-    });
+    }); */
 
     $('#mobile_number').on('input', function(){
         // abc=$(this).getValidationError();
-        is_valid=$('#mobile_number').intlTelInput('isValidNumber');
-        country_data=$('#mobile_number').intlTelInput('getSelectedCountryData');
+        // alert(1);
+        is_valid=iti.isValidNumber();
+        country_data=iti.getSelectedCountryData();
+        // console.log(country_data);
         dial_code= country_data.dialCode;
+       
         //console.log(is_valid);
-        if(is_valid && dial_code==91){
+        if(is_valid ){
             //$("#contact-form-home").addClass('was-validated');
             this.setCustomValidity('');
             $(this).removeClass('is-invalid');
@@ -64,11 +102,11 @@ $(function(){
 
     $('#alternate_number').on('input', function(){
         // abc=$(this).getValidationError();
-        is_valid=$('#alternate_number').intlTelInput('isValidNumber');
-        country_data=$('#alternate_number').intlTelInput('getSelectedCountryData');
+        is_valid=iti2.isValidNumber();
+        country_data=iti2.getSelectedCountryData();
         dial_code= country_data.dialCode;
         //console.log(is_valid);
-        if(is_valid && dial_code==91){
+        if(is_valid ){
             //$("#contact-form-home").addClass('was-validated');
             this.setCustomValidity('');
             $(this).removeClass('is-invalid');
