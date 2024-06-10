@@ -42,7 +42,6 @@ class ReportController extends Controller{
         $module = $this->module;
         $perpage = $request->perpage ?? $module['default_perpage'];
         if(!$request->perpage && !empty($request->cookie('perpage'))) $perpage = $request->cookie('perpage');
-        
         $model_get = $model;
         $auth_user = Auth::user();
         $roles = $auth_user->roles()->pluck('id')->toArray();
@@ -60,6 +59,7 @@ class ReportController extends Controller{
 
         $data = $model_get->paginate($perpage)->onEachSide(2);
 
+        $model_get = $model_get->join('journal_entry', 'members.id', '=', 'journal_entry.member_id')->select('members.*')->distinct()->get(); 
         $format = "Y-m";
         $month_arr = [];
         $end_month = Carbon::now()->format('Y-m');
@@ -68,12 +68,10 @@ class ReportController extends Controller{
         $month_arr = $helpers->get_financial_month_year($start_month, $end_month, $format);
         $form_data = $journalEntryModel->where('from_month',$start_month)->get()->toArray();
 
-        // echo "<pre>"; print_r($data->toArray()); exit;
-
-        // $month_arr = $helpers->get_financial_month_year($start_month, $end_month, $format);
-
         $title_shown = 'Manage '.$module['main_heading'].'s';
         $folder = $this->folder;
+
+        // dd($membersWithTable1);
 
         return view($module['main_view'].'.index', compact('data', 'model','month_arr' ,'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);
     }
