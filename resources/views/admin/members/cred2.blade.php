@@ -42,16 +42,20 @@ $(function(){
         initialCountry:'in'
 
     });
-     iti.setNumber("+91");
+    @if($mode != 'edit')
+        iti.setNumber("+91");
+    @endif
 
     var iti2 = window.intlTelInput(al_input, {
         utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
         autoPlaceholder: 'polite',
         nationalMode: false,
         onlyCountries: ['in'],
-        selectedCountry: 'in',
+        selectedCountry: 'in'
     });
-     iti2.setNumber("+91");
+    @if ($mode != 'edit')
+        iti2.setNumber("+91");
+    @endif
 
     /* input.addEventListener('blur', function() {
         this.value = this.value.replace(/\D/g, '');
