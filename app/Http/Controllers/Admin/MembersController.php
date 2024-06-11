@@ -64,7 +64,7 @@ class MembersController extends Controller{
         else $model_get = $model_get->latest();
         
         $query = $request->get('query') ?? '';
-        if($query!='') $model_get = $model_get->where('name', 'LIKE', '%'.$query.'%'); 
+        if($query!='') $model_get = $model_get->where('name', 'LIKE', '%'.$query.'%')->orwhere('unit_number','LIKE','%'.$query.'%' )->orwhere('mobile_number','LIKE','%'.$query.'%' );
 
         $data = $model_get->paginate($perpage)->onEachSide(2);
 
@@ -92,7 +92,7 @@ class MembersController extends Controller{
         // dd($request->input());
         $request->validate([
             'name' => 'required|regex:/^[a-zA-Z\s]+$/',
-            'unit_number' => 'required|integer|between:1,9999',
+            'unit_number' => 'required|integer|between:1,9999|unique:members,unit_number',
             'mobile_number' => 'required|unique:members,mobile_number',
             'charges_id' => 'required',
             'organization_id' =>in_array(1,$roles)? 'required':'nullable',
@@ -108,7 +108,7 @@ class MembersController extends Controller{
         if(!in_array(1, $roles)){
             $request->merge([ 'organization_id' => $auth_user->organization_id ]);
         }
-
+        $request->merge([['mobile_number', trim($request->input('mobile_number'))], ['alternate_number', trim($request->input('alternate_number'))]]);
         $model->create($request->all());
 
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
@@ -131,7 +131,7 @@ class MembersController extends Controller{
         $modelfind = $model->find($id);
         $request->validate([
             'name' => 'required',
-            'unit_number' => 'required|integer|between:1,9999',
+            'unit_number' => 'required|integer|between:1,9999|unique:members,unit_number,'.$id,
             'mobile_number' => 'required|unique:members,mobile_number,'.$id,
             'charges_id' => 'required',
             'alternate_name_1'=> 'required',
@@ -139,7 +139,7 @@ class MembersController extends Controller{
             'alternate_number'=> 'required|unique:members,alternate_number,'.$id
         ]);
         // dd($request->input());
-
+        $request->merge([['mobile_number', trim($request->input('mobile_number'))], ['alternate_number', trim($request->input('alternate_number'))]]);
         $modelfind->update($request->all());
     
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' updated successfully');
@@ -208,19 +208,30 @@ class MembersController extends Controller{
         $org_id = $member->organization_id;
         $dest_mob_no = $member->mobile_number;
         $charge = \App\Models\Charges::find($member->charges_id);
-        $params = [];
-
-        $data = [
-            'name'=> $member->name,
-            'mobile_number' => $member->mobile_number,
-            'unit_no'=> $member->unit_number,
-            'charge' => $charge->rate
-        ];
-        $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
-        $templ_json = $helpers->make_temp_json($temp->id, $data);
-        $message = '';
-        $message = json_encode($message, true);
-        dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
-        return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+        $now = Carbon::now();
+        $je_model = \App\Models\Journal_Entry::where([['member_id', '=',$mem_id],['status','>','0'],['delstatus','<', '1']])->orderBy('id','DESC')->first();
+        $month = $je_model->to_month;
+        $curr_month = $now->format('Y-m');
+        $now_date = $now->day(12);
+        $date = Carbon::parse($now_date)->format('d-M-Y');
+        $day = $now->day;
+        if($curr_month>$month && $day<=12){
+            $params = [];
+            $data = [
+                'name'=> $member->name,
+                'mobile_number' => $member->mobile_number,
+                'unit_no'=> $member->unit_number,
+                'charge' => $charge->rate,
+                'date' => $date
+            ];
+            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            $templ_json = $helpers->make_temp_json($temp->id, $data);
+            $message = '';
+            $message = json_encode($message, true);
+            dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
+            return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+        } else{
+            return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+        }
     }
 }

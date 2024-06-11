@@ -186,6 +186,9 @@ $(function(){
     #member_id+.select2-container{
         width: 300px !important;
     }
+     .select2-search--inline {
+    display: block!important;
+}
 </style>
 @section('content')
 <div class="app-page-title">
