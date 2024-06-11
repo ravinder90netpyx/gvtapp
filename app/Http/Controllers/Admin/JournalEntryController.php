@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use GuzzleHttp\Client;
 use Illuminate\Support\Arr;
 use App\Jobs\WhatsappAPI;
+use App\Models\Report;
 
 class JournalEntryController extends Controller{
     public $module = array(
@@ -112,6 +113,7 @@ class JournalEntryController extends Controller{
             $organization_id = $auth_user->organization_id;
             $model_get = $model_get->where('organization_id', $organization_id);
         }
+
         if($model->getDelStatusColumn()) $model_get = $model_get->where($model->getDelStatusColumn(), '<', '1');
         
         if($model->getSortOrderColumn()) $model_get = $model_get->orderBy($model->getSortOrderColumn(), 'ASC');
@@ -143,6 +145,7 @@ class JournalEntryController extends Controller{
     }
 
     public function store(Request $request, DefaultModel $model, helpers $helpers){
+
         $module = $this->module;
         $auth_user = Auth::user();
         $roles = $auth_user->roles()->pluck('name','id')->toArray();
@@ -165,11 +168,12 @@ class JournalEntryController extends Controller{
             'payment_mode' => 'required|in:online,cash',
             'from_month' => 
             [
-                'required',
+
+                !empty($request->input('from_month'))? 'required':'nullable',
                 function($attribute, $value, $fail){
                     $request = Request();
-                    $report_model = \App\Models\Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','=', '0']])->orderBy('id', 'DESC')->first();
-                    $report_model2 = \App\Models\Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orwhere([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0']])->orderBy('id', 'DESC')->first();
+                    $report_model = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','=', '0']])->orderBy('id', 'DESC')->first();
+                    $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orwhere([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0']])->orderBy('id', 'DESC')->first();
                     $last_month = $report_model->month ?? '0000-00';
                     $act_from_mon = $report_model2->month ?? '9999-11';
                     if(empty($report_model2->money_pending)){
@@ -178,9 +182,9 @@ class JournalEntryController extends Controller{
                         $act_from_mon = $date->format('Y-m');
                     }
                     $to_month = $request->input('to_month');
-                    if($value <= $last_month){
-                        $fail('The money for further month is already paid kindly select the next month to pay the money');
-                    }
+                    // if($value <= $last_month){
+                    //     $fail('The money for further month is already paid kindly select the next month to pay the money');
+                    // }
                     if($value>$act_from_mon){
                         $fail('The money of previous month is not paid please select previous month to pay');
                     }
@@ -191,7 +195,7 @@ class JournalEntryController extends Controller{
             ],
             'to_month' =>
             [
-                'required',
+                !empty($request->input('to_month'))? 'required':'nullable',
                 function($attribute, $value, $fail){
                     $hlp = new helpers;
                     $request = Request();
@@ -199,9 +203,34 @@ class JournalEntryController extends Controller{
                     $charge = \App\Models\Charges::find($member->charges_id)->rate;
                     $mon_arr = $hlp->get_financial_month_year($request->from_month, $value,'Y-m');
                     // $mon_arr = $helpers->get_financial_month_year($request->from_month, $value);
-                    $report_model2 = \App\Models\Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('id', 'ASC')->first();
+                    $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('id', 'ASC')->first();
                     $pending_money = $report_model2->money_pending ?? 0;
                     $count= count($mon_arr);
+                    if(!empty($report_model2->money_pending)) $count =$count-1;
+                    if(!empty($request->paid_money)){
+                        if($count !=ceil(($request->paid_money-$pending_money)/$charge)){
+                            $fail('Amount Paid and selected month are not proportional kindly adjust the value or month');
+                        }
+                    }
+                }
+            ],
+
+            'custom_month' =>
+            [
+                !empty($request->input('custom_month'))? 'required':'nullable',
+                function($attribute, $value, $fail){
+                    $val_arr = [];
+                    $val_arr = explode(',',$value);
+                    $request = Request();
+                    foreach($val_arr as $vl){
+                        $report = Report::where([['member_id', '=', $request->input('member_id')],['status','>', '0'], ['delstatus','<','1'], ['month', '=', $vl]])->count();
+                        if($report>0){
+                            $fail("The Amount of this month is already paid");
+                        }
+                    }
+                    $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('id', 'ASC')->first();
+                    $pending_money = $report_model2->money_pending ?? 0;
+                    $count = count($val_arr);
                     if(!empty($report_model2->money_pending)) $count =$count-1;
                     if(!empty($request->paid_money)){
                         if($count !=ceil(($request->paid_money-$pending_money)/$charge)){
@@ -228,8 +257,12 @@ class JournalEntryController extends Controller{
             $temp_arr = $helpers->get_financial_month_year($je['from_month'], $je['to_month'],'Y-m');
             $mon_arr = empty($temp_arr) ? $temp_arr : array_merge($mon_arr , $temp_arr);
         }
-        
-        $month_arr = $helpers->get_financial_month_year($from_month,$to_month,'Y-m');
+        $month_arr =[];
+        if(empty('from_month') && empty('to_month')){
+            $month_arr = $helpers->get_financial_month_year($from_month,$to_month,'Y-m');
+        } else{
+            $month_arr = explode(',', $request->input('custom_month'));
+        }
         
         $check = \App\Models\Members::where('id',$request->input('member_id'))->count();
         
@@ -329,10 +362,24 @@ class JournalEntryController extends Controller{
                 );
                 $date_arr = explode(' ', $fetch_data->entry_date);
                 $date = Carbon::parse($date_arr[0])->format('d-M-Y');
-                if($fetch_data->from_month != $fetch_data->to_month){
-                    $month = Carbon::parse($fetch_data->from_month)->format('M Y')."-".Carbon::parse($fetch_data->to_month)->format('M Y');
+                if(empty($fetch_data->from_month) && empty($fetch_data->to_month)){
+                    if($fetch_data->from_month != $fetch_data->to_month){
+                        $month = Carbon::parse($fetch_data->from_month)->format('M Y')."-".Carbon::parse($fetch_data->to_month)->format('M Y');
+                    } else{
+                        $month = Carbon::parse($fetch_data->from_month)->format('M Y');
+                    }
                 } else{
-                    $month = Carbon::parse($fetch_data->from_month)->format('M Y');
+                    $month = '';
+                    $val_ar = explode(',',$fetch_data->custom_data);
+                    $count = 0;
+                    foreach($val_ar as $vl){
+                        $count++;
+                        if($count == count($val_ar)){
+                            $month = $month.Carbon::parse($vl)->format('M Y');
+                        } else{
+                            $month = $month.Carbon::parse($vl)->format('M Y').',';
+                        }
+                    }
                 }
                 $data = [
                     'name'=> $member->name,

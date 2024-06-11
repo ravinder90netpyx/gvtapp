@@ -32,6 +32,8 @@ function form_submit(send , id = null){
     var from_month = $('#from_month').val();
     var to_month = $('#to_month').val();
     var payment_mode = $('#payment_mode').val();
+    var remarks = $('#remarks').val();
+    var custom_month = $('#custom_month').val();
 
     // form_data = {
     //     'series_id' : series_id,
@@ -51,7 +53,7 @@ function form_submit(send , id = null){
     $.ajax({
         url: action,
         method: method,
-        data: {'_token': '{!! csrf_token() !!}', 'series_id' : series_id, 'entry_date' : entry_date, 'entry_year' : entry_year, 'member_id' : member_id, 'organization_id' : organization_id, 'paid_money' : paid, 'from_month' : from_month, 'to_month': to_month, 'payment_mode':payment_mode, 'send' : send},
+        data: {'_token': '{!! csrf_token() !!}', 'series_id' : series_id, 'entry_date' : entry_date, 'entry_year' : entry_year, 'member_id' : member_id, 'organization_id' : organization_id, 'paid_money' : paid, 'from_month' : from_month, 'to_month': to_month, 'payment_mode':payment_mode, 'send' : send, 'remarks' : remarks, 'custom_month':custom_month},
         success: function(response){
             $('#cred_modal').modal('hide');
             location.reload();
@@ -154,6 +156,20 @@ function datetimepicker_month(id){
         minViewMode: 1,
         startDate : date,
         container: '#cred_modal',
+
+        autoclose: true
+    });
+}
+function custom_datetimepicker_month(id){
+    date = new Date('2020-01-01');
+    $('#'+id).datepicker({
+        format: "yyyy-mm",
+        startView: 1,
+        minViewMode: 1,
+        multidate : true,
+        startDate : date,
+        container: '#cred_modal',
+
         autoclose: true
     });
 }
@@ -225,6 +241,29 @@ $(function(){
 
     datetimepicker_month('from_month');
     datetimepicker_month('to_month');
+    custom_datetimepicker_month('custom_month');
+
+    $('#custom_toggle').on('change',function(){
+        is_check = $(this).prop('checked');
+        $('#from_month').val('');
+        $('#to_month').val('');
+        $('#custom_month').val('');
+        if(is_check){
+            $('.from_month').hide();
+            $('#from_month').prop('required',false);
+            $('.to_month').hide();
+            $('#to_month').prop('required', false);
+            $('.custom_month').show();
+            $('#custom_month').prop('required',true);
+        } else{
+            $('.from_month').show();
+            $('#from_month').prop('required',true);
+            $('.to_month').show();
+            $('#to_month').prop('required',true);
+            $('.custom_month').hide();
+            $('#custom_month').prop('required',false);
+        }
+    });
 
     $('#from_month').on('change',function(){
         date = new Date($(this).val());
@@ -548,11 +587,11 @@ $(function(){
                                             $wht_model = \App\Models\Templates::where([['name','=','reciept'],['organization_id','=',$org_id]])->count();
                                         @endphp
 
-                                        @if($wht_model>0)
+                                        {{-- @if($wht_model>0)
                                         <a href='' onclick="send_pdf({{ $row_id }})" title="Send Reciept on Whatsapp" rel="tab">
                                             <i class="fas fa-external-link-alt"></i>
                                         </a>
-                                        @endif
+                                        @endif --}}
 
                                         {{-- @can($module['permission_group'].'.edit')
                                         <a href="{{ route($module['main_route'].'.edit', $row_id) }}" data-id="{{ $row_id }}" class="edit_but" title="{{ __('admin.text_edit') }}" rel="tab">

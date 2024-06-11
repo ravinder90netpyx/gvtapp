@@ -70,7 +70,7 @@
     @else
         @php $current_field = 'member_id';
             $row_data=[];
-            $data_select=\App\Models\Members::where([['delstatus','<','1'],['status','>','0'], ['organisation_id']])->get();
+            $data_select=\App\Models\Members::where([['delstatus','<','1'],['status','>','0'], ['organization_id']])->get();
             foreach($data_select as $ds) $row_data[$ds->id]= $ds->name;
         @endphp
         {!! Form::bsSelect($current_field, __('Member'), $row_data, $form_data->$current_field ?? '', ['required', $disable], ['vertical'=>true]); !!}
@@ -86,15 +86,25 @@
     {!! Form::bsInput('number', $current_field, __('Paid Money'), $form_data->$current_field ?? '', ['disabled'], $add_perm); !!}
 </div>
 
-<div class="col-md-6">
+<div class="col-md-6 from_month">
     @php $current_field = 'from_month'; @endphp
     {!! Form::bsInput('text', $current_field, __('From'), $form_data->$current_field ?? '', [ 'required', 'autocomplete'=>'off', $disable ],  ['vertical'=>true]); !!}
 </div>
 
-<div class="col-md-6">
+<div class="col-md-6 to_month">
     @php $current_field = 'to_month'; @endphp
     
     {!! Form::bsInput('text', $current_field, __('To'), $form_data->$current_field ?? '', [ 'required', 'autocomplete'=>'off', $disable ],  ['vertical'=>true]); !!}
+</div>
+
+<div class="col-md-6">
+    @php $current_field = 'custom_toggle'; @endphp
+    {!! Form::bsToggle($current_field, 'Custom Month', '1', ( $form_data->$current_field ?? false ), [$disable], ['vertical'=>true]); !!}
+</div>
+
+<div class="col-md-6 custom_month" style = "display:none;">
+    @php $current_field = 'custom_month'; @endphp
+    {!! Form::bsInput('text', $current_field, __('Custom Month'), $form_data->$current_field ?? '', [ 'autocomplete'=>'off', $disable ],  ['vertical'=>true]); !!}
 </div>
 
 
@@ -103,6 +113,11 @@
         $row_data = \App\Models\Journal_Entry::getPaymentMode();
     @endphp
     {!! Form::bsSelect($current_field, __('Mode'), $row_data, $form_data->$current_field ?? '', ['required', 'placeholder'=>'Select Mode' , $disable], ['vertical'=>true]); !!}
+</div>
+
+<div class="col-md-6 ">
+    @php $current_field = 'remarks'; @endphp
+    {!! Form::bsTextArea($current_field, __('Remarks'), $form_data->$current_field ?? '', [$disable], ['vertical'=>true]); !!}
 </div>
 
 {!! Form::hidden('member_id', '', ['required', $disable,'id'=>'member_id']); !!}
