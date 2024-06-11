@@ -95,7 +95,7 @@ $("#from_date").change(function(){
 function download_csv_pdf(){
     abc = $("#repo_id").DataTable({
         "dom": "Bt",
-        'paging': true,
+        'paging': false,
         "buttons": [
             {
                 extend: 'csv',
