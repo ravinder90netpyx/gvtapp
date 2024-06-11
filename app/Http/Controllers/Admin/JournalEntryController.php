@@ -229,6 +229,8 @@ class JournalEntryController extends Controller{
                         }
                     }
                     $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('id', 'ASC')->first();
+                    $member = \App\Models\Members::find($request->input('member_id'));
+                    $charge = \App\Models\Charges::find($member->charges_id)->rate;
                     $pending_money = $report_model2->money_pending ?? 0;
                     $count = count($val_arr);
                     if(!empty($report_model2->money_pending)) $count =$count-1;
