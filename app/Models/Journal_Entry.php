@@ -27,7 +27,8 @@ class Journal_Entry extends Base_Model{
     */
     public const ModeOption = [
         'cash' => 'Cash',
-        'online' => 'Online'
+        'online' => 'Online',
+        'cheque' => 'Cheque'
     ];
 
     protected $fillable = [
@@ -45,7 +46,8 @@ class Journal_Entry extends Base_Model{
         'payment_mode',
         'partial',
         'custom_month',
-        'remarks'
+        'remarks',
+        'check_number'
     ];
 
     public static function getPaymentMode(){

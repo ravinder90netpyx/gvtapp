@@ -16,9 +16,9 @@ return new class extends Migration
       
 
       Schema::table('journal_entry', function (Blueprint $table) { 
-    $table->enum('payment_mode',['online', 'cash', 'cheque'])->change(); 
-    $table->string('cheque_number')->nullable();
-});
+        DB::statement("ALTER TABLE journal_entry MODIFY COLUMN payment_mode ENUM('online', 'cash', 'cheque')");
+        $table->string('cheque_number')->nullable();
+    });
     }
 
     /**
@@ -29,7 +29,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('journal_entry', function($table) {
-            $table->dropColumn('payment_mode');
+            DB::statement("ALTER TABLE journal_entry MODIFY COLUMN payment_mode ENUM('online','cash')");
             $table->dropColumn('cheque_number');
         });
     }
