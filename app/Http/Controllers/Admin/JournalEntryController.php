@@ -260,7 +260,7 @@ class JournalEntryController extends Controller{
             $mon_arr = empty($temp_arr) ? $temp_arr : array_merge($mon_arr , $temp_arr);
         }
         $month_arr =[];
-        if(empty('from_month') && empty('to_month')){
+        if(!empty($request->input('from_month')) && !empty($request->input('to_month'))){
             $month_arr = $helpers->get_financial_month_year($from_month,$to_month,'Y-m');
         } else{
             $month_arr = explode(',', $request->input('custom_month'));
@@ -319,6 +319,7 @@ class JournalEntryController extends Controller{
             } else{
                 $money = $report_models->money_pending;
                 if(!empty($money)){
+                    $report_data['month'] = $mt;
                     if($money <= $paid_m){
                         $report_data['money_paid'] = $charge;
                         $report_data['money_pending'] = 0;
