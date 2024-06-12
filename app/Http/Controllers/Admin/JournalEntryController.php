@@ -120,7 +120,7 @@ class JournalEntryController extends Controller{
         else $model_get = $model_get->latest();
         
         $query = $request->get('query') ?? '';
-        if($query!='') $model_get = $model_get->where('name', 'LIKE', '%'.$query.'%');
+        if($query!='') $model_get = $model_get->where('series_number', 'LIKE', '%'.$query.'%');
 
         $data = $model_get->paginate($perpage)->onEachSide(2);
 
@@ -165,7 +165,7 @@ class JournalEntryController extends Controller{
             'entry_date' => 'required|date_format:Y-m-d H:i:s',
             // 'form_data.member_mob' => 'required',
             'member_id' => 'required|numeric',
-            'payment_mode' => 'required|in:online,cash',
+            'payment_mode' => 'required|in:online,cash,cheque',
             'from_month' => 
             [
 
@@ -541,40 +541,40 @@ class JournalEntryController extends Controller{
         // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
     }
 
-    // public function edit(Request $request, $id, DefaultModel $model, helpers $helpers){
-    //     $module = $this->module;
-    //     $folder = $this->folder;
-    //     $form_data = $model->find($id);
-    //     $form_data['member_mob'] = \App\Models\Members::find($form_data->member_id)->mobile_number;
-    //     $action = URL::route($module['main_route'].'.update', $id);
-    //     $title_shown = 'Edit '.$module['main_heading'];
-    //     $method = 'PUT';
-    //     $mode = 'edit';
-    //     $financial_years = $helpers->get_financial_years($module['start_date'], null);
-    //     if($request->ajax()) {
-    //         $html_data = view($module['main_view'].'.form_include', compact(['form_data','id', 'mode', 'financial_years']))->render();
-    //         $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown, 'action'=>$action, 'method'=>$method, 'mode'=>$mode, 'id'=>$id]);
-    //         return $response;
-    //     } else{
-    //         return view($module['main_view'].'.cred2')->with(compact('form_data', 'financial_years', 'model', 'module', 'action', 'method', 'mode', 'folder', 'title_shown', 'id'));
-    //     }
-    // }
+    public function edit(Request $request, $id, DefaultModel $model, helpers $helpers){
+        $module = $this->module;
+        $folder = $this->folder;
+        $form_data = $model->find($id);
+        $form_data['member_mob'] = \App\Models\Members::find($form_data->member_id)->mobile_number;
+        $action = URL::route($module['main_route'].'.update', $id);
+        $title_shown = 'Edit '.$module['main_heading'];
+        $method = 'PUT';
+        $mode = 'edit';
+        $financial_years = $helpers->get_financial_years($module['start_date'], null);
+        if($request->ajax()) {
+            $html_data = view($module['main_view'].'.form_include', compact(['form_data','id', 'mode', 'financial_years', 'module']))->render();
+            $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown, 'action'=>$action, 'method'=>$method, 'mode'=>$mode, 'id'=>$id]);
+            return $response;
+        } else{
+            return view($module['main_view'].'.cred2')->with(compact('form_data', 'financial_years', 'model', '-', 'action', 'method', 'mode', 'folder', 'title_shown', 'id'));
+        }
+    }
 
-    // public function update(Request $request, $id, DefaultModel $model){
-    //     $module = $this->module;
-    //     $request->validate([
-    //         'series_id' => 'required|numeric',
-    //         'entry_year' => 'required',
-    //         'entry_date' => 'required|date_format:Y-m-d H:i:s',
-    //         // 'form_data.member_mob' => 'required',
-    //         'member_id' => 'required|numeric'
-    //     ]);
+    public function update(Request $request, $id, DefaultModel $model){
+        $module = $this->module;
+        $request->validate([
+            'series_id' => 'required|numeric',
+            'entry_year' => 'required',
+            'entry_date' => 'required|date_format:Y-m-d H:i:s',
+            // 'form_data.member_mob' => 'required',
+            'member_id' => 'required|numeric'
+        ]);
 
-    //     $modelfind = $model->find($id);
-    //     $modelfind->update($request->all());
+        $modelfind = $model->find($id);
+        $modelfind->update($request->all());
     
-    //     return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' updated successfully');
-    // } 
+        return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' updated successfully');
+    } 
 
     public function action($mode, $id, DefaultModel $model){
         $module = $this->module;
