@@ -172,8 +172,8 @@ class JournalEntryController extends Controller{
                 !empty($request->input('from_month'))? 'required':'nullable',
                 function($attribute, $value, $fail){
                     $request = Request();
-                    $report_model = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','=', '0']])->orderBy('id', 'DESC')->first();
-                    $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orwhere([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0']])->orderBy('id', 'DESC')->first();
+                    $report_model = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','=', '0']])->orderBy('month', 'DESC')->first();
+                    $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orwhere([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0']])->orderBy('month', 'DESC')->first();
                     $last_month = $report_model->month ?? '0000-00';
                     $act_from_mon = $report_model2->month ?? '9999-11';
                     if(empty($report_model2->money_pending)){
@@ -203,7 +203,7 @@ class JournalEntryController extends Controller{
                     $charge = \App\Models\Charges::find($member->charges_id)->rate;
                     $mon_arr = $hlp->get_financial_month_year($request->from_month, $value,'Y-m');
                     // $mon_arr = $helpers->get_financial_month_year($request->from_month, $value);
-                    $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('id', 'ASC')->first();
+                    $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('month', 'ASC')->first();
                     $pending_money = $report_model2->money_pending ?? 0;
                     $count= count($mon_arr);
                     if(!empty($report_model2->money_pending)) $count =$count-1;
@@ -228,7 +228,7 @@ class JournalEntryController extends Controller{
                             $fail("The Amount of this month is already paid");
                         }
                     }
-                    $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('id', 'ASC')->first();
+                    $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('month', 'ASC')->first();
                     $member = \App\Models\Members::find($request->input('member_id'));
                     $charge = \App\Models\Charges::find($member->charges_id)->rate;
                     $pending_money = $report_model2->money_pending ?? 0;
@@ -244,7 +244,7 @@ class JournalEntryController extends Controller{
         ];
         $validator=\Illuminate\Support\Facades\Validator::make([], []);
         $report_model = new \App\Models\Report();
-        $report_last_month = $report_model->where([['member_id','=',$request->input('member_id')],['delstatus','<','1'], ['status','>','0']])->orderBy('id', 'DESC')->first();
+        $report_last_month = $report_model->where([['member_id','=',$request->input('member_id')],['delstatus','<','1'], ['status','>','0']])->orderBy('month', 'DESC')->first();
         if(in_array('1', array_keys($roles))){
             $rules['organization_id'] = 'required|numeric';
         }
@@ -294,7 +294,7 @@ class JournalEntryController extends Controller{
                 // $request_data['to_month'] = $actu_month[$count-1];
             }
         } else{
-            $report_model_last_mon = $report_model->where([['month', '=', $from_month], ['member_id', '=', $request_data['member_id']], ['delstatus','<','1'], ['status','>', '0']])->orderBy('id','DESC')->first();
+            $report_model_last_mon = $report_model->where([['month', '=', $from_month], ['member_id', '=', $request_data['member_id']], ['delstatus','<','1'], ['status','>', '0']])->orderBy('month','DESC')->first();
             $dedt_amt=0;
             if(!empty($report_model_last_mon)) $dedt_amt = $report_model_last_mon->money_paid;
             $request_data['paid_money'] = count($month_arr)*$charge - $dedt_amt;
