@@ -281,7 +281,7 @@ class JournalEntryController extends Controller{
         // $month_arr = $helpers->get_financial_month_year($request->input('from_month'), $request->input('to_month'));
         $paid_m = empty($paid) ? $charge*count($month_arr) : $paid;
         // $pending_mon = $report_last_month['money_pending'] ?? 0;
-        $paid_m = $paid_m;
+        // dd($paid_m);
         
         if(!empty($paid)){
             $request_data['partial'] = ($paid%$charge > 0)? '1':'0';
@@ -299,41 +299,6 @@ class JournalEntryController extends Controller{
             if(!empty($report_model_last_mon)) $dedt_amt = $report_model_last_mon->money_paid;
             $request_data['paid_money'] = count($month_arr)*$charge - $dedt_amt;
         }
-        foreach($month_arr as $mt){
-            $report_models = $report_model->where([['month', '=',$mt], ['member_id','=',$request_data['member_id']], ['delstatus','<','1'],['status','>','0']])->first();
-            // $tempe_arr[] = $report_models->id;
-            if(empty($report_models)){
-                $report_data['month'] = $mt;
-
-                $report_data['member_id'] = $request_data['member_id'];
-                if($charge <= $paid_m){
-                    $report_data['money_paid'] = $charge;
-                    $report_data['money_pending'] = 0;
-                    $paid_m = $paid_m - $charge;
-                } else{
-                    $report_data['money_paid'] = $paid_m;
-                    $report_data['money_pending'] = $charge - $paid_m;
-                    $paid_m = 0;
-                }
-                $upd_rep = $report_model->create($report_data);
-            } else{
-                $money = $report_models->money_pending;
-                if(!empty($money)){
-                    $report_data['month'] = $mt;
-                    if($money <= $paid_m){
-                        $report_data['money_paid'] = $charge;
-                        $report_data['money_pending'] = 0;
-                        $paid_m = $paid_m - $money;
-                    } else{
-                        $report_data['money_paid'] = $paid_m + $report_models->money_paid;
-                        $report_data['money_pending'] = $money - $paid_m;
-                        $paid_m = 0;
-                    }
-                    $report_model->where('id','=',$report_models->id)->update($report_data);
-                }
-            }
-            $report_data =[];
-        }
         
         $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
         $date = $request_data['entry_date'];
@@ -346,6 +311,46 @@ class JournalEntryController extends Controller{
             $request_data['series_next_number'] = $next_number;
             $request_data['series_number'] = $series_num;
             $fetch_data = $model->create($request_data);
+            // report --
+
+            foreach($month_arr as $mt){
+                $report_models = $report_model->where([['month', '=',$mt], ['member_id','=',$request_data['member_id']], ['delstatus','<','1'],['status','>','0']])->first();
+                // $tempe_arr[] = $report_models->id;
+                $report_data['journal_entry_id'] = $fetch_data->id;
+                if(empty($report_models)){
+                    $report_data['month'] = $mt;
+
+                    $report_data['member_id'] = $request_data['member_id'];
+                    if($charge <= $paid_m){
+                        $report_data['money_paid'] = $charge;
+                        $report_data['money_pending'] = 0;
+                        $paid_m = $paid_m - $charge;
+                    } else{
+                        $report_data['money_paid'] = $paid_m;
+                        $report_data['money_pending'] = $charge - $paid_m;
+                        $paid_m = 0;
+                    }
+                    $upd_rep = $report_model->create($report_data);
+                } else{
+                    $money = $report_models->money_pending;
+                    if(!empty($money)){
+                        $report_data['month'] = $mt;
+                        if($money <= $paid_m){
+                            $report_data['money_paid'] = $charge;
+                            $report_data['money_pending'] = 0;
+                            $paid_m = $paid_m - $money;
+                        } else{
+                            $report_data['money_paid'] = $paid_m + $report_models->money_paid;
+                            $report_data['money_pending'] = $money - $paid_m;
+                            $paid_m = 0;
+                        }
+                        $report_model->where('id','=',$report_models->id)->update($report_data);
+                    }
+                }
+                $report_data =[];
+            }
+
+
             // $now=Carbon::now();
             // $file_name = $fetch_data->id.'-'.$now->format('Y-m-d-H-i-s');
             $this->generate_pdf_file($fetch_data->id);
@@ -426,6 +431,104 @@ class JournalEntryController extends Controller{
             return $response;
         } else{
             return view($module['main_view'].'.cred2', compact('form_data', 'financial_years', 'model', 'module', 'folder', 'title_shown', 'mode', 'id'));
+        }
+    }
+
+    
+
+    public function edit(Request $request, $id, DefaultModel $model, helpers $helpers){
+        $module = $this->module;
+        $folder = $this->folder;
+        $form_data = $model->find($id);
+        $form_data['member_mob'] = $form_data['member_id'];
+        $member_data = \App\Models\Members::find($form_data['member_id']);
+        $form_data['member_val'] = 'Name:'.$member_data['name'].' Unit Number:'.$member_data['unit_number'];
+        $org_id = $form_data['organization_id'];
+        $action = URL::route($module['main_route'].'.update', $id);
+        $title_shown = 'Edit '.$module['main_heading'];
+        $series_title = $form_data->series_number;
+        $method = 'PUT';
+        $mode = 'edit';
+        $financial_years = $helpers->get_financial_years($module['start_date'], null);
+        if($request->ajax()) {
+            $html_data = view($module['main_view'].'.form_include', compact(['form_data','id', 'mode', 'financial_years', 'module', 'org_id']))->render();
+            $response = response()->json(['html'=>$html_data, 'series_title'=>$series_title, 'title_shown'=>$title_shown, 'action'=>$action,'org_id'=>$org_id, 'method'=>$method, 'mode'=>$mode, 'id'=>$id]);
+            return $response;
+        } else{
+            return view($module['main_view'].'.cred2')->with(compact('form_data', 'financial_years', 'model', '-', 'action', 'method', 'mode', 'folder', 'title_shown', 'id'));
+        }
+    }
+
+    public function update(Request $request, $id, DefaultModel $model){
+        $module = $this->module;
+        $request->validate([
+            'series_id' => 'required|numeric',
+            'entry_year' => 'required',
+            'entry_date' => 'required|date_format:Y-m-d H:i:s',
+            // 'form_data.member_mob' => 'required',
+            'member_id' => 'required|numeric'
+        ]);
+
+        $modelfind = $model->find($id);
+        $modelfind->update($request->all());
+    
+        return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' updated successfully');
+    } 
+
+    public function action($mode, $id, DefaultModel $model){
+        $module = $this->module;
+        $err_type = $mode=='delete' ? 'info' : 'success';
+
+        switch($mode){
+            case 'activate':
+                $model->postActivate($id);
+            break;
+
+            case 'deactivate':
+                $model->postDeactivate($id);
+            break;
+
+            case 'delete':
+                $model->postDelete($id);
+            break;
+        }
+
+        return redirect()->route($module['main_route'].'.index')->with($err_type, $module['main_heading'].' '.$mode.'d successfully');
+    }
+
+    public function bulk(Request $request, DefaultModel $model){
+        $module = $this->module;
+        $token = $request->session()->token();
+        $post = $request->post();
+
+        if(!empty($post['btn_apply'])){
+            if($token==$post['_token']){
+                if(empty($post['combined_action'])){
+                    return redirect()->route($module['main_route'].'.index')->with('error', 'Please select one action to perform.');
+                } else if(is_null($request->post('row_check'))){
+                    return redirect()->route($module['main_route'].'.index')->with('error', 'Please select atleast one checkbox to perform action.');
+                } else{
+                    $msg_type = $post['combined_action']=='delete' ? 'info' : 'success';
+
+                    foreach($request->post('row_check') as $check_id){
+                        switch($post['combined_action']){
+                            case 'activate':
+                                $model->postActivate($check_id);
+                            break;
+
+                            case 'deactivate':
+                                $model->postDeactivate($check_id);
+                            break;
+
+                            case 'delete':
+                                $model->postDelete($check_id);
+                            break;
+                        }
+                    }
+
+                    return redirect()->route($module['main_route'].'.index')->with($msg_type, $module['main_heading']."s ".ucfirst(strtolower($post['combined_action'])).( (substr($post['combined_action'], -1)=='e') ? 'd' : 'ed' )." Successfully.");
+                }
+            }
         }
     }
 
@@ -539,98 +642,6 @@ class JournalEntryController extends Controller{
         dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
 
         // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
-    }
-
-    public function edit(Request $request, $id, DefaultModel $model, helpers $helpers){
-        $module = $this->module;
-        $folder = $this->folder;
-        $form_data = $model->find($id);
-        $form_data['member_mob'] = \App\Models\Members::find($form_data->member_id)->mobile_number;
-        $action = URL::route($module['main_route'].'.update', $id);
-        $title_shown = 'Edit '.$module['main_heading'];
-        $method = 'PUT';
-        $mode = 'edit';
-        $financial_years = $helpers->get_financial_years($module['start_date'], null);
-        if($request->ajax()) {
-            $html_data = view($module['main_view'].'.form_include', compact(['form_data','id', 'mode', 'financial_years', 'module']))->render();
-            $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown, 'action'=>$action, 'method'=>$method, 'mode'=>$mode, 'id'=>$id]);
-            return $response;
-        } else{
-            return view($module['main_view'].'.cred2')->with(compact('form_data', 'financial_years', 'model', '-', 'action', 'method', 'mode', 'folder', 'title_shown', 'id'));
-        }
-    }
-
-    public function update(Request $request, $id, DefaultModel $model){
-        $module = $this->module;
-        $request->validate([
-            'series_id' => 'required|numeric',
-            'entry_year' => 'required',
-            'entry_date' => 'required|date_format:Y-m-d H:i:s',
-            // 'form_data.member_mob' => 'required',
-            'member_id' => 'required|numeric'
-        ]);
-
-        $modelfind = $model->find($id);
-        $modelfind->update($request->all());
-    
-        return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' updated successfully');
-    } 
-
-    public function action($mode, $id, DefaultModel $model){
-        $module = $this->module;
-        $err_type = $mode=='delete' ? 'info' : 'success';
-
-        switch($mode){
-            case 'activate':
-                $model->postActivate($id);
-            break;
-
-            case 'deactivate':
-                $model->postDeactivate($id);
-            break;
-
-            case 'delete':
-                $model->postDelete($id);
-            break;
-        }
-
-        return redirect()->route($module['main_route'].'.index')->with($err_type, $module['main_heading'].' '.$mode.'d successfully');
-    }
-
-    public function bulk(Request $request, DefaultModel $model){
-        $module = $this->module;
-        $token = $request->session()->token();
-        $post = $request->post();
-
-        if(!empty($post['btn_apply'])){
-            if($token==$post['_token']){
-                if(empty($post['combined_action'])){
-                    return redirect()->route($module['main_route'].'.index')->with('error', 'Please select one action to perform.');
-                } else if(is_null($request->post('row_check'))){
-                    return redirect()->route($module['main_route'].'.index')->with('error', 'Please select atleast one checkbox to perform action.');
-                } else{
-                    $msg_type = $post['combined_action']=='delete' ? 'info' : 'success';
-
-                    foreach($request->post('row_check') as $check_id){
-                        switch($post['combined_action']){
-                            case 'activate':
-                                $model->postActivate($check_id);
-                            break;
-
-                            case 'deactivate':
-                                $model->postDeactivate($check_id);
-                            break;
-
-                            case 'delete':
-                                $model->postDelete($check_id);
-                            break;
-                        }
-                    }
-
-                    return redirect()->route($module['main_route'].'.index')->with($msg_type, $module['main_heading']."s ".ucfirst(strtolower($post['combined_action'])).( (substr($post['combined_action'], -1)=='e') ? 'd' : 'ed' )." Successfully.");
-                }
-            }
-        }
     }
 
     public function ajax_member(Request $request) {

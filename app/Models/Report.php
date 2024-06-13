@@ -30,6 +30,7 @@ class Report extends Base_Model{
         'month',
         'member_id',
         'money_paid',
-        'money_pending'
+        'money_pending',
+        'journal_entry_id'
     ];
 }
