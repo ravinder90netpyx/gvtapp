@@ -299,7 +299,7 @@ class JournalEntryController extends Controller{
             if(!empty($report_model_last_mon)) $dedt_amt = $report_model_last_mon->money_paid;
             $request_data['paid_money'] = count($month_arr)*$charge - $dedt_amt;
         }
-        
+
         $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
         $date = $request_data['entry_date'];
         $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
@@ -308,6 +308,7 @@ class JournalEntryController extends Controller{
             $next_number = $series_number->next_number;
             $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
             $request_data['charge'] = $request_data['paid_money'];
+            $request_data['name'] = $member['name'];
             $request_data['series_next_number'] = $next_number;
             $request_data['series_number'] = $series_num;
             $fetch_data = $model->create($request_data);
@@ -390,7 +391,7 @@ class JournalEntryController extends Controller{
                     }
                 }
                 $data = [
-                    'name'=> $member->name,
+                    'name'=> $fetch_data->name,
                     'date'=> $date,
                     'year'=> $fetch_data->entry_year,
                     'mobile_number' => $member->mobile_number,
@@ -619,7 +620,6 @@ class JournalEntryController extends Controller{
                 'filename' => 'Reciept'
             )
         );
-
         $date_arr = explode(' ', $model->entry_date);
         $date = Carbon::parse($date_arr[0])->format('d-M-Y');
         $month = Carbon::parse($model->from_month)->format('M Y')."-".Carbon::parse($model->to_month)->format('M Y');
@@ -637,7 +637,6 @@ class JournalEntryController extends Controller{
         ];
         $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
         $templ_json = $helpers->make_temp_json($temp->id, $data);
-        // dd($templ_json);
         $message = json_encode($message, true);
         dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
 
