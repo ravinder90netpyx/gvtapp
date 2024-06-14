@@ -130,23 +130,28 @@ class SiteuserroleController extends Controller{
             $module['table_column_prefix'].'name' => 'required',
             $module['table_column_prefix'].'prev' => 'required',
         ]);
-
+        $d=$request->all();
         $roles = Roles::find($id);
+
+        
         $req_fields = $request->only(['name']);
+
         $roles->update($req_fields);
 
         Role_Has_Permissions::where([ ['role_id', '=', $id] ])->delete();
         
         $request_prev = $request->input('prev');
         if($id=='1'){
-            $merge_perm = array(
-                'user_roles.manage' => '6',
-                'user_roles.edit' => '8',
-                'users.manage' => '11',
-                'users.edit' => '13'
-            );
+            // $merge_perm = array(
+            //     'user_roles.manage' => '6',
+            //     'user_roles.edit' => '8',
+            //     'users.manage' => '11',
+            //     'users.edit' => '13'
+            // );
+            $merge_perm=[];
             $request_prev = array_merge($request_prev, $merge_perm);
         }
+        //echo '<pre>';print_R($request_prev);exit;
 
         if(!empty($request_prev)){
             foreach($request_prev as $prek=>$prev){
