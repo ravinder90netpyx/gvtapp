@@ -13,13 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-      
-if (!Schema::hasColumn('journal_entry', 'name')) //check the column
-    {
         Schema::table('journal_entry', function (Blueprint $table) {
             $table->timestamp('reciept_date')->nullable();
+            $table->unsignedBigInteger('charge_type_id')->nullable();
         });
-    }
     }
 
     /**
@@ -31,6 +28,7 @@ if (!Schema::hasColumn('journal_entry', 'name')) //check the column
     {
         Schema::table('journal_entry', function($table) {
             $table->dropColumn('reciept_date');
+            $table->dropColumn('charge_type_id');
         });
     }
 };

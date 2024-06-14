@@ -48,7 +48,9 @@ class Journal_Entry extends Base_Model{
         'custom_month',
         'remarks',
         'check_number',
-        'name'
+        'name',
+        'reciept_date',
+        'charge_type_id'
     ];
 
     public static function getPaymentMode(){
