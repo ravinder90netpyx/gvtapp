@@ -14,10 +14,12 @@ return new class extends Migration
     public function up()
     {
       
-
+if (!Schema::hasColumn('journal_entry', 'name')) //check the column
+    {
         Schema::table('journal_entry', function (Blueprint $table) {
             $table->string('name')->nullable();
         });
+    }
     }
 
     /**

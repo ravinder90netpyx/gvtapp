@@ -82,7 +82,8 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
             'charges' => 'ChargesController',
             'series' => 'SeriesController',
             'journal_entry' => 'JournalEntryController',
-            'templates' => 'TemplatesController'
+            'templates' => 'TemplatesController',
+            'chargetype'=>'ChargeTypeController'
         ];
 
         foreach($routes_arr as $rak=>$rav){
