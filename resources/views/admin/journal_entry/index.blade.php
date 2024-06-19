@@ -213,7 +213,9 @@ function download_file(id){
 }
 
 function send_pdf(id){
-    document.location.href = "/supanel/journal_entry/"+id+"/send";
+    if(confirm("Do you really want to send the receipt? Please confirm")){
+        document.location.href = "/supanel/journal_entry/"+id+"/send";
+    }
 }
 
 function reciept_datetimepicker(){
@@ -562,6 +564,7 @@ $(function(){
                             <th style="width:40px">{{ __('admin.text_idcheck') }}</th>
                             <th style="width:120px">{{ __('admin.text_actions') }}</th>
                             <th>{{ __('Member Name') }}</th>
+                            <th>{{ __('Unit Number') }}</th>
                             <th>{{ __('Serial Number') }}</th>
                             <th>{{ __('Payment Date') }}</th>
                             <th style="width:150px">{{ __('admin.text_date_created') }}</th>
@@ -632,6 +635,7 @@ $(function(){
                                         $member = \App\Models\Members::find($item['member_id']);
                                     @endphp
                                     <td>{{ $member->name }}</td>
+                                    <td>{{ $member->unit_number }}</td>
                                     <td>{{ $item['series_number'] }}</td>
                                     <td>{{ $item['entry_date'] }}</td>
                                     <td>{{ $row_time }}</td>

@@ -121,7 +121,14 @@ class JournalEntryController extends Controller{
         else $model_get = $model_get->latest();
         
         $query = $request->get('query') ?? '';
-        if($query!='') $model_get = $model_get->where('series_number', 'LIKE', '%'.$query.'%')->orwhere('name', 'LIKE', '%'.$query.'%');
+        if($query!=''){
+            $model_get = $model_get->where('series_number', 'LIKE', '%'.$query.'%')->orwhere('name', 'LIKE', '%'.$query.'%');
+            $model_get = $model_get->orWhere(function($q) use ($query) {
+                $q->whereHas('memberSearch', function($q2) use ($query) {
+                    $q2->where('unit_number', 'LIKE', '%'.$query.'%');
+                });
+            });
+        }
 
         $data = $model_get->paginate($perpage)->onEachSide(2);
 

@@ -210,9 +210,9 @@ class MembersController extends Controller{
         $now = Carbon::now();
         // $month = $je_model->to_month;
         $day = $now->day;
-        if($day>12){
-            $now = $now->addMonth();
-        }
+        // if($day>12){
+        //     $now = $now->addMonth();
+        // }
         $curr_month = $now->format('Y-m');
         $je_model = \App\Models\Report::where([['member_id', '=',$mem_id],['month','=',$curr_month],['status','>','0'],['delstatus','<', '1']])->orderBy('id','DESC')->first();
         $now_date = $now->day(12);
@@ -228,6 +228,9 @@ class MembersController extends Controller{
                 'date' => $date
             ];
             $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            if($day>12){
+                $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            }
             $templ_json = $helpers->make_temp_json($temp->id, $data);
             $message = '';
             $message = json_encode($message, true);

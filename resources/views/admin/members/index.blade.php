@@ -11,8 +11,10 @@
 @section('scripts')
 <script type="text/javascript">
     function send_reminder(id){
-        document.location.href = "/supanel/members/"+id+"/reminder";
-        // window.open("/supanel/members/"+id+"/reminder");
+        if(confirm("Are you sure to to send reminder? Please Confirm")){
+            document.location.href = "/supanel/members/"+id+"/reminder";
+            // window.open("/supanel/members/"+id+"/reminder");
+        }
     }
 </script>
 @endsection

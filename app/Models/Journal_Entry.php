@@ -56,4 +56,8 @@ class Journal_Entry extends Base_Model{
     public static function getPaymentMode(){
         return self::ModeOption;
     }
+
+    public function memberSearch(){
+        return $this->hasMany(Members::class,'id', 'member_id');
+    }
 }
