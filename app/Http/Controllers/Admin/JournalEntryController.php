@@ -94,6 +94,7 @@ class JournalEntryController extends Controller{
         // $templ_json = json_encode($template_arr);
         // $message = json_encode($message, true);
         // $this->sendPdfToWhatsapp($destination,$message, $org_id,$params);
+
         $perpage = $request->perpage ?? $module['default_perpage'];
         $title_showns = 'Add '.$module['main_heading'];
         $method = 'POST';
@@ -120,14 +121,12 @@ class JournalEntryController extends Controller{
         else $model_get = $model_get->latest();
         
         $query = $request->get('query') ?? '';
-        if($query!='') $model_get = $model_get->where('series_number', 'LIKE', '%'.$query.'%');
+        if($query!='') $model_get = $model_get->where([['series_number', 'LIKE', '%'.$query.'%'],['name','LIKE','%',$query]]);
 
         $data = $model_get->paginate($perpage)->onEachSide(2);
 
         $title_shown = 'Manage '.$module['main_heading'];
         $folder = $this->folder;
-
-        
 
         return view($module['main_view'].'.index', compact('data', 'action', 'method', 'act', 'model', 'mode', 'carbon', 'module', 'perpage', 'folder', 'title_shown', 'title_showns', 'query', 'financial_years'))->with('i', ($request->input('page', 1) - 1) * $perpage);
     }
@@ -171,6 +170,15 @@ class JournalEntryController extends Controller{
                 empty($request->input('custom_month'))? 'required':'nullable',
                 function($attribute, $value, $fail){
                     $request = Request();
+                    $helpers = new helpers();
+                    $month_arr = $helpers->get_financial_month_year($value, $request->input('to_month','Y-m'));
+                    $report_month = Report::where([['member_id','=','10'], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending', '=', '0']])->orderBy('month', 'ASC')->pluck('month')->toArray();
+                    foreach($month_arr as $mt){
+                        if(in_array($mt, $report_month)){
+                            $fail("The money of ".$mt."is already paid");
+                        }
+                    }
+                    // dd($report_month);
                     $report_model = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','=', '0']])->orderBy('month', 'DESC')->first();
                     $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orwhere([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0']])->orderBy('month', 'DESC')->first();
                     $last_month = $report_model->month ?? '0000-00';
@@ -203,6 +211,7 @@ class JournalEntryController extends Controller{
                     $mon_arr = $hlp->get_financial_month_year($request->from_month, $value,'Y-m');
                     // $mon_arr = $helpers->get_financial_month_year($request->from_month, $value);
                     $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('month', 'ASC')->first();
+
                     $pending_money = $report_model2->money_pending ?? 0;
                     $count= count($mon_arr);
                     if(!empty($report_model2->money_pending)) $count =$count-1;
@@ -285,12 +294,6 @@ class JournalEntryController extends Controller{
             $request_data['partial'] = ($paid%$charge > 0)? '1':'0';
             $count=0;
             $count =ceil($paid/$charge);
-            
-            if($count<count($month_arr)){
-                $actu_month = array_slice( $month_arr , 0, $count);
-                // $request_data['from_month'] = $actu_month[0];
-                // $request_data['to_month'] = $actu_month[$count-1];
-            }
         } else{
             $report_model_last_mon = $report_model->where([['month', '=', $from_month], ['member_id', '=', $request_data['member_id']], ['delstatus','<','1'], ['status','>', '0']])->orderBy('month','DESC')->first();
             $dedt_amt=0;
@@ -302,114 +305,111 @@ class JournalEntryController extends Controller{
         $date = $request_data['entry_date'];
         $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
         // if(strtotime($date) > strtotime($pre_date)){
-            $series_num =$series_number->name.$series_number->number_separator.str_pad($series_number->next_number,$series_number->min_length,'0', STR_PAD_LEFT);
-            $next_number = $series_number->next_number;
-            $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
-            $request_data['charge'] = $request_data['paid_money'];
-            $request_data['name'] = $member['name'];
-            $request_data['series_next_number'] = $next_number;
-            $request_data['series_number'] = $series_num;
-            $fetch_data = $model->create($request_data);
-            // report --
+        $series_num =$series_number->name.$series_number->number_separator.str_pad($series_number->next_number,$series_number->min_length,'0', STR_PAD_LEFT);
+        $next_number = $series_number->next_number;
+        $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
+        $request_data['charge'] = $request_data['paid_money'];
+        $request_data['name'] = $member['name'];
+        $request_data['series_next_number'] = $next_number;
+        $request_data['series_number'] = $series_num;
+        $fetch_data = $model->create($request_data);
+        // report --
 
-            foreach($month_arr as $mt){
-                $report_models = $report_model->where([['month', '=',$mt], ['member_id','=',$request_data['member_id']], ['delstatus','<','1'],['status','>','0']])->first();
-                // $tempe_arr[] = $report_models->id;
-                $report_data['journal_entry_id'] = $fetch_data->id;
-                if(empty($report_models)){
+        foreach($month_arr as $mt){
+            $report_models = $report_model->where([['month', '=',$mt], ['member_id','=',$request_data['member_id']], ['delstatus','<','1'],['status','>','0']])->first();
+            // $tempe_arr[] = $report_models->id;
+            $report_data['journal_entry_id'] = $fetch_data->id;
+            if(empty($report_models)){
+                $report_data['month'] = $mt;
+
+                $report_data['member_id'] = $request_data['member_id'];
+                if($charge <= $paid_m){
+                    $report_data['money_paid'] = $charge;
+                    $report_data['money_pending'] = 0;
+                    $paid_m = $paid_m - $charge;
+                } else{
+                    $report_data['money_paid'] = $paid_m;
+                    $report_data['money_pending'] = $charge - $paid_m;
+                    $paid_m = 0;
+                }
+                $upd_rep = $report_model->create($report_data);
+            } else{
+                $money = $report_models->money_pending;
+                if(!empty($money)){
                     $report_data['month'] = $mt;
-
-                    $report_data['member_id'] = $request_data['member_id'];
-                    if($charge <= $paid_m){
+                    if($money <= $paid_m){
                         $report_data['money_paid'] = $charge;
                         $report_data['money_pending'] = 0;
-                        $paid_m = $paid_m - $charge;
+                        $paid_m = $paid_m - $money;
                     } else{
-                        $report_data['money_paid'] = $paid_m;
-                        $report_data['money_pending'] = $charge - $paid_m;
+                        $report_data['money_paid'] = $paid_m + $report_models->money_paid;
+                        $report_data['money_pending'] = $money - $paid_m;
                         $paid_m = 0;
                     }
-                    $upd_rep = $report_model->create($report_data);
-                } else{
-                    $money = $report_models->money_pending;
-                    if(!empty($money)){
-                        $report_data['month'] = $mt;
-                        if($money <= $paid_m){
-                            $report_data['money_paid'] = $charge;
-                            $report_data['money_pending'] = 0;
-                            $paid_m = $paid_m - $money;
-                        } else{
-                            $report_data['money_paid'] = $paid_m + $report_models->money_paid;
-                            $report_data['money_pending'] = $money - $paid_m;
-                            $paid_m = 0;
-                        }
-                        $report_model->where('id','=',$report_models->id)->update($report_data);
-                    }
+                    $report_model->where('id','=',$report_models->id)->update($report_data);
                 }
-                $report_data =[];
             }
-
-            // $now=Carbon::now();
-            // $file_name = $fetch_data->id.'-'.$now->format('Y-m-d-H-i-s');
-            $this->generate_pdf_file($fetch_data->id);
-            // $setting_model = new \App\Models\Settings();
-            if(!empty($request_data['send'])){                
-                $modl_find = $model->find($fetch_data->id);
-                $file_name = $modl_find->file_name;
-                $org_id = $modl_find->organization_id;
-                //  api message function
-                $api = $this->whatsapp_api;
-                $message = array(
-                    'type' => $api['type'],
-                    $api['type'] => array(
-                        'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
-                        'filename' => 'Reciept'
-                    )
-                );
-                $date_arr = explode(' ', $fetch_data->entry_date);
-                $date = Carbon::parse($date_arr[0])->format('d-M-Y');
-                if(empty($fetch_data->from_month) && empty($fetch_data->to_month)){
-                    if($fetch_data->from_month != $fetch_data->to_month){
-                        $month = Carbon::parse($fetch_data->from_month)->format('M Y')."-".Carbon::parse($fetch_data->to_month)->format('M Y');
-                    } else{
-                        $month = Carbon::parse($fetch_data->from_month)->format('M Y');
-                    }
-                } else{
-                    $month = '';
-                    $val_ar = explode(',',$fetch_data->custom_data);
-                    $count = 0;
-                    foreach($val_ar as $vl){
-                        $count++;
-                        if($count == count($val_ar)){
-                            $month = $month.Carbon::parse($vl)->format('M Y');
-                        } else{
-                            $month = $month.Carbon::parse($vl)->format('M Y').',';
-                        }
-                    }
-                }
-                $data = [
-                    'name'=> $fetch_data->name,
-                    'date'=> $date,
-                    'year'=> $fetch_data->entry_year,
-                    'mobile_number' => $member->mobile_number,
-                    'charge' => $fetch_data->charge,
-                    'month' => $month,
-                    'serial_no' => $fetch_data->series_number,
-                    'mode' =>$fetch_data->payment_mode,
-                    'unit_no'=> $member->unit_number
-                ];
-                
-                $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
-                $templ_json = $helpers->make_temp_json($temp->id, $data);
-                $member_id = $fetch_data->member_id;
-                $member = \App\Models\Members::find($member_id);
-                $destination = $member->mobile_number;
-                $message = json_encode($message,true);
-                dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
-            // }
-             
-            return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
+            $report_data =[];
         }
+
+        // $now=Carbon::now();
+        // $file_name = $fetch_data->id.'-'.$now->format('Y-m-d-H-i-s');
+        $this->generate_pdf_file($fetch_data->id);
+        // $setting_model = new \App\Models\Settings();
+        if(!empty($request_data['send'])){
+            $modl_find = $model->find($fetch_data->id);
+            $file_name = $modl_find->file_name;
+            $org_id = $modl_find->organization_id;
+            //  api message function
+            $api = $this->whatsapp_api;
+            $message = array(
+                'type' => $api['type'],
+                $api['type'] => array(
+                    'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
+                    'filename' => 'Reciept'
+                )
+            );
+            $date_arr = explode(' ', $fetch_data->entry_date);
+            $date = Carbon::parse($date_arr[0])->format('d-M-Y');
+            if(empty($fetch_data->from_month) && empty($fetch_data->to_month)){
+                if($fetch_data->from_month != $fetch_data->to_month){
+                    $month = Carbon::parse($fetch_data->from_month)->format('M Y')."-".Carbon::parse($fetch_data->to_month)->format('M Y');
+                } else{
+                    $month = Carbon::parse($fetch_data->from_month)->format('M Y');
+                }
+            } else{
+                $month = '';
+                $val_ar = explode(',',$fetch_data->custom_data);
+                $count = 0;
+                foreach($val_ar as $vl){
+                    $count++;
+                    if($count == count($val_ar)) $month = $month.Carbon::parse($vl)->format('M Y');
+                    else $month = $month.Carbon::parse($vl)->format('M Y').',';
+                }
+            }
+            $data = [
+                'name'=> $fetch_data->name,
+                'date'=> $date,
+                'year'=> $fetch_data->entry_year,
+                'mobile_number' => $member->mobile_number,
+                'charge' => $fetch_data->charge,
+                'month' => $month,
+                'serial_no' => $fetch_data->series_number,
+                'mode' =>$fetch_data->payment_mode,
+                'unit_no'=> $member->unit_number
+            ];
+            
+            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            $templ_json = $helpers->make_temp_json($temp->id, $data);
+            $member_id = $fetch_data->member_id;
+            $member = \App\Models\Members::find($member_id);
+            $destination = $member->mobile_number;
+            $message = json_encode($message,true);
+            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+        // }
+         
+        }
+        return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
     }
 
     public function show(Request $request, $id, DefaultModel $model, helpers $helpers){
@@ -431,8 +431,6 @@ class JournalEntryController extends Controller{
             return view($module['main_view'].'.cred2', compact('form_data', 'financial_years', 'model', 'module', 'folder', 'title_shown', 'mode', 'id'));
         }
     }
-
-    
 
     public function edit(Request $request, $id, DefaultModel $model, helpers $helpers){
         $module = $this->module;
@@ -457,8 +455,8 @@ class JournalEntryController extends Controller{
         }
     }
 
-    public function update(Request $request, $id, DefaultModel $model){
-        dd($request->input());
+    public function update(Request $request, $id, DefaultModel $model, helpers $helpers){
+        // dd($request->input());
         $modelfind = $model->find($id);
         $module = $this->module;
         $request->validate([
@@ -466,8 +464,16 @@ class JournalEntryController extends Controller{
             'from_month' => 
             [
                 !empty($request->input('custom_month'))? 'required':'nullable',
-                function($attribute, $value, $fail){
+                function($attribute, $value, $fail) use($request, $id) {
                     $request = Request();
+                    $helpers = new helpers();
+                    $month_arr = $helpers->get_financial_month_year($value, $request->input('to_month','Y-m'));
+                    $report_month = Report::where([['journal_entry_id','!=',$id], ['member_id','=','10'], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending', '=', '0']])->orderBy('month', 'ASC')->pluck('month')->toArray();
+                    foreach($month_arr as $mt){
+                        if(in_array($mt, $report_month)){
+                            $fail("The money of ".$mt."is already paid");
+                        }
+                    }
                     $report_model = Report::where([['journal_entry_id','!=',$id], ['delstatus','<', '1'], ['status', '>', '0']])->orderBy('month', 'DESC')->get()->toArray();
                     $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orwhere([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0']])->orderBy('month', 'DESC')->first();
                     $last_month = $report_model->month ?? '0000-00';
@@ -536,7 +542,7 @@ class JournalEntryController extends Controller{
                     }
                 }
             ],
-            'mode' => 'required',
+            'payment_mode' => 'required',
             'member_id' => 'required|numeric'
         ]);
 
@@ -544,6 +550,9 @@ class JournalEntryController extends Controller{
         $report_data = [];
         $member = \App\Models\Members::find($request_data['member_id']);
         $charge = \App\Models\Charges::find($member->charges_id)->rate;
+        $from_month = $request->input('from_month');
+        $to_month = $request->input('to_month');
+        $report_model = new Report();
 
         $month_arr =[];
         if(!empty($request->input('from_month')) && !empty($request->input('to_month'))){
@@ -565,7 +574,117 @@ class JournalEntryController extends Controller{
             $request_data['paid_money'] = count($month_arr)*$charge - $dedt_amt;
         }
 
-        $modelfind->update($request->all());
+        $report_find = Report::where([['journal_entry_id','=',$id],['status','>','0'],['delstatus','<','1']])->orderBy('month', 'DESC')->get()->toArray();
+        $prev_paid_money = $modelfind->charge;
+        foreach(array_reverse($report_find) as $rf){
+            if($prev_paid_money >= $rf['money_paid']){
+                $prev_paid_money = $prev_paid_money-$rf['money_paid'];
+                $rep = Report::where('id','=',$rf['id'])->delete();
+            } else{
+                $journal_entry = $model->where([['to_month', '=', $rf['month']],['member_id','=', $rf['member_id']]])->orderBy('id','DESC')->first();
+                $chr = $rf['money_paid'] - $prev_paid_money;
+                $rep =Report::where('id', '=', $rf['id'])->update([['money_paid','=', $chr], ['journal_entry_id', '=', $journal_entry->id]]);
+            }
+        }
+
+        $request_data['charge'] = $request_data['paid_money'];
+        $request_data['name'] = $member['name'];
+        $modelfind->update($request_data);
+
+        $this->generate_pdf_file($id);
+
+        foreach($month_arr as $mt){
+            $report_models = $report_model->where([['month', '=',$mt], ['member_id','=',$request_data['member_id']], ['delstatus','<','1'],['status','>','0']])->first();
+            // $tempe_arr[] = $report_models->id;
+            $report_data['journal_entry_id'] = $id;
+            if(empty($report_models)){
+                $report_data['month'] = $mt;
+
+                $report_data['member_id'] = $request_data['member_id'];
+                if($charge <= $paid){
+                    $report_data['money_paid'] = $charge;
+                    $report_data['money_pending'] = 0;
+                    $paid = $paid - $charge;
+                } else{
+                    $report_data['money_paid'] = $paid;
+                    $report_data['money_pending'] = $charge - $paid;
+                    $paid = 0;
+                }
+                $upd_rep = $report_model->create($report_data);
+            } else{
+                $money = $report_models->money_pending;
+                if(!empty($money)){
+                    $report_data['month'] = $mt;
+                    if($money <= $paid){
+                        $report_data['money_paid'] = $charge;
+                        $report_data['money_pending'] = 0;
+                        $paid = $paid - $money;
+                    } else{
+                        $report_data['money_paid'] = $paid + $report_models->money_paid;
+                        $report_data['money_pending'] = $money - $paid;
+                        $paid = 0;
+                    }
+                    $report_model->where('id','=',$report_models->id)->update($report_data);
+                }
+            }
+            $report_data =[];
+        }
+        //  api message function
+        if(!empty($request_data['send'])){
+            $modl_find = $model->find($fetch_data->id);
+            $file_name = $modl_find->file_name;
+            $org_id = $modl_find->organization_id;
+            $api = $this->whatsapp_api;
+            $message = array(
+                'type' => $api['type'],
+                $api['type'] => array(
+                    'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
+                    'filename' => 'Reciept'
+                )
+            );
+            $date_arr = explode(' ', $fetch_data->entry_date);
+            $date = Carbon::parse($date_arr[0])->format('d-M-Y');
+            if(empty($fetch_data->from_month) && empty($fetch_data->to_month)){
+                if($fetch_data->from_month != $fetch_data->to_month){
+                    $month = Carbon::parse($fetch_data->from_month)->format('M Y')."-".Carbon::parse($fetch_data->to_month)->format('M Y');
+                } else{
+                    $month = Carbon::parse($fetch_data->from_month)->format('M Y');
+                }
+            } else{
+                $month = '';
+                $val_ar = explode(',',$fetch_data->custom_data);
+                $count = 0;
+                foreach($val_ar as $vl){
+                    $count++;
+                    if($count == count($val_ar)){
+                        $month = $month.Carbon::parse($vl)->format('M Y');
+                    } else{
+                        $month = $month.Carbon::parse($vl)->format('M Y').',';
+                    }
+                }
+            }
+            $data = [
+                'name'=> $fetch_data->name,
+                'date'=> $date,
+                'year'=> $fetch_data->entry_year,
+                'mobile_number' => $member->mobile_number,
+                'charge' => $fetch_data->charge,
+                'month' => $month,
+                'serial_no' => $fetch_data->series_number,
+                'mode' =>$fetch_data->payment_mode,
+                'unit_no'=> $member->unit_number
+            ];
+            
+            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            $templ_json = $helpers->make_temp_json($temp->id, $data);
+            $member_id = $fetch_data->member_id;
+            $member = \App\Models\Members::find($member_id);
+            $destination = $member->mobile_number;
+            $message = json_encode($message,true);
+            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+        }
+
+
     
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' updated successfully');
     } 
@@ -780,68 +899,68 @@ class JournalEntryController extends Controller{
         return $response;
     }
 
-    public function sendPdfToWhatsapp($destination,$message, $org_id, $template){
-        $module = $this->module;
-        $api = $this->whatsapp_api;
-        $model = new \App\Models\Organization_Settings();
-        $src_no = $model->getVal($module['group'], 'source_number',$org_id);
-        $api_key = $model->getVal($module['group'], 'api_key',$org_id);
-        $curl = curl_init();
+//     public function sendPdfToWhatsapp($destination,$message, $org_id, $template){
+//         $module = $this->module;
+//         $api = $this->whatsapp_api;
+//         $model = new \App\Models\Organization_Settings();
+//         $src_no = $model->getVal($module['group'], 'source_number',$org_id);
+//         $api_key = $model->getVal($module['group'], 'api_key',$org_id);
+//         $curl = curl_init();
 
-// curl_setopt_array($curl, array(
-//   CURLOPT_URL => 'https://api.gupshup.io/wa/api/v1/template/msg',
-//   CURLOPT_RETURNTRANSFER => true,
-//   CURLOPT_ENCODING => '',
-//   CURLOPT_MAXREDIRS => 10,
-//   CURLOPT_TIMEOUT => 0,
-//   CURLOPT_FOLLOWLOCATION => true,
-//   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-//   CURLOPT_CUSTOMREQUEST => 'POST',
-//   CURLOPT_POSTFIELDS => 'source='.$src_no.'&destination='.$destination.'&message='.$message,
-//   CURLOPT_HTTPHEADER => array(
-//     'Content-Type: application/x-www-form-urlencoded',
-//     'Apikey: '.$api_key
-//   ),
-// ));
-        // $post_field = 'channel='.$api['channel'].'&source='.$src_no.'&destination='.$destination.'&src.name='.$api['src_name'].'&template={"id":"'.$templ_id.'","params":'.$params.'}&message='.$message;
-        // $post_field_encode = urlencode($post_field);
-        // dd($post_field_encode);
+// // curl_setopt_array($curl, array(
+// //   CURLOPT_URL => 'https://api.gupshup.io/wa/api/v1/template/msg',
+// //   CURLOPT_RETURNTRANSFER => true,
+// //   CURLOPT_ENCODING => '',
+// //   CURLOPT_MAXREDIRS => 10,
+// //   CURLOPT_TIMEOUT => 0,
+// //   CURLOPT_FOLLOWLOCATION => true,
+// //   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+// //   CURLOPT_CUSTOMREQUEST => 'POST',
+// //   CURLOPT_POSTFIELDS => 'source='.$src_no.'&destination='.$destination.'&message='.$message,
+// //   CURLOPT_HTTPHEADER => array(
+// //     'Content-Type: application/x-www-form-urlencoded',
+// //     'Apikey: '.$api_key
+// //   ),
+// // ));
+//         // $post_field = 'channel='.$api['channel'].'&source='.$src_no.'&destination='.$destination.'&src.name='.$api['src_name'].'&template={"id":"'.$templ_id.'","params":'.$params.'}&message='.$message;
+//         // $post_field_encode = urlencode($post_field);
+//         // dd($post_field_encode);
 
-        $post_data = [];
+//         $post_data = [];
 
-        // $template_arr = [
-        //     'id'=>$templ_id,
-        //     'params'=>$params
-        // ];
+//         // $template_arr = [
+//         //     'id'=>$templ_id,
+//         //     'params'=>$params
+//         // ];
 
-        $post_data['channel'] = $api['channel'];
-        $post_data['source'] = $src_no;
-        $post_data['destination'] = $destination;
-        $post_data['src.name'] = $api['src_name'];
-        $post_data['template'] = $template;
-        $post_data['message'] = $message;
+//         $post_data['channel'] = $api['channel'];
+//         $post_data['source'] = $src_no;
+//         $post_data['destination'] = $destination;
+//         $post_data['src.name'] = $api['src_name'];
+//         $post_data['template'] = $template;
+//         $post_data['message'] = $message;
 
-        // dd($post_data);
-        // dd($api['whatsapp_api_url']);
-        // dd($api_key);
+//         // dd($post_data);
+//         // dd($api['whatsapp_api_url']);
+//         // dd($api_key);
 
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => $api['whatsapp_api_url'],
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => Arr::query($post_data),
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/x-www-form-urlencoded',
-                'Apikey:'.$api_key
-            ),
-        ));
-        $response = curl_exec($curl);
-        curl_close($curl);
-        echo $response;
-    }
+//         curl_setopt_array($curl, array(
+//             CURLOPT_URL => $api['whatsapp_api_url'],
+//             CURLOPT_RETURNTRANSFER => true,
+//             CURLOPT_ENCODING => '',
+//             CURLOPT_MAXREDIRS => 10,
+//             CURLOPT_TIMEOUT => 0,
+//             CURLOPT_FOLLOWLOCATION => true,
+//             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+//             CURLOPT_CUSTOMREQUEST => 'POST',
+//             CURLOPT_POSTFIELDS => Arr::query($post_data),
+//             CURLOPT_HTTPHEADER => array(
+//                 'Content-Type: application/x-www-form-urlencoded',
+//                 'Apikey:'.$api_key
+//             ),
+//         ));
+//         $response = curl_exec($curl);
+//         curl_close($curl);
+//         echo $response;
+//     }
 }

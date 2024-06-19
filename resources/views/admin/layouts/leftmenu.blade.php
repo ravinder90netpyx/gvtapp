@@ -159,7 +159,7 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
               <span class="nav-link-text">Masters</span>
             </a>
 
-            <div class="collapse{{ Str::contains(url()->current(), array('charges', 'members', 'series', 'journal_entry', 'report')) ? ' show' : '' }}" id="leftMenu2" style="">
+            <div class="collapse{{ Str::contains(url()->current(), array('charges', 'members', 'series', 'journal_entry', 'report', 'pending_report', 'chargetype')) ? ' show' : '' }}" id="leftMenu2" style="">
               <ul class="nav nav-sm flex-column">
                 @can('charges.manage')
                 <li class="nav-item">
@@ -172,8 +172,8 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
                  @can('charge_type.manage')
                 <li class="nav-item">
                   <a href="{{route($folder['route_folder_name'].'.chargetype.index')}}" class="nav-link{{ Str::contains(url()->current(), array('chargetype')) ? ' active' : '' }}">
-                    <span class="sidenav-mini-icon"> C </span>
-                    <span class="sidenav-normal"> Charge type </span>
+                    <span class="sidenav-mini-icon"> CT </span>
+                    <span class="sidenav-normal"> Charge Type </span>
                   </a>
                 </li>
                 @endcan
@@ -217,7 +217,7 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
 
                 @can('journal_entry.report')
                 <li class="nav-item">
-                  <a href="{{route($folder['route_folder_name'].'.pending_report')}}" class="nav-link{{ Str::contains(url()->current(), array('report')) ? ' active' : '' }}">
+                  <a href="{{route($folder['route_folder_name'].'.pending_report')}}" class="nav-link{{ Str::contains(url()->current(), array('pending_report')) ? ' active' : '' }}">
                     <span class="sidenav-mini-icon"> PR </span>
                     <span class="sidenav-normal"> Pending Report </span>
                   </a>

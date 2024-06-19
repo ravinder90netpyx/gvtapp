@@ -17,7 +17,7 @@ class ChargeTypeController extends Controller
         'module_view' => 'chargetype',
         'module_route' => 'chargetype',
         'permission_group' => 'charge_type',
-        'main_heading' => 'Chargtype',
+        'main_heading' => 'Charge Type',
         'default_perpage' => 10
     );
 

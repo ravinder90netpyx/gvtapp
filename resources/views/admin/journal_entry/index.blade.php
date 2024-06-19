@@ -34,6 +34,8 @@ function form_submit(send , id = null){
     var payment_mode = $('#payment_mode').val();
     var remarks = $('#remarks').val();
     var custom_month = $('#custom_month').val();
+    var charge_type_id = $('#charge_type_id').val();
+    var reciept_date = $('#reciept_date').val();
 
     // form_data = {
     //     'series_id' : series_id,
@@ -48,12 +50,12 @@ function form_submit(send , id = null){
         action = "{{ $action }}";
     } else {
         method = "PUT";
-        action="{{ $act }}"+id;
+        action="{{ $act }}/"+id;
     }
     $.ajax({
         url: action,
         method: method,
-        data: {'_token': '{!! csrf_token() !!}', 'series_id' : series_id, 'entry_date' : entry_date, 'entry_year' : entry_year, 'member_id' : member_id, 'organization_id' : organization_id, 'paid_money' : paid, 'from_month' : from_month, 'to_month': to_month, 'payment_mode':payment_mode, 'send' : send, 'remarks' : remarks, 'custom_month':custom_month},
+        data: {'_token': '{!! csrf_token() !!}', 'series_id' : series_id, 'entry_date' : entry_date, 'entry_year' : entry_year, 'member_id' : member_id, 'organization_id' : organization_id, 'paid_money' : paid, 'from_month' : from_month, 'to_month': to_month, 'payment_mode':payment_mode, 'send' : send, 'remarks' : remarks, 'custom_month':custom_month, 'charge_type_id': charge_type_id, 'reciept_date':reciept_date},
         success: function(response){
             $('#cred_modal').modal('hide');
             location.reload();
@@ -92,6 +94,15 @@ function ajax_edit(id){
             $('#changable_div').html(response.html);
             $('#exampleModalLabel').text(response.title_shown);
             // console.log(action, method);
+            $('#next_number').closest('.form-group-multi-input').find('label').append(' (S. NO.- '+response.series_title+')');
+            $('#series_id').prop('disabled',true);
+            $('#organization_id').prop('disabled',true);
+            $('#entry_year').prop('disabled',true);
+            autocomplete_trigger(response.org_id);
+            datetimepicker_month('from_month');
+            datetimepicker_month('to_month');
+            custom_datetimepicker_month('custom_month');
+            reciept_datetimepicker();
         },
         error: function(error) {
             console.error('Error fetching folder content:', error);
@@ -109,8 +120,8 @@ function ajax_show(id){
             $('#exampleModalLabel').text(response.title_shown);
             // console.log(action, method);
             $('#next_number').closest('.form-group-multi-input').find('label').append(' (S. NO.- '+response.series_title+')');
-                $('#series_id').prop('disabled',true);
-                $('#member_mob').prop('disabled',true);
+            $('#series_id').prop('disabled',true);
+            $('#member_mob').prop('disabled',true);
         },
         error: function(error) {
             console.error('Error fetching folder content:', error);
@@ -156,7 +167,6 @@ function datetimepicker_month(id){
         minViewMode: 1,
         startDate : date,
         container: '#cred_modal',
-
         autoclose: true
     });
 }
@@ -206,10 +216,32 @@ function send_pdf(id){
     document.location.href = "/supanel/journal_entry/"+id+"/send";
 }
 
+function reciept_datetimepicker(){
+    $('#reciept_date').datetimepicker({
+        useCurrent : false,
+        showClose : true,
+        format : "YYYY-MM-DD",
+        icons:{
+            time : "fa fa-clock",
+            date : "fa fa-calendar-day",
+            up : "fa fa-chevron-up",
+            down : "fa fa-chevron-down",
+            previous : 'fa fa-chevron-left',
+            next :'fa fa-chevron-right',
+            today :'fa fa-screenshot',
+            clear : 'fa fa-trash',
+            close : 'fa fa-remove'
+        }
+    });
+}
+
 $(function(){
+    id = null;
 
     $("#add_but").on('click',function(e){
         e.preventDefault();
+        id = null;
+
         form = document.getElementById('form_id');
         form.classList.remove('was-validated');
         $('#changable_div input[type=text], input[type=search], input[type=hidden], input[type=number], input[type=date], input[type=radio], select').val('');
@@ -242,8 +274,10 @@ $(function(){
     datetimepicker_month('from_month');
     datetimepicker_month('to_month');
     custom_datetimepicker_month('custom_month');
+    reciept_datetimepicker();
 
-    $('#custom_toggle').on('change',function(){
+    
+        $(document).on("click","#custom_toggle",function() {
         is_check = $(this).prop('checked');
         $('#from_month').val('');
         $('#to_month').val('');
@@ -270,25 +304,18 @@ $(function(){
         $('#to_month').datepicker('setStartDate' , date);
     });
 
-
     $('#to_month').on('change',function(){
         date = new Date($(this).val());
         $('#from_month').datepicker('setEndDate', date);
     });
 
-    // $('#from_month').on('dp.update', function(e){
-    //     $('#from_month').datepicker('remove');
-    //     datetimepicker_month('from_month');
-    // });
-
-
-    // $('.edit_but').on('click', function(e){
-    //     e.preventDefault();
-    //     id = $(this).data('id');
-    //     $('#cred_modal').modal('show');
-    //     $('#cred_modal').modal({ backdrop:false });
-    //     ajax_edit(id);
-    // });
+    $('.edit_but').on('click', function(e){
+        e.preventDefault();
+        id = $(this).data('id');
+        $('#cred_modal').modal('show');
+        $('#cred_modal').modal({ backdrop:false });
+        ajax_edit(id);
+    });
 
     $('.show_but').on('click', function(e){
         e.preventDefault();
@@ -391,7 +418,7 @@ $(function(){
         }
     });
 
-    $('#unpaid').on('click', function(){
+    $(document).on('click', '#unpaid', function(){
         var val = $(this).prop('checked');
         if(val){
             $('#charge').prop('disabled', false);
@@ -399,10 +426,6 @@ $(function(){
             $('#charge').prop('disabled', true);
             $('#charge').val('');
         }
-    });
-
-    $('#charge').on('change', function(){
-        
     });
 
     $('#entry_year').on('change',function(){
@@ -437,7 +460,7 @@ $(function(){
         e.preventDefault();
         var send =0;
         if(form_je.checkValidity()=== true){
-            form_submit(send);
+            form_submit(send,id);
         } else{
             form_je.classList.add('was-validated');
         }
@@ -449,7 +472,7 @@ $(function(){
         var send = 1;
         // form_je.reportValidity();
         if(form_je.checkValidity()=== true){
-            form_submit(send);
+            form_submit(send,id);
         } else{
             form_je.classList.add('was-validated');
         }
@@ -593,18 +616,18 @@ $(function(){
                                         </a>
                                         @endif --}}
 
-                                        {{-- @can($module['permission_group'].'.edit')
+                                        @can($module['permission_group'].'.edit')
                                         <a href="{{ route($module['main_route'].'.edit', $row_id) }}" data-id="{{ $row_id }}" class="edit_but" title="{{ __('admin.text_edit') }}" rel="tab">
                                             <i class="{{ config('custom.icons.edit') }}"></i>
                                         </a>
-                                        @endcan --}}
+                                        @endcan
 
                                         @can($module['permission_group'].'.delete')
                                             <a href="{{ route($module['main_route'].'.action', ['mode'=>'delete', 'id'=>$row_id]) }}" onclick="return confirm('Are you sure to delete?');" title="{{ __('admin.text_delete') }}">
                                                 <i class="{{ config('custom.icons.delete') }}"></i>
                                             </a>
                                         @endcan
-                                    </td>       
+                                    </td>
                                     @php $series= \App\Models\Series::find($item['series_id']);
                                         $member = \App\Models\Members::find($item['member_id']);
                                     @endphp

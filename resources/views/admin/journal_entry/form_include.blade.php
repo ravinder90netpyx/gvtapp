@@ -1,7 +1,7 @@
 @php
     $bsmodal=$bsmodal ?? true;
     $disable=($mode == 'show') ? "disabled": '';
-
+    $hide = "style='display:none;'";
     $auth_user = Auth::user();  
     $roles = $auth_user->roles()->pluck('name','id')->toArray();
     if(in_array('1', array_keys($roles))){
@@ -9,7 +9,7 @@
 <div class="col-md-6">
     @php 
     $current_field = 'organization_id';
-     $organizations = \App\Models\Organization::pluck('name', 'id');
+    $organizations = \App\Models\Organization::pluck('name', 'id');
     @endphp
     {!! Form::bsSelect($current_field, __('Organization Name'), $organizations, $form_data->$current_field ?? '', ['required', $disable], ['vertical'=>true]); !!}
 </div>
@@ -19,7 +19,7 @@
 <div class="col-md-6" id = "series_div_id">
     @php
         $row_data=[];
-        if($mode=='show') {
+        if($mode=='show' || $mode == 'edit') {
             $data_select=\App\Models\Series::where([['delstatus','<','1'],['status','>','0']])->get();
             foreach($data_select as $ds) $row_data[$ds->id]= $ds->name;
         }
@@ -57,11 +57,38 @@
 </div>
 
 <div class="col-md-6">
+    @php 
+    $current_field = 'reciept_date';
+    $now=Carbon\Carbon::now();
+    $add_perm = ['vertical'=>true];
+    $add_perm = array_merge($add_perm);
+    @endphp
+    {!! Form::bsInput('text', $current_field, __('Reciept Date'), $form_data->$current_field ?? $now->toDateTimeString(), ['required', $disable], $add_perm); !!}
+</div>
+
+<div class="col-md-6">
+    @php $current_field = 'charge_type_id';
+        $row_data=[];
+        $charge_type_model = \App\Models\ChargeType::where([['status','>','0'],['delstatus','<','1']])->get();
+        foreach($charge_type_model as $ch){
+            $row_data[$ch->id] = $ch->name;
+        }
+    @endphp
+    {!! Form::bsSelect($current_field, __('Charge Type'), $row_data, $form_data->$current_field ?? '', ['required', $disable], ['vertical'=>true]); !!}
+</div>
+
+<div class="col-md-6">
     @if($bsmodal==true)
         @php $current_field = 'member_mob';
             $row_data = [];
             if($mode =="show"){
                 $row_data[$form_data->$current_field] = $form_data['member_val'];
+            }
+            if($mode=='edit'){
+                $member = \App\Models\Members::where([['organization_id','=',$form_data['organization_id']], ['delstatus','<','1'], ['status','>','0']])->get()->toArray();
+                foreach($member as $mem){
+                    $row_data[$mem['id']] = "Name : ".$mem['name']."; Unit No : ".$mem['unit_number']."; Mob No : ".$mem['mobile_number'];
+                }
             }
         @endphp
         {{-- {!! Form::bsInput('search', $current_field, __('Search Member'), $form_data->$current_field ?? '', ['required', 'disabled'], ['vertical'=>true ]); !!} --}}
@@ -77,7 +104,7 @@
     @endif
 </div>
 
-<div class="col-md-6 charge" @if($mode!='show') style="display:none;" @endif>
+<div class="col-md-6 charge" @if($mode == 'insert') style="display:none;" @endif>
     @php $current_field = 'charge';
         $add_perm = ['vertical'=>true];
         $apm = ['addon_check'=>'unpaid', 'addon_check_title' => 'Not Fully Paid'];
@@ -86,13 +113,13 @@
     {!! Form::bsInput('number', $current_field, __('Paid Money'), $form_data->$current_field ?? '', ['disabled'], $add_perm); !!}
 </div>
 
-<div class="col-md-6 from_month">
-    @php $current_field = 'from_month'; @endphp
+@php $current_field = 'from_month'; @endphp
+<div class="col-md-6 from_month" @if(empty($form_data->$current_field) && $mode =='edit') style='display:none;' @endif>
     {!! Form::bsInput('text', $current_field, __('From'), $form_data->$current_field ?? '', [ 'required', 'autocomplete'=>'off', $disable ],  ['vertical'=>true]); !!}
 </div>
 
-<div class="col-md-6 to_month">
-    @php $current_field = 'to_month'; @endphp
+@php $current_field = 'to_month'; @endphp
+<div class="col-md-6 to_month" @if(empty($form_data->$current_field) && $mode =='edit') style='display:none;' @endif >
     
     {!! Form::bsInput('text', $current_field, __('To'), $form_data->$current_field ?? '', [ 'required', 'autocomplete'=>'off', $disable ],  ['vertical'=>true]); !!}
 </div>
@@ -102,11 +129,10 @@
     {!! Form::bsToggle($current_field, 'Custom Month', '1', ( $form_data->$current_field ?? false ), [$disable], ['vertical'=>true]); !!}
 </div>
 
-<div class="col-md-6 custom_month" style = "display:none;">
-    @php $current_field = 'custom_month'; @endphp
+@php $current_field = 'custom_month'; @endphp
+<div class="col-md-6 custom_month" @if(empty($form_data->$current_field) || $mode == 'insert') style='display:none;' @endif>
     {!! Form::bsInput('text', $current_field, __('Custom Month'), $form_data->$current_field ?? '', [ 'autocomplete'=>'off', $disable ],  ['vertical'=>true]); !!}
 </div>
-
 
 <div class="col-md-6 ">
     @php $current_field = 'payment_mode';
