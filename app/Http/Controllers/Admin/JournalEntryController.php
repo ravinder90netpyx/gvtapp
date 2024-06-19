@@ -121,7 +121,7 @@ class JournalEntryController extends Controller{
         else $model_get = $model_get->latest();
         
         $query = $request->get('query') ?? '';
-        if($query!='') $model_get = $model_get->where([['series_number', 'LIKE', '%'.$query.'%'],['name','LIKE'.'%',$query.'%']]);
+        if($query!='') $model_get = $model_get->where('series_number', 'LIKE', '%'.$query.'%')->orwhere('name', 'LIKE', '%'.$query.'%');
 
         $data = $model_get->paginate($perpage)->onEachSide(2);
 
