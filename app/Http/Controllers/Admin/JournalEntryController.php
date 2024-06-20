@@ -179,7 +179,7 @@ class JournalEntryController extends Controller{
                     $request = Request();
                     $helpers = new helpers();
                     $month_arr = $helpers->get_financial_month_year($value, $request->input('to_month','Y-m'));
-                    $report_month = Report::where([['member_id','=','10'], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending', '=', '0']])->orderBy('month', 'ASC')->pluck('month')->toArray();
+                    $report_month = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending', '=', '0']])->orderBy('month', 'ASC')->pluck('month')->toArray();
                     foreach($month_arr as $mt){
                         if(in_array($mt, $report_month)){
                             $fail("The money of ".$mt."is already paid");
@@ -475,7 +475,7 @@ class JournalEntryController extends Controller{
                     $request = Request();
                     $helpers = new helpers();
                     $month_arr = $helpers->get_financial_month_year($value, $request->input('to_month','Y-m'));
-                    $report_month = Report::where([['journal_entry_id','!=',$id], ['member_id','=','10'], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending', '=', '0']])->orderBy('month', 'ASC')->pluck('month')->toArray();
+                    $report_month = Report::where([['journal_entry_id','!=',$id], ['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending', '=', '0']])->orderBy('month', 'ASC')->pluck('month')->toArray();
                     foreach($month_arr as $mt){
                         if(in_array($mt, $report_month)){
                             $fail("The money of ".$mt."is already paid");
