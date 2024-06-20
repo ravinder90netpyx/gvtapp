@@ -28,7 +28,8 @@ class Templates extends Base_Model{
     protected $templates_name = [
         'welcome' => 'Welcome',
         'reminder' => 'Reminder',
-        'reciept' => 'Reciept'
+        'reciept' => 'Reciept',
+        'overdue' => 'Over-due'
     ];
 
     protected $fillable = [
