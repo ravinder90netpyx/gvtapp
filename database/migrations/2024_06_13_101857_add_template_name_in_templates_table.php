@@ -27,6 +27,7 @@ return new class extends Migration
     {
         Schema::table('templates', function($table) {
             DB::statement("ALTER TABLE templates MODIFY COLUMN name ENUM('welcome', 'reminder', 'reciept')");
+            
         });
     }
 };
