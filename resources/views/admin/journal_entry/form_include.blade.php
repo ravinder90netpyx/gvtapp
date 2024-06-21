@@ -59,11 +59,10 @@
 <div class="col-md-6">
     @php 
     $current_field = 'reciept_date';
-    $now=Carbon\Carbon::now();
     $add_perm = ['vertical'=>true];
     $add_perm = array_merge($add_perm);
     @endphp
-    {!! Form::bsInput('text', $current_field, __('Reciept Date'), $form_data->$current_field ?? $now->toDateTimeString(), ['required', $disable], $add_perm); !!}
+    {!! Form::bsInput('text', $current_field, __('Reciept Date'), $form_data->$current_field ?? '', ['required', $disable], $add_perm); !!}
 </div>
 
 <div class="col-md-6">
@@ -84,7 +83,7 @@
             if($mode =="show"){
                 $row_data[$form_data->$current_field] = $form_data['member_val'];
             }
-            if($mode=='edit'){
+            if($mode =='edit'){
                 $member = \App\Models\Members::where([['organization_id','=',$form_data['organization_id']], ['delstatus','<','1'], ['status','>','0']])->get()->toArray();
                 foreach($member as $mem){
                     $row_data[$mem['id']] = "Name : ".$mem['name']."; Unit No : ".$mem['unit_number']."; Mob No : ".$mem['mobile_number'];
