@@ -14,7 +14,7 @@ class GroupController extends Controller{
     public $module = array(
         'module_view' => 'group',
         'module_route' => 'group',
-        'permission_group' => 'user_roles',
+        'permission_group' => 'group',
         'main_heading' => 'Group',
         'default_perpage' => 10
     );
