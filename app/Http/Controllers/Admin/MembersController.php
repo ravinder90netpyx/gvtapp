@@ -42,6 +42,7 @@ class MembersController extends Controller{
 
         if(in_array($mode_construct, array('activate', 'deactivate'))) $this->middleware('permission:'.$module['permission_group'].'.status', ['only' => ['action', 'bulk']]);
         if(in_array($mode_construct, array('delete'))) $this->middleware('permission:'.$module['permission_group'].'.delete', ['only' => ['action', 'bulk']]);
+        if(in_array($mode_construct, array('reminder'))) $this->middleware('permission:'.$module['permission_group'].'.reminder', ['only' => ['action', 'bulk']]);
     }
 
     public function index(Request $request, DefaultModel $model){
@@ -169,7 +170,7 @@ class MembersController extends Controller{
         $module = $this->module;
         $token = $request->session()->token();
         $post = $request->post();
-
+        // dd($request->input());
         if(!empty($post['btn_apply'])){
             if($token==$post['_token']){
                 if(empty($post['combined_action'])){
@@ -192,6 +193,11 @@ class MembersController extends Controller{
                             case 'delete':
                                 $model->postDelete($check_id);
                             break;
+
+                            case 'reminder':
+                                // dd(12);
+                                $this->send_reminder_bulk($check_id);
+                            break;
                         }
                     }
 
@@ -201,7 +207,8 @@ class MembersController extends Controller{
         }
     }
 
-    public function send_reminder($mem_id, helpers $helpers){
+    public function send_reminder($mem_id){
+        $helpers =new helpers();
         $module = $this->module;
         $member = \App\Models\Members::find($mem_id);
         $org_id = $member->organization_id;
@@ -219,7 +226,6 @@ class MembersController extends Controller{
         $date = Carbon::parse($now_date)->format('d-M-Y');
         // $day = $now->day;
         if(empty($je_model)){
-            $params = [];
             $data = [
                 'name'=> $member->name,
                 'mobile_number' => $member->mobile_number,
@@ -238,6 +244,39 @@ class MembersController extends Controller{
             return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
         } else{
             return redirect()->route($module['main_route'].'.index')->with('success', 'Amount Already paid');
+        }
+    }
+
+    public function send_reminder_bulk($mem_id){
+        $helpers =new helpers();
+        $module = $this->module;
+        $member = \App\Models\Members::find($mem_id);
+        $org_id = $member->organization_id;
+        $dest_mob_no = $member->mobile_number;
+        $charge = \App\Models\Charges::find($member->charges_id);
+        $now = Carbon::now();
+
+        $day = $now->day;
+        $curr_month = $now->format('Y-m');
+        $je_model = \App\Models\Report::where([['member_id', '=',$mem_id],['month','=',$curr_month],['status','>','0'],['delstatus','<', '1']])->orderBy('id','DESC')->first();
+        $now_date = $now->day(12);
+        $date = Carbon::parse($now_date)->format('d-M-Y');
+        if(empty($je_model)){
+            $data = [
+                'name'=> $member->name,
+                'mobile_number' => $member->mobile_number,
+                'unit_no'=> $member->unit_number,
+                'charge' => $charge->rate,
+                'date' => $date
+            ];
+            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            if($day>12){
+                $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','overdue'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            }
+            $templ_json = $helpers->make_temp_json($temp->id, $data);
+            $message = '';
+            $message = json_encode($message, true);
+            dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
         }
     }
 }

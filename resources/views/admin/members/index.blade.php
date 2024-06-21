@@ -11,7 +11,7 @@
 @section('scripts')
 <script type="text/javascript">
     function send_reminder(id){
-        if(confirm("Are you sure to to send reminder? Please Confirm")){
+        if(confirm("Are you sure to send reminder to Whatsapp? Please Confirm")){
             document.location.href = "/supanel/members/"+id+"/reminder";
             // window.open("/supanel/members/"+id+"/reminder");
         }
@@ -49,6 +49,9 @@
 
                                 <select name="combined_action" id="combined_action" class="custom-select">
                                     <option value="">{{ __('admin.text_select') }}</option>
+                                    @can($module['permission_group'].'.reminder')
+                                    <option value="reminder">{{ __('Send Reminder') }}</option>
+                                    @endcan
                                     @can($module['permission_group'].'.status')
                                     <option value="activate">{{ __('admin.text_activate') }}</option>
                                     <option value="deactivate">{{ __('admin.text_deactivate') }}</option>
@@ -146,10 +149,13 @@
                                         @php
                                             $org_id = $item['organization_id'];
                                             $wht_model = \App\Models\Templates::where([['name','=','reminder'],['organization_id','=',$org_id]])->count();
+                                            $now = \Carbon\Carbon::now();
+                                            $curr_month = $now->format('Y-m');
+                                            $je_model = \App\Models\Report::where([['member_id', '=',$row_id],['month','=',$curr_month],['status','>','0'],['delstatus','<', '1']])->orderBy('id','DESC')->first();
                                         @endphp
 
                                         @if($wht_model>0)
-                                            <a href='' onclick="send_reminder({{ $row_id }})" title="Send Reminder on Whatsapp" rel="tab">
+                                            <a @if(empty($je_model)) href='' @endif onclick="send_reminder({{ $row_id }})" title="Send Reminder on Whatsapp" rel="tab">
                                                 <i class="fas fa-bell"></i>
                                             </a>
                                         @endif

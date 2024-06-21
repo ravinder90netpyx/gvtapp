@@ -35,7 +35,8 @@ class Members extends Base_Model{
         'alternate_name_1',
         'alternate_name_2',
         'sublet_name',
-        'alternate_number'
+        'alternate_number',
+        'group_id'
     ];
 
     public function report(){

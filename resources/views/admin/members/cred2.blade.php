@@ -201,6 +201,16 @@ $(function(){
                         @endif
 
                         <div class="col-md-6">
+                            @php 
+                            $current_field = 'group_id';
+                            $row_data=[];
+                            $data_select=\App\Models\Group::select('id','name')->get();
+                            foreach($data_select as $ds) $row_data[$ds->id]=$ds->name;
+                            @endphp
+                            {!! Form::bsSelect($current_field, __('Group'), $row_data, $form_data->$current_field ?? '', ['data-toggle'=> 'select', 'required'], ['vertical'=> true]); !!}
+                        </div>
+
+                        <div class="col-md-6">
                              @php $current_field = 'alternate_name_1'; @endphp
                             {!! Form::bsText($current_field, __('Alternate Name 1'), $form_data->$current_field ?? '', ['required'], ['vertical'=>true ]); !!}
                         </div>
