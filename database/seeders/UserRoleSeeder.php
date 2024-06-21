@@ -54,11 +54,24 @@ class UserRoleSeeder extends Seeder
             [ 'name' => 'charges.delete' ],
             [ 'name' => 'charges.status' ],
 
+            [ 'name' => 'charge_type.manage' ],
+            [ 'name' => 'charge_type.add' ],
+            [ 'name' => 'charge_type.edit' ],
+            [ 'name' => 'charge_type.delete' ],
+            [ 'name' => 'charge_type.status' ],
+
             [ 'name' => 'members.manage' ],
             [ 'name' => 'members.add' ],
             [ 'name' => 'members.edit' ],
             [ 'name' => 'members.delete' ],
             [ 'name' => 'members.status' ],
+            [ 'name' => 'members.reminder' ],
+
+            [ 'name' => 'group.manage' ],
+            [ 'name' => 'group.add' ],
+            [ 'name' => 'group.edit' ],
+            [ 'name' => 'group.delete' ],
+            [ 'name' => 'group.status' ],
 
             [ 'name' => 'series.manage' ],
             [ 'name' => 'series.add' ],

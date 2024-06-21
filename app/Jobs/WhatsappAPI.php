@@ -40,38 +40,40 @@ class WhatsappAPI implements ShouldQueue
      */
     public function handle(){
         // echo $this->destination; exit;
-        $api = array(
-            'whatsapp_api_url' => 'https://api.gupshup.io/wa/api/v1/template/msg',
-            'channel' => 'whatsapp',
-            'src_name' => 'GVTGH9',
-            'type' => 'document'
-            // 'template_id' => 'c376f4e4-2743-4eb9-8cdb-2648f7457d22',
-        );
+        // $api = array(
+        //     'whatsapp_api_url' => 'https://api.gupshup.io/wa/api/v1/template/msg',
+        //     'channel' => 'whatsapp',
+        //     'src_name' => 'GVTGH9',
+        //     'type' => 'document'
+        //     // 'template_id' => 'c376f4e4-2743-4eb9-8cdb-2648f7457d22',
+        // );
 
         $destination = $this->destination;
         $message = $this->message;
         $org_id = $this->org_id;
         $template = $this->template;
 
-        $group = 'whatsapp_settings';
         $model = new \App\Models\Organization_Settings();
+        $group = 'whatsapp_settings';
+
+        $url = $model->getVal($group, 'api_url', $org_id);
+        $channel = $model->getVal($group, 'channel', $org_id);
+        $src_name = $model->getVal($group, 'src_name', $org_id);
         $src_no = $model->getVal($group, 'source_number',$org_id);
         $api_key = $model->getVal($group, 'api_key',$org_id);
         $curl = curl_init();
 
         $post_data = [];
-        // dd($message);
-        $post_data['channel'] = $api['channel'];
+
+        $post_data['channel'] = $channel;
         $post_data['source'] = $src_no;
         $post_data['destination'] = $destination;
-        $post_data['src.name'] = $api['src_name'];
+        $post_data['src.name'] = $src_name;
         $post_data['template'] = $template;
         $post_data['message'] = $message;
 
-        // dd($post_data);
-
         curl_setopt_array($curl, array(
-            CURLOPT_URL => $api['whatsapp_api_url'],
+            CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
