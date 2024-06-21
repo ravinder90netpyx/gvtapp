@@ -60,12 +60,12 @@ class Kernel extends ConsoleKernel{
                         $send_notification = 0;
                     }
                 }
-                if(!empty($send_notification)){
+                // if(!empty($send_notification)){
                     dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
-                }
+                // }
             }
         
-        })/*->everyMinute();*/->monthlyOn(22, '00:00');
+        })/*->everyMinute();/*->monthlyOn(22, '00:00');*/->everyFourHours()->days([0, 5, 6]);
     }
 
     /**
