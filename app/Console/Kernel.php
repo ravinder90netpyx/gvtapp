@@ -21,7 +21,7 @@ class Kernel extends ConsoleKernel{
         // $schedule->command('inspire')->hourly();
         $schedule->call(function (){
 
-            $member_model = \App\Models\Members::where([['status','>','0'], ['delstatus','<','1']])->get();
+            $member_model = \App\Models\Members::where([['status','>','0'], ['delstatus','<','1'], ['group_id','=', '2']])->get();
 
             $type = 'document';
             // $date_arr = explode(' ', $model->entry_date);
@@ -65,7 +65,7 @@ class Kernel extends ConsoleKernel{
                 }
             }
         
-        })/*->everyMinute();*/->monthlyOn(12, '15:00');
+        })/*->everyMinute();*/->monthlyOn(22, '00:00');
     }
 
     /**
