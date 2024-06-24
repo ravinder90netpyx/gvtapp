@@ -69,7 +69,7 @@ class Kernel extends ConsoleKernel{
                 // }
             }
         
-        })->everyMinute();/*->monthlyOn(22, '00:00');->everyFourHours()->days([0, 5, 6]);*/
+        })/*->everyMinute();/*->monthlyOn(22, '00:00');*/->everyThreeHours()->days([1, 2, 3]);
     }
 
     /**
