@@ -1,6 +1,13 @@
 @php
     $auth_user = Auth::user();
     $roles = $auth_user->roles()->pluck('id')->toArray();
+    $row_data=[];
+    $organization_id = $auth_user->organization_id;
+    if(empty($organization_id)){
+        $data_select=\App\Models\Members::where([['delstatus','<','1'],['status','>','0']])->get();
+    } else {
+        $data_select=\App\Models\Members::where([['delstatus','<','1'],['status','>','0'], ['organization_id','=', $organization_id]])->get();
+    }
 @endphp
 @extends($folder['folder_name'].'.layouts.master')
 
@@ -10,11 +17,15 @@
 @endsection
 
 @section('css')
+<link href="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.44/dist/virtual-select.min.css
+" rel="stylesheet">
 @endsection
 
 @section('scripts')
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.44/dist/virtual-select.min.js
+"></script>
 <script type="text/javascript">
 
 
@@ -119,6 +130,19 @@ $(function(){
     datetimepicker_month(fromid);
     datetimepicker_month(toid);
     
+    var options = [
+        @foreach($data_select as $ds)
+            { label: "{{ $ds->name }}", value: "{{ $ds->id }}" },
+        @endforeach
+    ];
+    VirtualSelect.init({ 
+        ele: '#member_id',
+        options: options,
+        multiple: true,
+        search: true,
+        noOptionsText: "{{__('No results found')}}"
+    });
+
     $('#member_id').on('change',function(){
         // console.log($(this).val().length);
         if($(this).val().length>9){
@@ -161,32 +185,32 @@ $(function(){
     $('#from_date').show();
     $('#to_date').show();
 
-    $('#select_all_member').on('click', function(){
-        val = $(this).prop('checked');
-        if(val){
-            $(this).closest('.input-group').find('select').select2('destroy').find('option').prop('selected', $(this).prop('checked')).end().select2();
-            $('[data-toggle="select-multiple"]').select2({
-                allowClear: true,
-                closeOnSelect: false,
-                templateSelection: function(selected, container) {
-                    if (selected.id !== '') {
-                        $(container).text(selected.text);
-                    }
-                    return container;
-                }
-            });
-        } else{
-            $(this).closest('.input-group').find('select').select2('destroy').find('option').prop('selected', $(this).prop('checked')).end().select2();
-        }
-    });
+    // $('#select_all_member').on('click', function(){
+    //     val = $(this).prop('checked');
+    //     if(val){
+    //         $(this).closest('.input-group').find('select').select2('destroy').find('option').prop('selected', $(this).prop('checked')).end().select2();
+    //         $('[data-toggle="select-multiple"]').select2({
+    //             allowClear: true,
+    //             closeOnSelect: false,
+    //             templateSelection: function(selected, container) {
+    //                 if (selected.id !== '') {
+    //                     $(container).text(selected.text);
+    //                 }
+    //                 return container;
+    //             }
+    //         });
+    //     } else{
+    //         $(this).closest('.input-group').find('select').select2('destroy').find('option').prop('selected', $(this).prop('checked')).end().select2();
+    //     }
+    // });
 });
 </script>
 @endsection
-<style type="text/css">
+<!-- <style type="text/css">
     #member_id+.select2-container{
         width: 300px !important;
     }
-</style>
+</style> -->
 @section('content')
 <div class="app-page-title">
     <div class="page-title-wrapper">
@@ -206,31 +230,23 @@ $(function(){
                     
                     <div class="col-auto mt-1 mb-1" style="width: 450px;">
                         <div class="form-group">
-                            <div class="input-group input-group-sm">
+                            <div class="input-group input-group-sm" style="width:100%">
                                 <label for="member_id[]" class="combined_action_label mt-1 mr-3 d-none d-sm-block">{!! __('Member') !!}</label>
-                                <div class="input-group-prepend">
+                                <!-- <div class="input-group-prepend">
                                     <div class="input-group-text p-0 pl-2">
                                         <div class="custom-checkbox custom-control">
                                             <input type="checkbox" class="custom-control-input" id="select_all_member" aria-label="Checkbox for selecting all checkboxes">
                                             <label class="custom-control-label" for="select_all_member"></label>
                                         </div>
                                     </div>
-                                </div>
-                                @php 
-                                    $row_data=[];
-                                    $organization_id = $auth_user->organization_id;
-                                    if(empty($organization_id)){
-                                        $data_select=\App\Models\Members::where([['delstatus','<','1'],['status','>','0']])->get();
-                                    } else {
-                                        $data_select=\App\Models\Members::where([['delstatus','<','1'],['status','>','0'], ['organization_id','=', $organization_id]])->get();
-                                    }
-                                @endphp
+                                </div> -->
                                 
-                                <select name="member_id[]" id="member_id" multiple data-toggle ="select-multiple" class="custom-select">
+                                <!-- <select name="member_id[]" id="member_id" multiple data-toggle ="select-multiple" class="custom-select">
                                     @foreach($data_select as $ds)
                                         <option value="{!! $ds->id !!}">{!! $ds->name !!}</option>
                                     @endforeach
-                                </select>
+                                </select> -->
+                                <div class="" id="member_id" style="margin-left: 20px;"></div>
                             </div>
                         </div>
                     </div>

@@ -87,6 +87,8 @@ class MembersController extends Controller{
     }
 
     public function store(Request $request, DefaultModel $model){
+           
+
         $auth_user = \Illuminate\Support\Facades\Auth::user();
         $roles = $auth_user->roles()->pluck('id')->toArray();
         $module = $this->module;
@@ -96,10 +98,10 @@ class MembersController extends Controller{
             'mobile_number' => 'required|unique:members,mobile_number',
             'charges_id' => 'required',
             'organization_id' =>in_array(1,$roles)? 'required':'nullable',
-            'alternate_name_1'=> 'required',
+            // 'alternate_name_1'=> 'required',
             // 'alternate_name_2'=> 'required',
-            'sublet_name'=> 'required',
-            'alternate_number'=> 'required|unique:members,alternate_number'
+            // 'sublet_name'=> 'required',
+            'alternate_number'=> 'unique:members,alternate_number'
         ]);
 
         if(!in_array(1,$roles)){
@@ -108,8 +110,18 @@ class MembersController extends Controller{
         if(!in_array(1, $roles)){
             $request->merge([ 'organization_id' => $auth_user->organization_id ]);
         }
-        $request->merge([['mobile_number', trim($request->input('mobile_number'))], ['alternate_number', trim($request->input('alternate_number'))]]);
-        $model->create($request->all());
+        
+        $req=$request->input();
+        $req['mobile_number']=trim($request->input('mobile_number'));
+        $req['alternate_number']=trim($request->input('alternate_number'));
+        $req['sublet_number']=trim($request->input('sublet_number'));
+        $req['mobile_message']=json_encode($request->input('mobile_message'));
+        $req['sublet_message']=json_encode($request->input('sublet_message'));
+            // echo '<pre>';print_R($req);exit;
+
+        // $request->merge([['mobile_number', trim($request->input('mobile_number'))], ['alternate_number', trim($request->input('alternate_number'))], ['sublet_number', trim($request->input('sublet_number'))],['sublet_message', $sublet_message], ['mobile_message',$mobile_message] ]);
+        // dd($request->input());
+        $model->create($req);
 
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
     }
@@ -134,13 +146,19 @@ class MembersController extends Controller{
             'unit_number' => 'required|integer|between:1,9999|unique:members,unit_number,'.$id,
             'mobile_number' => 'required|unique:members,mobile_number,'.$id,
             'charges_id' => 'required',
-            'alternate_name_1'=> 'required',
-            'sublet_name'=> 'required',
-            'alternate_number'=> 'required|unique:members,alternate_number,'.$id
+            // 'alternate_name_1'=> 'required',
+            // 'sublet_name'=> 'required',
+            'alternate_number'=> 'unique:members,alternate_number,'.$id
         ]);
         // dd($request->input());
         $request->merge([['mobile_number', trim($request->input('mobile_number'))], ['alternate_number', trim($request->input('alternate_number'))]]);
-        $modelfind->update($request->all());
+        $req=$request->input();
+        $req['mobile_number']=trim($request->input('mobile_number'));
+        $req['alternate_number']=trim($request->input('alternate_number'));
+        $req['sublet_number']=trim($request->input('sublet_number'));
+        $req['mobile_message']=json_encode($request->input('mobile_message'));
+        $req['sublet_message']=json_encode($request->input('sublet_message'));
+        $modelfind->update($req);
     
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' updated successfully');
     }

@@ -33,28 +33,36 @@ $(function(){
 
     var input = document.querySelector("#mobile_number");
     var al_input = document.querySelector("#alternate_number");
+    var sl_input = document.querySelector("#sublet_number");
     var errorMap = ["Invalid number", "Invalid country code", "Too short", "Too long", "Invalid number"];
     var iti = window.intlTelInput(input, {
         utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
         autoPlaceholder: 'polite',
         nationalMode: false,
-        onlyCountries: ['in'],
+        onlyCountries: ['in','ie'],
         initialCountry:'in'
 
     });
-    @if($mode != 'edit')
-        iti.setNumber("+91");
-    @endif
 
     var iti2 = window.intlTelInput(al_input, {
         utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
         autoPlaceholder: 'polite',
         nationalMode: false,
-        onlyCountries: ['in'],
+        onlyCountries: ['in','ie'],
         selectedCountry: 'in'
     });
-    @if ($mode != 'edit')
+
+    var iti3 = window.intlTelInput(sl_input, {
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+        autoPlaceholder: 'polite',
+        nationalMode: false,
+        onlyCountries: ['in','ie'],
+        selectedCountry: 'in'
+    });
+    @if ($mode != 'edit' || empty($form_data))
+        iti.setNumber("+91");
         iti2.setNumber("+91");
+        iti3.setNumber("+91");
     @endif
 
     /* input.addEventListener('blur', function() {
@@ -96,6 +104,28 @@ $(function(){
         // alert(1);
         is_valid=iti.isValidNumber();
         country_data=iti.getSelectedCountryData();
+        // console.log(country_data);
+        dial_code= country_data.dialCode;
+       
+        //console.log(is_valid);
+        if(is_valid ){
+            //$("#contact-form-home").addClass('was-validated');
+            this.setCustomValidity('');
+            $(this).removeClass('is-invalid');
+            $(this).addClass('is-valid');
+        } else{
+            this.setCustomValidity('Phone is Invalid');
+            $(this).addClass('is-invalid');
+            $(this).removeClass('is-valid');
+        }
+        // alert(this.checkValidity());
+    });
+
+    $('#sublet_number').on('input', function(){
+        // abc=$(this).getValidationError();
+        // alert(1);
+        is_valid=iti3.isValidNumber();
+        country_data=iti3.getSelectedCountryData();
         // console.log(country_data);
         dial_code= country_data.dialCode;
        
@@ -180,12 +210,38 @@ $(function(){
 
                         <div class="col-md-6">
                             @php 
+                            $current_field = 'mobile_message[]';
+                            $row_data=['reminder'=>'Reminder', 'reciept'=>'Reciept'];
+                            @endphp
+                            {!! Form::bsSelect($current_field, __('Mobile Message'), $row_data, json_decode($form_data->mobile_message) ?? '', ['data-toggle'=>'select-multiple', 'multiple', 'id'=>'mobile_message'], ['vertical'=> true, 'remove_blank_field'=>true]); !!}
+                        </div>
+
+                        <div class="col-md-6">
+                             @php $current_field = 'sublet_name'; @endphp
+                            {!! Form::bsText($current_field, __('Sublet Name'), $form_data->$current_field ?? '', ['pattern' => '[a-zA-Z\s]+'], ['vertical'=>true ]); !!}
+                        </div>
+
+                        <div class="col-md-6">
+                            @php 
                             $current_field = 'charges_id';
                             $row_data = [];
                             $data_select = \App\Models\Charges::where([['delstatus','<','1'],['status','>','0']])->get();
                             foreach($data_select as $ds) $row_data[$ds->id] = $ds->name;
                             @endphp
                             {!! Form::bsSelect($current_field, __('Charge'), $row_data, $form_data->$current_field ?? '', ['data-toggle'=> 'select', 'required'], ['vertical'=> true]); !!}
+                        </div>
+
+                        <div class="col-md-6">
+                            @php $current_field = 'sublet_number'; @endphp
+                            {!! Form::bsInput('tel',$current_field, __('Sublet Number'), $form_data->$current_field ?? '', ['autocomplete'=>'tel'], ['vertical'=>true ]); !!}
+                        </div>
+
+                        <div class="col-md-6">
+                            @php 
+                            $current_field = 'sublet_message[]';
+                            $row_data=['reminder'=>'Reminder', 'reciept'=>'Reciept'];
+                            @endphp
+                            {!! Form::bsSelect($current_field, __('Sublet Message'), $row_data, json_decode($form_data->sublet_message) ?? '', ['data-toggle'=> 'select-multiple', 'multiple', 'id'=>'sublet_message'], ['vertical'=> true, 'remove_blank_field'=>true]); !!}
                         </div>
 
                         @if(in_array(1, $roles) && $mode!='edit')
@@ -212,7 +268,7 @@ $(function(){
 
                         <div class="col-md-6">
                              @php $current_field = 'alternate_name_1'; @endphp
-                            {!! Form::bsText($current_field, __('Alternate Name 1'), $form_data->$current_field ?? '', ['required'], ['vertical'=>true ]); !!}
+                            {!! Form::bsText($current_field, __('Alternate Name 1'), $form_data->$current_field ?? '', [''], ['vertical'=>true ]); !!}
                         </div>
 
                         <div class="col-md-6">
@@ -221,13 +277,8 @@ $(function(){
                         </div>
 
                         <div class="col-md-6">
-                             @php $current_field = 'sublet_name'; @endphp
-                            {!! Form::bsText($current_field, __('Sublet Name'), $form_data->$current_field ?? '', ['required', 'pattern' => '[a-zA-Z\s]+'], ['vertical'=>true ]); !!}
-                        </div>
-
-                        <div class="col-md-6">
                             @php $current_field = 'alternate_number'; @endphp
-                            {!! Form::bsInput('tel',$current_field, __('Alternate Number'), $form_data->$current_field ?? '', ['required', 'autocomplete'=>'tel'], ['vertical'=>true ]); !!}
+                            {!! Form::bsInput('tel',$current_field, __('Alternate Number'), $form_data->$current_field ?? '', ['autocomplete'=>'tel'], ['vertical'=>true ]); !!}
                         </div>
 
                     </div>  

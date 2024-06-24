@@ -1,6 +1,13 @@
 @php
     $auth_user = Auth::user();
     $roles = $auth_user->roles()->pluck('id')->toArray();
+    $row_data=[];
+    $organization_id = $auth_user->organization_id;
+    if(empty($organization_id)){
+        $data_select=\App\Models\Members::where([['delstatus','<','1'],['status','>','0']])->get();
+    } else {
+        $data_select=\App\Models\Members::where([['delstatus','<','1'],['status','>','0'], ['organization_id','=', $organization_id]])->get();
+    }
 @endphp
 @extends($folder['folder_name'].'.layouts.master')
 
@@ -10,11 +17,15 @@
 @endsection
 
 @section('css')
+<link href="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.44/dist/virtual-select.min.css
+" rel="stylesheet">
 @endsection
 
 @section('scripts')
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.44/dist/virtual-select.min.js
+"></script>
 <script type="text/javascript">
 
 
@@ -118,6 +129,19 @@ $(function(){
     toid = 'to_date';
     datetimepicker_month(fromid);
     datetimepicker_month(toid);
+
+    var options = [
+        @foreach($data_select as $ds)
+            { label: "{{ $ds->name }}", value: "{{ $ds->id }}" },
+        @endforeach
+    ];
+    VirtualSelect.init({ 
+        ele: '#member_id',
+        options: options,
+        multiple: true,
+        search: true,
+        noOptionsText: "{{__('No results found')}}"
+    });
     
     $('#member_id').on('change',function(){
         // console.log($(this).val().length);
@@ -182,14 +206,14 @@ $(function(){
 });
 </script>
 @endsection
-<style type="text/css">
+<!-- <style type="text/css">
     #member_id+.select2-container{
         width: 300px !important;
     }
      .select2-search--inline {
     display: block!important;
 }
-</style>
+</style> -->
 @section('content')
 <div class="app-page-title">
     <div class="page-title-wrapper">
@@ -206,34 +230,23 @@ $(function(){
         <div class="card-header">   
             <div class="form-inline form-list-actions">
                 <div class="row"> 
-                    
                     <div class="col-auto mt-1 mb-1" style="width: 450px;">
                         <div class="form-group">
-                            <div class="input-group input-group-sm">
+                            <div class="input-group input-group-sm" style="width:100%">
                                 <label for="member_id[]" class="combined_action_label mt-1 mr-3 d-none d-sm-block">{!! __('Member') !!}</label>
-                                <div class="input-group-prepend">
+                                <!-- <div class="input-group-prepend">
                                     <div class="input-group-text p-0 pl-2">
                                         <div class="custom-checkbox custom-control">
                                             <input type="checkbox" class="custom-control-input" id="select_all_member" aria-label="Checkbox for selecting all checkboxes">
                                             <label class="custom-control-label" for="select_all_member"></label>
                                         </div>
                                     </div>
-                                </div>
-                                @php 
-                                    $row_data=[];
-                                    $organization_id = $auth_user->organization_id;
-                                    if(empty($organization_id)){
-                                        $data_select=\App\Models\Members::where([['delstatus','<','1'],['status','>','0']])->get();
-                                    } else {
-                                        $data_select=\App\Models\Members::where([['delstatus','<','1'],['status','>','0'], ['organization_id','=', $organization_id]])->get();
-                                    }
-                                @endphp
+                                </div> -->
                                 
-                                <select name="member_id[]" id="member_id" multiple data-toggle ="select-multiple" class="custom-select">
-                                    @foreach($data_select as $ds)
-                                        <option value="{!! $ds->id !!}">{!! $ds->name !!}</option>
-                                    @endforeach
-                                </select>
+                                <div class="" id="member_id" style="margin-left: 20px;"></div>
+                                <!-- <select name="member_id[]" id="member_id" multiple class="custom-select"> -->
+                                    
+                                <!-- </select> -->
                             </div>
                         </div>
                     </div>
@@ -308,25 +321,25 @@ $(function(){
                                     <td>{{ $item['name'] }}</td>
                                     <td>{{ $item['mobile_number'] }}</td>
                                     @php
-                                    $match = '0';
-                                    $mm = [];
-                                    $money = []; 
-                                    foreach($report as $rp){
-                                        $mm[] = $rp['month'];
-                                        $money[] = $rp['money_paid'];
-                                    }
+                                        $match = '0';
+                                        $mm = [];
+                                        $money = []; 
+                                        foreach($report as $rp){
+                                            $mm[] = $rp['month'];
+                                            $money[] = $rp['money_paid'];
+                                        }
 
-                                    foreach($month_arr as $k => $v) {
-                                        foreach($report as $ke => $rpt){
-                                            if(in_array($v,$mm)) {
-                                                if($rpt['month'] == $v){
-                                                    $match = $rpt['money_paid'];
+                                        foreach($month_arr as $k => $v) {
+                                            foreach($report as $ke => $rpt){
+                                                if(in_array($v,$mm)) {
+                                                    if($rpt['month'] == $v){
+                                                        $match = $rpt['money_paid'];
+                                                    }
+                                                }else {
+                                                    $match = "0";
                                                 }
-                                            }else {
-                                                $match = "0";
-                                            }
-                                    }
-                            @endphp
+                                        }
+                                    @endphp
                                 <td>&#8377;{{ $match }}</td>
                         @php
                         $match = '0'; } @endphp

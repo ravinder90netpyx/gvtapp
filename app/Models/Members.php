@@ -36,7 +36,10 @@ class Members extends Base_Model{
         'alternate_name_2',
         'sublet_name',
         'alternate_number',
-        'group_id'
+        'group_id',
+        'sublet_number',
+        'sublet_message',
+        'mobile_message'
     ];
 
     public function report(){

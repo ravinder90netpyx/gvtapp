@@ -21,10 +21,10 @@ class CreateMembersTable extends Migration
             $table->unsignedInteger('unit_number');
             $table->string('mobile_number')->unique();
             $table->unsignedBigInteger('charges_id');
-            $table->string('alternate_name_1');
+            $table->string('alternate_name_1')->nullable();
             $table->string('alternate_name_2')->nullable();
-            $table->string('sublet_name');
-            $table->string('alternate_number')->unique();
+            $table->string('sublet_name')->nullable();
+            $table->string('alternate_number')->unique()->nullable();
             
             $table->enum('delstatus', ['0', '1'])->default('0');
             $table->enum('status', ['0', '1'])->default('1');
