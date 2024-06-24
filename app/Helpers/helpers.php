@@ -49,8 +49,9 @@ class helpers{
 		$params = json_decode($templ_model->params);
 		$par_ar = [];
 		$param_arr = [];
-		// dd($params);
+		// dd($data);
 		foreach($params as $par){
+			// dd($par->position);
 			if(!empty($par->name) && !empty($par->position)){
 				$par_ar[$par->position] = $data[$par->name];
 			}
@@ -60,6 +61,7 @@ class helpers{
 				$param_arr[] = $p;
 			}
 		}
+		// dd($param_arr);
 
 		$templ_id = $templ_model->template_id;
 		$templ_arr = [

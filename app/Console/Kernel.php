@@ -32,11 +32,14 @@ class Kernel extends ConsoleKernel{
             //     $month,
             //     $date
             // );
-            // echo "hello"; exit;
 
             $message = '';
             $message = json_encode($message, true);
             $helpers = new \App\Helpers\helpers();
+            $now = Carbon::now();
+            $day = $now->day;
+            $now_date = $now->day(12);
+            $date = Carbon::parse($now_date)->format('d-M-Y');
             foreach ($member_model as $val){
                 $send_notification = 1;
                 $org_model = new \App\Models\Organization_Settings();
@@ -46,7 +49,8 @@ class Kernel extends ConsoleKernel{
                     'name'=> $val->name,
                     'mobile_number' => $val->mobile_number,
                     'unit_no'=> $val->unit_number,
-                    'charge' => $charge->rate
+                    'charge' => $charge->rate,
+                    'date' => $date
                 ];
                 $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
                 $templ_json = $helpers->make_temp_json($temp->id, $data);
@@ -80,3 +84,5 @@ class Kernel extends ConsoleKernel{
         require base_path('routes/console.php');
     }
 }
+// crontab -e command
+// * * * * * cd /var/www/html/journal_entry && php artisan schedule:run >> /dev/null 2>&1
