@@ -294,7 +294,15 @@ class MembersController extends Controller{
             $templ_json = $helpers->make_temp_json($temp->id, $data);
             $message = '';
             $message = json_encode($message, true);
-            dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
+            if(in_array('reminder',json_decode($member->mobile_message))){
+                dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
+            }
+            if(in_array('reminder',json_decode($member->sublet_message))){
+                $dest_mob_no = $member->sublet_number;
+                if(!empty($dest_mob_no)){
+                    dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
+                }
+            }
         }
     }
 }

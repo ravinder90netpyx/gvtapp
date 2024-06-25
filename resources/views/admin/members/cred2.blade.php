@@ -212,8 +212,10 @@ $(function(){
                             @php 
                             $current_field = 'mobile_message[]';
                             $row_data=['reminder'=>'Reminder', 'reciept'=>'Reciept'];
+                            $fill_data ='';
+                            $fill_data = !empty($form_data->mobile_message)? json_decode($form_data->mobile_message) : '';
                             @endphp
-                            {!! Form::bsSelect($current_field, __('Mobile Message'), $row_data, json_decode($form_data->mobile_message) ?? '', ['data-toggle'=>'select-multiple', 'multiple', 'id'=>'mobile_message'], ['vertical'=> true, 'remove_blank_field'=>true]); !!}
+                            {!! Form::bsSelect($current_field, __('Mobile Message'), $row_data,$fill_data, ['data-toggle'=>'select-multiple', 'multiple', 'id'=>'mobile_message'], ['vertical'=> true, 'remove_blank_field'=>true]); !!}
                         </div>
 
                         <div class="col-md-6">
@@ -240,8 +242,10 @@ $(function(){
                             @php 
                             $current_field = 'sublet_message[]';
                             $row_data=['reminder'=>'Reminder', 'reciept'=>'Reciept'];
+                            $fill_data ='';
+                            $fill_data = !empty($form_data->sublet_message)? json_decode($form_data->sublet_message) : '';
                             @endphp
-                            {!! Form::bsSelect($current_field, __('Sublet Message'), $row_data, json_decode($form_data->sublet_message) ?? '', ['data-toggle'=> 'select-multiple', 'multiple', 'id'=>'sublet_message'], ['vertical'=> true, 'remove_blank_field'=>true]); !!}
+                            {!! Form::bsSelect($current_field, __('Sublet Message'), $row_data,$fill_data, ['data-toggle'=> 'select-multiple', 'multiple', 'id'=>'sublet_message'], ['vertical'=> true, 'remove_blank_field'=>true]); !!}
                         </div>
 
                         @if(in_array(1, $roles) && $mode!='edit')
