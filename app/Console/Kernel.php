@@ -53,6 +53,10 @@ class Kernel extends ConsoleKernel{
                     'date' => $date
                 ];
                 $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+                if($day>12){
+                    $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','overdue'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+                }
+
                 $templ_json = $helpers->make_temp_json($temp->id, $data);
 
                 $destination = $val->mobile_number;
@@ -64,12 +68,22 @@ class Kernel extends ConsoleKernel{
                         $send_notification = 0;
                     }
                 }
+
                 // if(!empty($send_notification)){
-                    dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+                    if(in_array('reminder',json_decode($val->mobile_message))){
+                        dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+                    }
+                    if(in_array('reminder',json_decode($val->sublet_message))){
+                        $destination = $val->sublet_number;
+                        if(!empty($destination)){
+                            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+                        }
+                    }
+                    // dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
                 // }
             }
         
-        })->everyMinute();/*->monthlyOn(22, '00:00');->everyThreeHours()->days([1, 2, 3]);*/
+        })/*->everyMinute();/*->monthlyOn(22, '00:00');->everyThreeHours()->days([1, 2, 3]);*/->cron('0 10 1,7,11,12,14,18,25,30 * *');
     }
 
     /**
