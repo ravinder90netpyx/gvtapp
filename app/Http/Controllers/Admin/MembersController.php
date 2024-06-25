@@ -47,6 +47,7 @@ class MembersController extends Controller{
 
     public function index(Request $request, DefaultModel $model){
         $carbon = new Carbon();
+        dump($request->input());
         $module = $this->module;
         $perpage = $request->perpage ?? $module['default_perpage'];
         if(!$request->perpage && !empty($request->cookie('perpage'))) $perpage = $request->cookie('perpage');
@@ -188,6 +189,7 @@ class MembersController extends Controller{
         $module = $this->module;
         $token = $request->session()->token();
         $post = $request->post();
+        // dd($request->post('row_check'));
         // dd($request->input());
         if(!empty($post['btn_apply'])){
             if($token==$post['_token']){
@@ -254,14 +256,26 @@ class MembersController extends Controller{
             $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
             if($day>12){
                 $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','overdue'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            } elseif ($day == 12) {
+                $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
             }
             $templ_json = $helpers->make_temp_json($temp->id, $data);
             $message = '';
             $message = json_encode($message, true);
-            dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
-            return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+            $mobile_msg_arr =!empty($member->mobile_message)? json_decode($member->mobile_message): [];
+            $sublet_msg_arr =!empty($member->sublet_message)? json_decode($member->sublet_message): [];
+            if(in_array('reminder',$mobile_msg_arr)){
+                dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
+            }
+            if(in_array('reminder',$sublet_msg_arr)){
+                $dest_mob_no = $member->sublet_number;
+                if(!empty($dest_mob_no)){
+                    dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
+                }
+            }
+            // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
         } else{
-            return redirect()->route($module['main_route'].'.index')->with('success', 'Amount Already paid');
+            // return redirect()->route($module['main_route'].'.index')->with('success', 'Amount Already paid');
         }
     }
 
@@ -290,14 +304,18 @@ class MembersController extends Controller{
             $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
             if($day>12){
                 $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','overdue'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            } elseif ($day == 12) {
+                $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
             }
             $templ_json = $helpers->make_temp_json($temp->id, $data);
             $message = '';
             $message = json_encode($message, true);
-            if(in_array('reminder',json_decode($member->mobile_message))){
+            $mobile_msg_arr =!empty($member->mobile_message)? json_decode($member->mobile_message): [];
+            $sublet_msg_arr =!empty($member->sublet_message)? json_decode($member->sublet_message): [];
+            if(in_array('reminder',$mobile_msg_arr)){
                 dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
             }
-            if(in_array('reminder',json_decode($member->sublet_message))){
+            if(in_array('reminder',$sublet_msg_arr)){
                 $dest_mob_no = $member->sublet_number;
                 if(!empty($dest_mob_no)){
                     dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
