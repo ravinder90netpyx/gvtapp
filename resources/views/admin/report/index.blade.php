@@ -298,6 +298,7 @@ $(function(){
                     <thead>
                         <tr>
                             <th>{{ __('admin.text_name') }}</th>
+                            <th>{{ __('Unit Number') }}</th>
                             <th>{{__('Mobile Number') }}</th>
                             @foreach($month_arr as $mn)
                                 <th>{{ date("Y M", strtotime($mn)) }}</th>
@@ -319,6 +320,7 @@ $(function(){
                                     
 
                                     <td>{{ $item['name'] }}</td>
+                                    <td>{{ $item['unit_number'] }}</td>
                                     <td>{{ $item['mobile_number'] }}</td>
                                     @php
                                         $match = '0';

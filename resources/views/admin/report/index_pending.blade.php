@@ -299,6 +299,7 @@ $(function(){
                     <thead>
                         <tr>
                             <th>{{ __('admin.text_name') }}</th>
+                            <th>{{ __('Unit Number') }}</th>
                             <th>{{__('Mobile Number') }}</th>
                             <th>{{ __('Total Amount') }}</th>
                             <th>{{ __('Amount Paid') }}</th>
@@ -318,6 +319,7 @@ $(function(){
                             @if($journal_entry>0)
                             <tr>
                                 <td>{{ $item['name'] }}</td>
+                                <td>{{ $item['unit_number'] }}</td>
                                 <td>{{ $item['mobile_number'] }}</td>
                                 @php 
                                 $match = '';

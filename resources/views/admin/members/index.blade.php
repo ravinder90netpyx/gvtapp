@@ -72,6 +72,30 @@
                     </div>
                     @endcanany
 
+                    <div class="col-auto mt-1 mb-1">
+                        <div class="form-group">
+                            <div class="input-group input-group-sm">
+                                <label for="group" class="combined_action_label mt-1 mr-3 d-none d-sm-block">{!! __('Group') !!}</label>
+
+                                @php
+                                    $group_mod = \App\Models\Group::where([['delstatus', '<', '1'], ['status','>','0']])->get();
+                                @endphp
+                                <select name="group" id="group" class="custom-select">
+                                    <option value="">{{ __('admin.text_select') }}</option>
+                                    @foreach($group_mod as $gr)
+                                        <option value="{!! $gr->id !!}">{!! $gr->name !!}</option>
+                                    @endforeach
+                                </select>
+
+                                <span class="input-group-append">
+                                    @csrf
+                                    @method('HEAD')
+                                    <input type="submit" class="btn btn-success" value="{{ __('admin.text_go') }}" name="btn_apply">
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
                     @can($module['permission_group'].'.add')
                     <div class="col-auto mt-1 mb-1">
                         <div class="form-group">
