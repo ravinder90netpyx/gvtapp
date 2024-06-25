@@ -29,7 +29,8 @@ class Templates extends Base_Model{
         'welcome' => 'Welcome',
         'reminder' => 'Reminder',
         'reciept' => 'Reciept',
-        'overdue' => 'Over-due'
+        'overdue' => 'Over-due',
+        'maitenance_last_day' => 'Maitenance Last Day'
     ];
 
     protected $fillable = [

@@ -47,7 +47,7 @@ class MembersController extends Controller{
 
     public function index(Request $request, DefaultModel $model){
         $carbon = new Carbon();
-        dump($request->input());
+        // dump($request->input());
         $module = $this->module;
         $perpage = $request->perpage ?? $module['default_perpage'];
         if(!$request->perpage && !empty($request->cookie('perpage'))) $perpage = $request->cookie('perpage');
