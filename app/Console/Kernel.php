@@ -23,10 +23,6 @@ class Kernel extends ConsoleKernel{
         $schedule->call(function (){
 
             $now = Carbon::now();
-            $model12 = new \App\Models\Test_Cron();
-            $data1['name'] = "testing cronesss";
-            $data1['date'] = $now;
-            // $model1 = $model12->create($data1);
             // echo "hello"; exit;
             $member_model = \App\Models\Members::where([['status','>','0'], ['delstatus','<','1'], ['group_id','=', '2']])->get();
            // echo '<pre>';print_R($member_model);exit;
@@ -110,8 +106,12 @@ class Kernel extends ConsoleKernel{
                     }
                     // dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
                 // }
-            }        
-        })/*->everyMinute();/*->everyThreeHours()->days([1, 2, 3]);/*/->cron('20 16 1,8,12,14,18,26,30 * *');
+            }      
+            $model12 = new \App\Models\Test_Cron();
+            $data1['name'] = "testing cronesss";
+            $data1['date'] = $now;
+            $model1 = $model12->create($data1);  
+        })/*->everyMinute();/*->everyThreeHours()->days([1, 2, 3]);/*/->cron('24 16 1,8,12,14,18,26,30 * *');
         
             
         }
