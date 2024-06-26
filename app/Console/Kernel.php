@@ -25,7 +25,7 @@ class Kernel extends ConsoleKernel{
             $model12 = new \App\Models\Test_Cron();
             $now = Carbon::now();
 
-            $data1['name'] = "testing crone";
+            $data1['name'] = "testing cronesss";
             $model1 = $model12->create($data1);
             // echo "hello"; exit;
             $member_model = \App\Models\Members::where([['status','>','0'], ['delstatus','<','1'], ['group_id','=', '2']])->get();
@@ -93,7 +93,7 @@ class Kernel extends ConsoleKernel{
                 // }
             }
         
-        })/*->everyMinute();/*->everyThreeHours()->days([1, 2, 3]);/*/->cron('58 14 1,8,12,14,18,26,30 * *');
+        })/*->everyMinute();/*->everyThreeHours()->days([1, 2, 3]);/*/->cron('05 15 1,8,12,14,18,26,30 * *');
         
             
         }
