@@ -32,7 +32,7 @@ class Kernel extends ConsoleKernel{
             //     $month,
             //     $date
             // );
-            // echo "hello"; exit;
+            echo "hello"; exit;
             $message = '';
             $message = json_encode($message, true);
             $helpers = new \App\Helpers\helpers();
