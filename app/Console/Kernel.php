@@ -23,7 +23,9 @@ class Kernel extends ConsoleKernel{
         $schedule->call(function (){
 
             $model = new \App\Models\Test_Cron();
-            $data1['name'] = "test";
+            $now = Carbon::now();
+
+            $data1['name'] = "testing crone";
             $model1 = $model->create($data1);
             echo "hello"; exit;
             $member_model = \App\Models\Members::where([['status','>','0'], ['delstatus','<','1'], ['group_id','=', '2']])->get();
