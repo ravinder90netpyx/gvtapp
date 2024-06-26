@@ -27,6 +27,7 @@ class Test_Cron extends Base_Model{
     */
 
     protected $fillable = [
-        'name'
+        'name',
+        'date'
     ];
 }
