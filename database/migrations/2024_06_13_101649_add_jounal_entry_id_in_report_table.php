@@ -15,8 +15,9 @@ return new class extends Migration
     {
       
 
-      Schema::table('report', function (Blueprint $table) {
+    Schema::table('report', function (Blueprint $table) {
         $table->unsignedBigInteger('journal_entry_id')->nullable();
+        $table->foreign('journal_entry_id')->references('id')->on('journal_entry')->onUpdate('cascade')->onDelete('cascade');
     });
     }
 
