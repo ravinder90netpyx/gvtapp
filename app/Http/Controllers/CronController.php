@@ -41,11 +41,6 @@ class CronController extends BaseController
     }
 
     public function optimize(){
-        $model = new \App\Models\Test_Cron();
-        $data1['name'] = "test";
-        $model1 = $model->create($data1);
-        echo "done"; exit();
-
         Artisan::call('optimize:clear');
         Artisan::call('optimize');
 

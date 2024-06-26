@@ -27,7 +27,7 @@ class Kernel extends ConsoleKernel{
 
             $data1['name'] = "testing crone";
             $model1 = $model12->create($data1);
-            echo "hello"; exit;
+            // echo "hello"; exit;
             $member_model = \App\Models\Members::where([['status','>','0'], ['delstatus','<','1'], ['group_id','=', '2']])->get();
 
             $type = 'document';
