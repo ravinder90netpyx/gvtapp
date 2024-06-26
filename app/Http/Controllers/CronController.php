@@ -109,18 +109,19 @@ class CronController extends BaseController
                     $mobile_msg_arr =!empty($val->mobile_message)? json_decode($val->mobile_message): [];
                     $sublet_msg_arr =!empty($val->sublet_message)? json_decode($val->sublet_message): [];
                     if(!empty($val->sublet_message) && $val->sublet_message!='null'){
-                       $sublet_msg_arr =$val->sublet_message; 
+                       $sublet_msg_arr =json_decode($val->sublet_message); 
                     }else{
                        $sublet_msg_arr =[]; 
                     }
 
                     if(!empty($val->mobile_message) && $val->mobile_message!='null'){
-                       $mobile_msg_arr =$val->mobile_message;
+                       $mobile_msg_arr =json_decode($val->mobile_message);
                     }else{
                        $mobile_msg_arr =[]; 
                     }
 
-                    //echo '<pre>';print_R($sublet_msg_arr);exit;
+                    echo '<pre>';print_R($sublet_msg_arr);
+                    echo '<pre>';print_R($mobile_msg_arr);exit;
                     if(in_array('reminder',$mobile_msg_arr)){
                         dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
                     }
