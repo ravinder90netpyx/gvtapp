@@ -22,6 +22,10 @@ class Kernel extends ConsoleKernel{
         // $schedule->command('inspire')->hourly();
         $schedule->call(function (){
 
+            $model = new \App\Models\Test_Cron();
+            $data1['name'] = "test";
+            $model1 = $model->create($data1);
+            echo "hello"; exit;
             $member_model = \App\Models\Members::where([['status','>','0'], ['delstatus','<','1'], ['group_id','=', '2']])->get();
 
             $type = 'document';
@@ -33,9 +37,6 @@ class Kernel extends ConsoleKernel{
             //     $month,
             //     $date
             // );
-            $data1['name'] = "test";
-            $model = cronModel::create($data1);
-            echo "hello"; exit;
             $message = '';
             $message = json_encode($message, true);
             $helpers = new \App\Helpers\helpers();
