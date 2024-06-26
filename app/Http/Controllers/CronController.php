@@ -69,6 +69,7 @@ class CronController extends BaseController
             $helpers = new \App\Helpers\helpers();
             $now = Carbon::now();
             $day = $now->day;
+            $month = $now->format('M Y');
             $now_date = $now->day(12);
             $date = Carbon::parse($now_date)->format('d-M-Y');
             foreach ($member_model as $val){
@@ -81,7 +82,8 @@ class CronController extends BaseController
                     'mobile_number' => $val->mobile_number,
                     'unit_no'=> $val->unit_number,
                     'charge' => $charge->rate,
-                    'date' => $date
+                    'date' => $date,
+                    'month' => $month
                 ];
                 $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
                 if($day>12){
