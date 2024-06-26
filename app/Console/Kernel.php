@@ -9,6 +9,7 @@ use App\Jobs\WhatsappAPI;
 use Carbon\Carbon;
 use App\Models\API_Connections;
 use App\Models\Settings as settingsModel;
+use App\Models\Test_Cron as cronModel;
 
 class Kernel extends ConsoleKernel{
     /**
@@ -32,6 +33,8 @@ class Kernel extends ConsoleKernel{
             //     $month,
             //     $date
             // );
+            $data1['name'] = "test";
+            $model = cronModel::create($data1);
             echo "hello"; exit;
             $message = '';
             $message = json_encode($message, true);
