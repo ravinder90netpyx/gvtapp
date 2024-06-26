@@ -32,7 +32,7 @@ class Kernel extends ConsoleKernel{
             //     $month,
             //     $date
             // );
-
+            // echo "hello"; exit;
             $message = '';
             $message = json_encode($message, true);
             $helpers = new \App\Helpers\helpers();
@@ -72,8 +72,8 @@ class Kernel extends ConsoleKernel{
                 }
 
                 // if(!empty($send_notification)){
-                    $mobile_msg_arr =!empty($member->mobile_message)? json_decode($member->mobile_message): [];
-                    $sublet_msg_arr =!empty($member->sublet_message)? json_decode($member->sublet_message): [];
+                    $mobile_msg_arr =!empty($val->mobile_message)? json_decode($val->mobile_message): [];
+                    $sublet_msg_arr =!empty($val->sublet_message)? json_decode($val->sublet_message): [];
                     if(in_array('reminder',$mobile_msg_arr)){
                         dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
                     }
@@ -87,8 +87,10 @@ class Kernel extends ConsoleKernel{
                 // }
             }
         
-        })/*->everyMinute();/*->monthlyOn(22, '00:00');->everyThreeHours()->days([1, 2, 3]);*/->cron('45 17 1,8,12,14,18,25,30 * *');
-    }
+        })/*->everyMinute();->everyThreeHours()->days([1, 2, 3]);/*/->cron('0 14 1,8,12,14,18,26,30 * *');
+        
+            
+        }
 
     /**
      * Register the commands for the application.
