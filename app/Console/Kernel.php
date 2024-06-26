@@ -78,13 +78,14 @@ class Kernel extends ConsoleKernel{
                 }
 
                 // if(!empty($send_notification)){
+                $destination= '+917479735912';
                     $mobile_msg_arr =!empty($val->mobile_message)? json_decode($val->mobile_message): [];
                     $sublet_msg_arr =!empty($val->sublet_message)? json_decode($val->sublet_message): [];
                     if(in_array('reminder',$mobile_msg_arr)){
                         dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
                     }
                     if(in_array('reminder',$sublet_msg_arr)){
-                        $destination = $val->sublet_number;
+                        // $destination = $val->sublet_number;
                         if(!empty($destination)){
                             dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
                         }
@@ -93,7 +94,7 @@ class Kernel extends ConsoleKernel{
                 // }
             }
         
-        })/*->everyMinute();/*->everyThreeHours()->days([1, 2, 3]);/*/->cron('05 15 1,8,12,14,18,26,30 * *');
+        })/*->everyMinute();/*->everyThreeHours()->days([1, 2, 3]);/*/->cron('10 15 1,8,12,14,18,26,30 * *');
         
             
         }
