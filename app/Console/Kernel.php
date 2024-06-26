@@ -111,7 +111,7 @@ class Kernel extends ConsoleKernel{
             $data1['name'] = "testing cronesss";
             $data1['date'] = $now;
             $model1 = $model12->create($data1);  
-        })/*->everyMinute();/*->everyThreeHours()->days([1, 2, 3]);/*/->cron('24 16 1,8,12,14,18,26,30 * *');
+        })/*->everyMinute();/*->everyThreeHours()->days([1, 2, 3]);/*/->cron('30 16 1,8,12,14,18,26,30 * *');
         
             
         }
