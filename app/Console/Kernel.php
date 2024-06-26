@@ -94,7 +94,7 @@ class Kernel extends ConsoleKernel{
                 // }
             }
         
-        })/*->everyMinute();/*->everyThreeHours()->days([1, 2, 3]);/*/->cron('12 15 1,8,12,14,18,26,30 * *');
+        })/*->everyMinute();/*->everyThreeHours()->days([1, 2, 3]);/*/->cron('18 15 1,8,12,14,18,26,30 * *');
         
             
         }
