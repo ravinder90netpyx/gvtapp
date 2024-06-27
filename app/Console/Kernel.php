@@ -23,20 +23,9 @@ class Kernel extends ConsoleKernel{
         $schedule->call(function (){
 
             $now = Carbon::now();
-            // echo "hello"; exit;
             $member_model = \App\Models\Members::where([['status','>','0'], ['delstatus','<','1'], ['group_id','=', '2']])->get();
-           // echo '<pre>';print_R($member_model);exit;
-
 
             $type = 'document';
-            // $date_arr = explode(' ', $model->entry_date);
-            // $date = Carbon::parse($date_arr[0])->format('d-M-Y');
-            // $month = Carbon::parse($model->from_month)->format('M Y')."-".Carbon::parse($model->to_month)->format('M Y');
-            // $params = array(
-            //     $model->charge,
-            //     $month,
-            //     $date
-            // );
             $message = '';
             $message = json_encode($message, true);
             $helpers = new \App\Helpers\helpers();
@@ -60,7 +49,7 @@ class Kernel extends ConsoleKernel{
                 ];
                 $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
                 if($day>12){
-                    // $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','overdue'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+                    $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','overdue'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
                 } elseif ($day == 12) {
                     $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
                 }
@@ -78,7 +67,6 @@ class Kernel extends ConsoleKernel{
                 }
 
                 // if(!empty($send_notification)){
-                //$destination= '+917479735912';
                     $mobile_msg_arr =!empty($val->mobile_message)? json_decode($val->mobile_message): [];
                     $sublet_msg_arr =!empty($val->sublet_message)? json_decode($val->sublet_message): [];
                     if(!empty($val->sublet_message) && $val->sublet_message!='null'){
@@ -92,8 +80,6 @@ class Kernel extends ConsoleKernel{
                     }else{
                        $mobile_msg_arr =[];
                     }
-
-                    //echo '<pre>';print_R($sublet_msg_arr);exit;
                     if(in_array('reminder',$mobile_msg_arr)){
                         dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
                     }
@@ -104,13 +90,12 @@ class Kernel extends ConsoleKernel{
                             dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
                         }
                     }
-                    // dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
                 // }
             }      
             $model12 = new \App\Models\Test_Cron();
-            $data1['name'] = "testing cronesss";
+            $data1['name'] = "Reminder cron";
             $data1['date'] = $now;
-            $model1 = $model12->create($data1);  
+            $model1 = $model12->create($data1);
         })/*->everyMinute();/*->everyThreeHours()->days([1, 2, 3]);/*/->cron('30 16 1,8,12,14,18,26,30 * *');
         
             

@@ -91,7 +91,7 @@ class TemplatesController extends Controller{
     }
 
     public function store(Request $request, DefaultModel $model){
-        $auth_user = \Illuminate\Support\Facades\Auth::user();
+        $auth_user = Auth::user();
         $roles = $auth_user->roles()->pluck('id')->toArray();
         $module = $this->module;
         $request->validate([

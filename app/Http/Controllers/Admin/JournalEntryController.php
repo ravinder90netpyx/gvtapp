@@ -410,6 +410,8 @@ class JournalEntryController extends Controller{
             $templ_json = $helpers->make_temp_json($temp->id, $data);
             $message = json_encode($message,true);
             $destination = $member->mobile_number;
+            $mobile_msg_arr =!empty($member->mobile_message)? json_decode($member->mobile_message): [];
+            $sublet_msg_arr =!empty($member->sublet_message)? json_decode($member->sublet_message): [];
             if(in_array('reciept',json_decode($member->mobile_message))){
                 dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
             }
@@ -804,8 +806,12 @@ class JournalEntryController extends Controller{
             'year' => $journal_entry->entry_year
         ];
         $pdf = PDF::loadView('include.make_pdf', $data);
-        $pdf->save(public_path("upload/pdf_files/{$file_name}.pdf"));
+        $mpdf = $pdf->getMpdf();
+        $mpdf->SetWatermarkImage(public_path('dashboard/img/Logo-GVT.png'));
+        $mpdf->showWatermarkImage = true;
+        // $mpdf->save(public_path("upload/pdf_files/{$file_name}.pdf"));
         // $models=$journal_entry->find($je_id);
+        $mpdf->Output(public_path("upload/pdf_files/{$file_name}.pdf"), \Mpdf\Output\Destination::FILE);
         $journal_model->where('id', '=', $je_id)->update(['file_name'=> $file_name]);
         if(!empty($request->input('redirect'))){
             return redirect()->route($module['main_route'].'.show_pdf', $je_id);
