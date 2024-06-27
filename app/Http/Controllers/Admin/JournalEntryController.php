@@ -410,12 +410,21 @@ class JournalEntryController extends Controller{
             $templ_json = $helpers->make_temp_json($temp->id, $data);
             $message = json_encode($message,true);
             $destination = $member->mobile_number;
-            $mobile_msg_arr =!empty($member->mobile_message)? json_decode($member->mobile_message): [];
-            $sublet_msg_arr =!empty($member->sublet_message)? json_decode($member->sublet_message): [];
-            if(in_array('reciept',json_decode($member->mobile_message))){
+            if(!empty($val->sublet_message) && $val->sublet_message!='null'){
+               $sublet_msg_arr =json_decode($val->sublet_message);
+            }else{
+               $sublet_msg_arr =[];
+            }
+
+            if(!empty($val->mobile_message) && $val->mobile_message!='null'){
+               $mobile_msg_arr =json_decode($val->mobile_message);
+            }else{
+               $mobile_msg_arr =[];
+            }
+            if(in_array('reciept',$mobile_msg_arr)){
                 dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
             }
-            if(in_array('reciept',json_decode($member->sublet_message))){
+            if(in_array('reciept',$sublet_msg_arr)){
                 $destination = $member->sublet_number;
                 if(!empty($destination)){
                     dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
@@ -697,10 +706,21 @@ class JournalEntryController extends Controller{
             $member = \App\Models\Members::find($member_id);
             $destination = $member->mobile_number;
             $message = json_encode($message,true);
-            if(in_array('reciept',json_decode($member->mobile_message))){
+            if(!empty($val->sublet_message) && $val->sublet_message!='null'){
+               $sublet_msg_arr =json_decode($val->sublet_message);
+            }else{
+               $sublet_msg_arr =[];
+            }
+
+            if(!empty($val->mobile_message) && $val->mobile_message!='null'){
+               $mobile_msg_arr =json_decode($val->mobile_message);
+            }else{
+               $mobile_msg_arr =[];
+            }
+            if(in_array('reciept',$mobile_msg_arr)){
                 dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
             }
-            if(in_array('reciept',json_decode($member->sublet_message))){
+            if(in_array('reciept',$sublet_msg_arr)){
                 $destination = $member->sublet_number;
                 if(!empty($destination)){
                     dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
@@ -882,6 +902,18 @@ class JournalEntryController extends Controller{
         $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
         $templ_json = $helpers->make_temp_json($temp->id, $data);
         $message = json_encode($message, true);
+        if(!empty($val->sublet_message) && $val->sublet_message!='null'){
+           $sublet_msg_arr =json_decode($val->sublet_message);
+        }else{
+           $sublet_msg_arr =[];
+        }
+
+        if(!empty($val->mobile_message) && $val->mobile_message!='null'){
+           $mobile_msg_arr =json_decode($val->mobile_message);
+        }else{
+           $mobile_msg_arr =[];
+        }
+
         if(in_array('reciept',json_decode($member->mobile_message))){
             dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
         }
