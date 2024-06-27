@@ -51,7 +51,7 @@ class Kernel extends ConsoleKernel{
                 if($day>12){
                     $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','overdue'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
                 } elseif ($day == 12) {
-                    $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+                    $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','maitenance_last_day'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
                 }
 
                 $templ_json = $helpers->make_temp_json($temp->id, $data);
