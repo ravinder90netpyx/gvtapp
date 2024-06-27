@@ -826,8 +826,21 @@ class JournalEntryController extends Controller{
             'year' => $journal_entry->entry_year
         ];
         $pdf = PDF::loadView('include.make_pdf', $data);
+
         $mpdf = $pdf->getMpdf();
-        $mpdf->SetWatermarkImage(public_path('dashboard/img/Logo-GVT.png'));
+         $width = 10; // Adjust the width of the watermark image
+        $height = 10; // Adjust the height of the watermark image
+
+        // Get the dimensions of the page
+        $pageWidth = $mpdf->w;
+        $pageHeight = $mpdf->h;
+
+        // Calculate the position to center the image
+        $x = ($pageWidth - $width) / 8;
+        $y = ($pageHeight - $height) / 8;
+
+        $mpdf->SetWatermarkImage(public_path('dashboard/img/Logo-GVT.png'), 0.1, '', array($x, $y), true);
+        
         $mpdf->showWatermarkImage = true;
         // $mpdf->save(public_path("upload/pdf_files/{$file_name}.pdf"));
         // $models=$journal_entry->find($je_id);
@@ -863,6 +876,7 @@ class JournalEntryController extends Controller{
     }
 
     public function show_pdf($je_id){
+
         $journal_entry = \App\Models\Journal_Entry::find($je_id);
         $name = $journal_entry->file_name;
         return view('include.show_pdf',compact('name'));

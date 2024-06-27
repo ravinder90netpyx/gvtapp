@@ -245,6 +245,8 @@ $(function(){
         id = null;
 
         form = document.getElementById('form_id');
+        $('#member_mob').val('');
+
         form.classList.remove('was-validated');
         $('#changable_div input[type=text], input[type=search], input[type=hidden], input[type=number], input[type=date], input[type=radio], select').val('');
         $('#changable_div input[type=text], input[type=search], input[type=hidden], input[type=number], input[type=date], input[type=radio], select').prop('disabled', false);
@@ -269,6 +271,8 @@ $(function(){
         $('#entry_year').val("{{ $val_year }}");
         $('#cred_modal').modal('show');
         $('#cred_modal').modal({ backdrop:false });
+        // $('#form_id').trigger('reset');
+        // $('#member_mob').val('');
         $('#form_btn_submit').show();
         $('#exampleModalLabel').text("{{ $title_shown }}");
     });
@@ -279,7 +283,7 @@ $(function(){
     reciept_datetimepicker();
 
     
-        $(document).on("click","#custom_toggle",function() {
+    $(document).on("click","#custom_toggle",function() {
         is_check = $(this).prop('checked');
         $('#from_month').val('');
         $('#to_month').val('');
@@ -310,6 +314,10 @@ $(function(){
         date = new Date($(this).val());
         $('#from_month').datepicker('setEndDate', date);
     });
+
+    // $('#cred_modal').on('hide.bs.modal', function (e) {
+    //     document.getElementById('form_id').reset();
+    // });
 
     $('.edit_but').on('click', function(e){
         e.preventDefault();
@@ -469,14 +477,18 @@ $(function(){
     });
 
     $('#form_btn_save_submit').on('click', function(e){
-        var form_je = document.getElementById('form_id');
-        e.preventDefault();
-        var send = 1;
-        // form_je.reportValidity();
-        if(form_je.checkValidity()=== true){
-            form_submit(send,id);
+        if(confirm("Do you really want to send the receipt? Please confirm")){
+            var form_je = document.getElementById('form_id');
+            e.preventDefault();
+            var send = 1;
+            // form_je.reportValidity();
+            if(form_je.checkValidity()=== true){
+                form_submit(send,id);
+            } else{
+                form_je.classList.add('was-validated');
+            }
         } else{
-            form_je.classList.add('was-validated');
+            e.preventDefault();
         }
     });
 });
@@ -574,7 +586,7 @@ $(function(){
                     @if($data->count())
                         <tbody>
                             @foreach($data as $item)
-                                @php 
+                                @php
                                 $row_id = $item[$model->getKeyName()];
                                 $dt_str = $carbon->createFromFormat('Y-m-d H:i:s', $item[$model::CREATED_AT]);
                                 $row_time = $dt_str->format(config('custom.datetime_format'));
@@ -584,11 +596,11 @@ $(function(){
                                         <div class="custom-checkbox custom-control">
                                             <input class="custom-control-input data-checkboxes" type="checkbox" name="row_check[]" id="row_check_{{ $row_id }}" value="{{ $row_id }}">
                                             <label class="custom-control-label" for="row_check_{{ $row_id }}"></label>
-                                        </div>                  
+                                        </div>
                                     </td> 
 
                                     <td>
-                                        @can($module['permission_group'].'.status')  
+                                        @can($module['permission_group'].'.status')
                                             @if($item[$model->getStatusColumn()]=='1')
                                             <a href="{{ route($module['main_route'].'.action', ['mode'=>'deactivate', 'id'=>$row_id]) }}" title="{{ __('admin.text_deactivate') }}">
                                                 <i class="{{ config('custom.icons.active') }}"></i>
@@ -613,11 +625,11 @@ $(function(){
                                             $wht_model = \App\Models\Templates::where([['name','=','reciept'],['organization_id','=',$org_id]])->count();
                                         @endphp
 
-                                        {{-- @if($wht_model>0)
+                                        @if($wht_model>0)
                                         <a href='' onclick="send_pdf({{ $row_id }})" title="Send Reciept on Whatsapp" rel="tab">
                                             <i class="fas fa-external-link-alt"></i>
                                         </a>
-                                        @endif --}}
+                                        @endif
 
                                         @can($module['permission_group'].'.edit')
                                         <a href="{{ route($module['main_route'].'.edit', $row_id) }}" data-id="{{ $row_id }}" class="edit_but" title="{{ __('admin.text_edit') }}" rel="tab">
@@ -671,7 +683,7 @@ $(function(){
                 </div>
                 <div class="modal-body" style="overflow:hidden;">
                     <div class="row" id="changable_div">
-                        @include($module['main_view'].'.form_include',['bsmodal'=>true, 'module'=>$module])
+                        @include($module['main_view'].'.form_include',['bsmodal'=>true, 'module'=>$module, 'form_data'=>null])
                     </div>
                 </div>
                 <div class="modal-footer">
