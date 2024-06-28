@@ -162,7 +162,7 @@ class ReportController extends Controller{
         $roles = $auth_user->roles()->pluck('id')->toArray();
         if(!in_array(1, $roles)){
             $organization_id = $auth_user->organization_id;
-            $model_get = $model_get->where('organization_id', $organization_id);
+            // $model_get = $model_get->where('organization_id', $organization_id);
         }
         if($model->getDelStatusColumn()) $model_get = $model_get->where($model->getDelStatusColumn(), '<', '1');
         
