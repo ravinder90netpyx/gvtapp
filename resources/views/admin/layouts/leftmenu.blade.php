@@ -218,8 +218,8 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
                 @can('journal_entry.report')
                 <li class="nav-item">
                   <a href="{{route($folder['route_folder_name'].'.report.index')}}" class="nav-link{{ Str::contains(url()->current(), array('report')) ? ' active' : '' }}">
-                    <span class="sidenav-mini-icon"> R </span>
-                    <span class="sidenav-normal"> Report </span>
+                    <span class="sidenav-mini-icon"> MWR </span>
+                    <span class="sidenav-normal"> Month-Wise Txn Report </span>
                   </a>
                 </li>
                 @endcan
@@ -227,8 +227,8 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
                 @can('journal_entry.report')
                 <li class="nav-item">
                   <a href="{{route($folder['route_folder_name'].'.pending_report')}}" class="nav-link{{ Str::contains(url()->current(), array('pending_report')) ? ' active' : '' }}">
-                    <span class="sidenav-mini-icon"> PDR </span>
-                    <span class="sidenav-normal"> Pending Report </span>
+                    <span class="sidenav-mini-icon"> CR </span>
+                    <span class="sidenav-normal"> Consolidated Txn Report </span>
                   </a>
                 </li>
                 @endcan
@@ -236,8 +236,8 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
                 @can('journal_entry.report')
                 <li class="nav-item">
                   <a href="{{route($folder['route_folder_name'].'.personal_report')}}" class="nav-link{{ Str::contains(url()->current(), array('personal_report')) ? ' active' : '' }}">
-                    <span class="sidenav-mini-icon"> PSR </span>
-                    <span class="sidenav-normal"> Personal Report </span>
+                    <span class="sidenav-mini-icon"> DWR </span>
+                    <span class="sidenav-normal"> Date-Wise Txn Report </span>
                   </a>
                 </li>
                 @endcan
