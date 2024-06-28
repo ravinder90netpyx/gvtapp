@@ -929,12 +929,12 @@ class JournalEntryController extends Controller{
         }
 
         if(in_array('reciept',json_decode($member->mobile_message))){
-            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+            dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
         }
         if(in_array('reciept',json_decode($member->sublet_message))){
-            $destination = $member->sublet_number;
-            if(!empty($destination)){
-                dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+            $dest_mob_no = $member->sublet_number;
+            if(!empty($dest_mob_no)){
+                dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
             }
         }
         // dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
