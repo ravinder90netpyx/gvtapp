@@ -8,6 +8,7 @@
     } else {
         $data_select=\App\Models\Members::where([['delstatus','<','1'],['status','>','0'], ['organization_id','=', $organization_id]])->get();
     }
+    dump($data->count());
 @endphp
 @extends($folder['folder_name'].'.layouts.master')
 
@@ -19,6 +20,22 @@
 @section('css')
 <link href="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.44/dist/virtual-select.min.css
 " rel="stylesheet">
+<style>
+    .submit_bttn {
+    padding: 0 !important;
+    margin: -30px 0 0 0px !important;
+}
+.from_to-label {
+    margin: 6px 6px 0 0 !important;
+    width: 18%;
+}
+.form-feilds {
+    width: 100% !important;
+}
+.form-group.to-form-feild {
+    margin-top: 12px !important;
+}
+</style>
 @endsection
 
 @section('scripts')
@@ -245,31 +262,30 @@ $(function(){
                         </div>
                     </div>
 
-                    <div class="col-auto mt-1 mb-1" >
-                        <div class="form-group">
-                            <div class="input-group input-group-sm">
-                                <label for="from_date" class="combined_action_label mt-1 mr-3 d-none d-sm-block">{!! __('From') !!}</label>
-                                <input class="form-control" id="from_date" name="from_date" type="text" value="">
+                    <div class="from-to-inputs">
+                        <div class="col-auto mt-1 mb-1" >
+                            <div class="form-group">
+                                <div class="input-group input-group-sm form-feilds">
+                                    <label for="from_date" class="combined_action_label mt-1 mr-3 d-none d-sm-block from_to-label">{!! __('From') !!}</label>
+                                    <input class="form-control" id="from_date" name="from_date" type="text" value="">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-auto mt-1 mb-1">
+                            <div class="form-group to-form-feild">
+                                <div class="input-group input-group-sm form-feilds">
+                                    <label for="to_date" class="combined_action_label mt-1 mr-3 d-none d-sm-block from_to-label">{!! __('To') !!}</label>
+                                    <input class="form-control" id="to_date" name="to_date" type="text" value="">
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-auto mt-1 mb-1">
-                        <div class="form-group">
-                            <div class="input-group input-group-sm">
-                                <label for="to_date" class="combined_action_label mt-1 mr-3 d-none d-sm-block">{!! __('To') !!}</label>
-                                <input class="form-control" id="to_date" name="to_date" type="text" value="">
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
-                <div class="row">
-                     <div class="col-auto mt-1 mb-1 my-2">
-                        <div class="form-group">
-                            <button id="submit_button" type="submit" class="btn btn-primary btn-add btn-sm" rel="tab" href="">{{ __('Submit') }}</button>
-                        </div>
-                    </div>
+            </div>
+            <div class="col-auto mt-1 mb-1 my-2 submit_bttn">
+                <div class="form-group">
+                    <button id="submit_button" type="submit" class="btn btn-primary btn-add btn-sm" rel="tab" href="">{{ __('Submit') }}</button>
                 </div>
             </div>
         </div>

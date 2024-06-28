@@ -22,7 +22,7 @@
     <div class="entry-section" style="text-align: center; padding:10px;">
         <h2 class="text-center">{{ $org_name }}</h2>
             <p>Payment Receipt</p>
-            <p style="text-align: left;">Thank You for Paying Monthly Maintenance. Here is the payment receipt.</p>
+            <p style="text-align: left;">Thank You for Paying Monthly Maintenance Charges. Here is the payment receipt.</p>
         <div class="table-responsive" style="text-align:center;">
             <table border="1" cellpadding="2" cellspacing="0" width="100%">
                 <tbody>
