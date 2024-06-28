@@ -849,6 +849,9 @@ class JournalEntryController extends Controller{
         if(!empty($request->input('redirect'))){
             return redirect()->route($module['main_route'].'.show_pdf', $je_id);
         }
+        if(!empty($request->input('redirect_index'))){
+            return redirect()->route($module['main_route'].'.index')->with('success', 'File regenerated Successfully');
+        }
     }
 
     public function view_pdf($je_id){

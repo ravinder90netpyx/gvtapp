@@ -219,7 +219,7 @@ function download_file(id){
 }
 
 function regenerate_file(id){
-    window.open("/supanel/journal_entry/"+id+"/make?redirect=1");
+    document.location.href = "/supanel/journal_entry/"+id+"/make?redirect_index=1";
 }
 
 function send_pdf(id){
