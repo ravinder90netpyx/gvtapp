@@ -930,16 +930,21 @@ class JournalEntryController extends Controller{
 
         if(in_array('reciept',json_decode($member->mobile_message))){
             dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
+            return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+            
         }
         if(in_array('reciept',json_decode($member->sublet_message))){
             $dest_mob_no = $member->sublet_number;
             if(!empty($dest_mob_no)){
                 dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
+                return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
             }
         }
+
+        return redirect()->route($module['main_route'].'.index')->with('info', "Message can't be sent");
+
         // dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
 
-        return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
     }
 
     public function ajax_member(Request $request) {
