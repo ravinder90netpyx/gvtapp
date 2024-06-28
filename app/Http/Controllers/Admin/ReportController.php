@@ -77,7 +77,7 @@ class ReportController extends Controller{
 
         // $month_arr = $helpers->get_financial_month_year($start_month, $end_month, $format);
 
-        $title_shown = 'Manage '.$module['main_heading'].'s';
+        $title_shown = 'Month-Wise Txn '.$module['main_heading'].'s';
         $folder = $this->folder;
 
         return view($module['main_view'].'.index', compact('data', 'model','month_arr' ,'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);
@@ -146,7 +146,7 @@ class ReportController extends Controller{
 
         // $month_arr = $helpers->get_financial_month_year($start_month, $end_month, $format);
 
-        $title_shown = 'Manage Pending '.$module['main_heading'].'s';
+        $title_shown = 'Consolidated Txn '.$module['main_heading'].'s';
         $folder = $this->folder;
 
         return view($module['main_view'].'.index_pending', compact('data', 'model','month_arr' ,'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);
@@ -184,7 +184,7 @@ class ReportController extends Controller{
 
         // $month_arr = $helpers->get_financial_month_year($start_month, $end_month, $format);
 
-        $title_shown = 'Manage Personal '.$module['main_heading'].'s';
+        $title_shown = 'Date-Wise Txn '.$module['main_heading'].'s';
         $folder = $this->folder;
 
         return view($module['main_view'].'.index_personal', compact('data', 'model','month_arr' ,'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);

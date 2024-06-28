@@ -900,7 +900,11 @@ class JournalEntryController extends Controller{
         );
         $date_arr = explode(' ', $model->entry_date);
         $date = Carbon::parse($date_arr[0])->format('d-M-Y');
-        $month = Carbon::parse($model->from_month)->format('M Y')."-".Carbon::parse($model->to_month)->format('M Y');
+        if($model->from_month == $model->to_month){
+            $month = Carbon::parse($model->from_month)->format('M Y');
+        } else{
+            $month = Carbon::parse($model->from_month)->format('M Y')."-".Carbon::parse($model->to_month)->format('M Y');
+        }
         // $a = 'charge';
         $data = [
             'name'=> $model->name,

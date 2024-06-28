@@ -8,7 +8,6 @@
     } else {
         $data_select=\App\Models\Members::where([['delstatus','<','1'],['status','>','0'], ['organization_id','=', $organization_id]])->get();
     }
-    dump($data->count());
 @endphp
 @extends($folder['folder_name'].'.layouts.master')
 
