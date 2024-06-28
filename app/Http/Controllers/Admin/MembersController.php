@@ -47,7 +47,6 @@ class MembersController extends Controller{
 
     public function index(Request $request, DefaultModel $model){
         $carbon = new Carbon();
-        // dump($request->input());
         $module = $this->module;
         $perpage = $request->perpage ?? $module['default_perpage'];
         if(!$request->perpage && !empty($request->cookie('perpage'))) $perpage = $request->cookie('perpage');
@@ -65,6 +64,8 @@ class MembersController extends Controller{
         if($model->getSortOrderColumn()) $model_get = $model_get->orderBy($model->getSortOrderColumn(), 'ASC');
         else $model_get = $model_get->latest();
         
+        $group = $request->get('group') ?? null;
+        if(!empty($group)) $model_get = $model_get->where('group_id', $group);
         $query = $request->get('query') ?? '';
         if($query!='') $model_get = $model_get->where('name', 'LIKE', '%'.$query.'%')->orwhere('unit_number','LIKE','%'.$query.'%' )->orwhere('mobile_number','LIKE','%'.$query.'%' );
 
@@ -73,7 +74,7 @@ class MembersController extends Controller{
         $title_shown = 'Manage '.$module['main_heading'].'s';
         $folder = $this->folder;
 
-        return view($module['main_view'].'.index', compact('data', 'model', 'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);
+        return view($module['main_view'].'.index', compact('data', 'model', 'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query', 'group'))->with('i', ($request->input('page', 1) - 1) * $perpage);
     }
 
     public function create(DefaultModel $model){
@@ -232,11 +233,11 @@ class MembersController extends Controller{
         $module = $this->module;
         $member = \App\Models\Members::find($mem_id);
         $org_id = $member->organization_id;
-        // $dest_mob_no = $member->mobile_number;
+        $dest_mob_no = $member->mobile_number;
         $charge = \App\Models\Charges::find($member->charges_id);
         $now = Carbon::now();
         // $month = $je_model->to_month;
-        $dest_mob_no = '+917479735912';
+        // $dest_mob_no = '+917479735912';
         $day = $now->day;
 
         // if($day>12){

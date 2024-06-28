@@ -12,6 +12,12 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
 @section('css')
 <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-ui@1.13.3/themes/base/core.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-ui@1.13.3/themes/base/base.css"> -->
+<style type="text/css">
+    table td.link-icons a{
+        display: inline-block;
+        padding: 0 1px;
+    }
+</style>
 @endsection
 
 @section('scripts')
@@ -599,7 +605,7 @@ $(function(){
                                         </div>
                                     </td> 
 
-                                    <td>
+                                    <td class="link-icons">
                                         @can($module['permission_group'].'.status')
                                             @if($item[$model->getStatusColumn()]=='1')
                                             <a href="{{ route($module['main_route'].'.action', ['mode'=>'deactivate', 'id'=>$row_id]) }}" title="{{ __('admin.text_deactivate') }}">

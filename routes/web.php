@@ -63,6 +63,7 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
         Route::post('journal_entry/series_data', [JournalEntryController::class, 'series_data'])->name('journal_entry.series_data');
         Route::get('report/', [ReportController::class, 'index'])->name('report.index');
         Route::post('report/order_by_date', [ReportController::class, 'getReportByDate'])->name('report.report_by_date');
+        Route::post('report/ajax_personal', [ReportController::class, 'ajaxPersonal'])->name('report.ajax_personal');
         Route::get('pending_report/', [ReportController::class, 'getPendingReport'])->name('pending_report');
         Route::get('personal_report/', [ReportController::class, 'getPersonalReport'])->name('personal_report');
         Route::get('organization_configs/', [OrganizationConfigController::class, 'index'])->name('organization_configs.index');
