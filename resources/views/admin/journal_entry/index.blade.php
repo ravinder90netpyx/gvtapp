@@ -218,6 +218,10 @@ function download_file(id){
     }
 }
 
+function regenerate_file(id){
+    window.open("/supanel/journal_entry/"+id+"/make?redirect=1");
+}
+
 function send_pdf(id){
     if(confirm("Do you really want to send the receipt? Please confirm")){
         document.location.href = "/supanel/journal_entry/"+id+"/send";
@@ -580,7 +584,7 @@ $(function(){
                     <thead>
                         <tr>
                             <th style="width:40px">{{ __('admin.text_idcheck') }}</th>
-                            <th style="width:160px">{{ __('admin.text_actions') }}</th>
+                            <th style="width:180px">{{ __('admin.text_actions') }}</th>
                             <th>{{ __('Member Name') }}</th>
                             <th>{{ __('Unit Number') }}</th>
                             <th>{{ __('Serial Number') }}</th>
@@ -624,6 +628,10 @@ $(function(){
 
                                         <a href='' onclick="download_file({{ $row_id }})" title="Download Reciept" rel="tab">
                                             <i class="fa fa-lg fa-download"></i>
+                                        </a>
+
+                                        <a href='' onclick="regenerate_file({{ $row_id }})" title="Regenerate File" rel="tab">
+                                            <i class="fa fa-lg fa-redo"></i>
                                         </a>
 
                                         @php
