@@ -574,7 +574,7 @@ $(function(){
                     <thead>
                         <tr>
                             <th style="width:40px">{{ __('admin.text_idcheck') }}</th>
-                            <th style="width:120px">{{ __('admin.text_actions') }}</th>
+                            <th style="width:160px">{{ __('admin.text_actions') }}</th>
                             <th>{{ __('Member Name') }}</th>
                             <th>{{ __('Unit Number') }}</th>
                             <th>{{ __('Serial Number') }}</th>
@@ -617,7 +617,7 @@ $(function(){
                                         </a>
 
                                         <a href='' onclick="download_file({{ $row_id }})" title="Download Reciept" rel="tab">
-                                            <i class="fa fa-download"></i>
+                                            <i class="fa fa-lg fa-download"></i>
                                         </a>
 
                                         @php
@@ -627,19 +627,19 @@ $(function(){
 
                                         @if($wht_model>0)
                                         <a href='' onclick="send_pdf({{ $row_id }})" title="Send Reciept on Whatsapp" rel="tab">
-                                            <i class="fas fa-external-link-alt"></i>
+                                            <i class="fas fa-lg fa-external-link-alt"></i>
                                         </a>
                                         @endif
 
                                         @can($module['permission_group'].'.edit')
                                         <a href="{{ route($module['main_route'].'.edit', $row_id) }}" data-id="{{ $row_id }}" class="edit_but" title="{{ __('admin.text_edit') }}" rel="tab">
-                                            <i class="{{ config('custom.icons.edit') }}"></i>
+                                            <i class="text-primary fa-lg fas fa-edit"></i>
                                         </a>
                                         @endcan
 
                                         @can($module['permission_group'].'.delete')
                                             <a href="{{ route($module['main_route'].'.action', ['mode'=>'delete', 'id'=>$row_id]) }}" onclick="return confirm('Are you sure to delete?');" title="{{ __('admin.text_delete') }}">
-                                                <i class="{{ config('custom.icons.delete') }}"></i>
+                                                <i class="text-danger fas fa-lg fa-trash-alt"></i>
                                             </a>
                                         @endcan
                                     </td>

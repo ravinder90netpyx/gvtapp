@@ -939,7 +939,7 @@ class JournalEntryController extends Controller{
         }
         // dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
 
-        // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+        return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
     }
 
     public function ajax_member(Request $request) {
