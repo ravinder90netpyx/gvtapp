@@ -381,8 +381,6 @@ $(function(){
                                 <td>&#8377;{{ $total_charge }}</td>
                                 <td>&#8377;{{ $total_money }}</td>
                                 <td>&#8377;{{ $pending_money }}</td>
-                    
-                                
                             </tr>
                             @endif
                         @endforeach
@@ -400,7 +398,6 @@ $(function(){
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </form>
