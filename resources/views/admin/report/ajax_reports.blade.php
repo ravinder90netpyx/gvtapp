@@ -3,6 +3,7 @@
         <tr>
             <th>{{ __('Name') }}</th>
             <th >{{ __('Mobile Number') }}</th>
+            <th >{{ __('Unit Number') }}</th>
             @foreach($month_arr as $mn)
                 <th>{{ date("Y M", strtotime($mn)) }}</th>
             @endforeach
@@ -26,6 +27,7 @@
 
                     <td>{{ $item['name'] }}</td>
                     <td>{{ $item['mobile_number'] }}</td>
+                    <td>{{ $item['unit_number'] }}</td>
                         @php 
                         $match = 0;
                         $report=\App\Models\Report::where('member_id',$item['id'])->get();
