@@ -66,7 +66,7 @@ class Kernel extends ConsoleKernel{
                     }
                 }
 
-                // if(!empty($send_notification)){
+                if(!empty($send_notification)){
                     $mobile_msg_arr =!empty($val->mobile_message)? json_decode($val->mobile_message): [];
                     $sublet_msg_arr =!empty($val->sublet_message)? json_decode($val->sublet_message): [];
                     if(!empty($val->sublet_message) && $val->sublet_message!='null'){
@@ -85,12 +85,12 @@ class Kernel extends ConsoleKernel{
                     }
 
                     if(in_array('reminder',$sublet_msg_arr)){
-                        // $destination = $val->sublet_number;
+                        $destination = $val->sublet_number;
                         if(!empty($destination)){
                             dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
                         }
                     }
-                // }
+                }
             }      
             $model12 = new \App\Models\Test_Cron();
             $data1['name'] = "Reminder cron";
