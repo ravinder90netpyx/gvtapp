@@ -22,7 +22,10 @@
 <style>
     .submit_bttn {
     padding: 0 !important;
-    margin: -30px 0 0 0px !important;
+/*    margin: -30px 0 0 0px !important;*/
+}
+.submit_bttn button#submit_button {
+    margin-top: -60px;
 }
 .from_to-label {
     margin: 6px 6px 0 0 !important;
@@ -35,6 +38,7 @@
     margin-top: 12px !important;
 }
 </style>
+
 @endsection
 
 @section('scripts')

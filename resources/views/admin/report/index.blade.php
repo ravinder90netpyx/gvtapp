@@ -22,7 +22,10 @@
 <style>
     .submit_bttn {
     padding: 0 !important;
-    margin: -30px 0 0 0px !important;
+/*    margin: -30px 0 0 0px !important;*/
+}
+.submit_bttn button#submit_button {
+    margin-top: -60px;
 }
 .from_to-label {
     margin: 6px 6px 0 0 !important;
@@ -296,7 +299,7 @@ $(function(){
                             </div>
                         </div>
 
-                        <div class="col-auto mt-1 mb-1">
+                        <div class="col-auto mt-2 mb-1">
                             <div class="form-group to-form-feild">
                                 <div class="input-group input-group-sm form-feilds">
                                     <label for="to_date" class="combined_action_label mt-1 mr-3 d-none d-sm-block from_to-label">{!! __('To') !!}</label>
