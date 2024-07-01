@@ -121,8 +121,27 @@ $("#from_date").change(function(){
 
 function download_csv_pdf(){
     abc = $("#repo_id").DataTable({
-        "dom": "Bt",
-        'paging': true,
+        // "dom": "Bt",
+        // "dom":'Bfrtip',
+        'dom': '<"top"lfB>rt<"bottom"ip><"clear">',
+        'bPaginate': true,
+        'paging' : true,
+        // 'scrollY' : 'auto',
+        'lengthMenu': [1, 5, 10, 30, 50, 100],
+        // 'processing' : true,
+        // 'iDisplayLength' : 10,
+        'pageLength': 10,
+        'language': {
+            'paginate': {
+                'first': '<< ',
+                'last': ' >>',
+                'next': ' >',
+                'previous': '< '
+            },
+            'lengthMenu': 'Display _MENU_ records per page',
+            'info': 'Showing page _PAGE_ of _PAGES_',
+            'infoEmpty': 'No records available'
+        },
         "buttons": [
             {
                 extend: 'csv',
@@ -297,11 +316,11 @@ $(function(){
         
         <div class="card-body">
             <div class="row">
-                <div class="col-auto perpage-wrap">@include('include.perpage', ['perpage'=>$perpage, 'default_perpage'=>$module['default_perpage']])</div>
+                <div class="col-auto perpage-wrap">{{-- @include('include.perpage', ['perpage'=>$perpage, 'default_perpage'=>$module['default_perpage']]) --}}</div>
                 <div class="col pagination-wrap">
                     <div class="float-right">
                         <div class="row">
-                             <div class="col-auto mt-2"><span class="pagination-info">{{ __('admin.text_page_info', ['firstItem'=>$data->firstItem(), 'lastItem'=>$data->lastItem(), 'total'=>$data->total()]) }}</span></div> 
+                             <div class="col-auto mt-2"><span class="pagination-info">{{-- {{ __('admin.text_page_info', ['firstItem'=>$data->firstItem(), 'lastItem'=>$data->lastItem(), 'total'=>$data->total()]) }} --}}</span></div> 
                         </div>
                     </div>
                 </div>
@@ -373,7 +392,7 @@ $(function(){
                 <div class="col pagination-wrap">
                     <div class="float-right">
                         <div class="row">
-                            <div class="col"> {!! $data->appends(compact('perpage', 'query'))->links() !!}</div>
+                            <div class="col">{{-- {!! $data->appends(compact('perpage', 'query'))->links() !!} --}}</div>
                         </div>
                     </div>
                 </div>
