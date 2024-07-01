@@ -279,9 +279,9 @@ class MembersController extends Controller{
                     dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
                 }
             }
-            // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+            return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
         } else{
-            // return redirect()->route($module['main_route'].'.index')->with('success', 'Amount Already paid');
+            return redirect()->route($module['main_route'].'.index')->with('info', 'Amount Already paid');
         }
     }
 
