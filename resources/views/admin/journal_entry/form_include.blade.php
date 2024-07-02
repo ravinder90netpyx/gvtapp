@@ -53,7 +53,7 @@
     $apm = ['addon_check'=>'back_date', 'addon_check_title' => 'Enter Previous Date'];
     $add_perm = array_merge($add_perm, $apm);
     @endphp
-    {!! Form::bsInput('text', $current_field, __('Date'), $form_data->$current_field ?? $now->toDateTimeString(), ['required', $disable], $add_perm); !!}
+    {!! Form::bsInput('text', $current_field, __('Payment Date'), $form_data->$current_field ?? $now->toDateTimeString(), ['required', $disable], $add_perm); !!}
 </div>
 
 <div class="col-md-6">
