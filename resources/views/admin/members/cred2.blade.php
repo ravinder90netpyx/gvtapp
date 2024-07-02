@@ -123,43 +123,52 @@ $(function(){
 
     $('#sublet_number').on('input', function(){
         // abc=$(this).getValidationError();
-        // alert(1);
-        is_valid=iti3.isValidNumber();
-        country_data=iti3.getSelectedCountryData();
-        // console.log(country_data);
-        dial_code= country_data.dialCode;
-       
-        //console.log(is_valid);
-        if(is_valid ){
-            //$("#contact-form-home").addClass('was-validated');
+        val = $(this).val();
+        if(val != ''){
+            is_valid=iti3.isValidNumber();
+            country_data=iti3.getSelectedCountryData();
+            dial_code= country_data.dialCode;
+           
+            if(is_valid ){
+                //$("#contact-form-home").addClass('was-validated');
+                this.setCustomValidity('');
+                $(this).removeClass('is-invalid');
+                $(this).addClass('is-valid');
+            } else{
+                this.setCustomValidity('Phone is Invalid');
+                $(this).addClass('is-invalid');
+                $(this).removeClass('is-valid');
+            }
+        } else{
             this.setCustomValidity('');
             $(this).removeClass('is-invalid');
             $(this).addClass('is-valid');
-        } else{
-            this.setCustomValidity('Phone is Invalid');
-            $(this).addClass('is-invalid');
-            $(this).removeClass('is-valid');
         }
         // alert(this.checkValidity());
     });
 
     $('#alternate_number').on('input', function(){
         // abc=$(this).getValidationError();
-        is_valid=iti2.isValidNumber();
-        country_data=iti2.getSelectedCountryData();
-        dial_code= country_data.dialCode;
-        //console.log(is_valid);
-        if(is_valid ){
-            //$("#contact-form-home").addClass('was-validated');
+        val = $(this).val();
+        if(val != ''){
+            is_valid=iti2.isValidNumber();
+            country_data=iti2.getSelectedCountryData();
+            dial_code= country_data.dialCode;
+            if(is_valid ){
+                //$("#contact-form-home").addClass('was-validated');
+                this.setCustomValidity('');
+                $(this).removeClass('is-invalid');
+                $(this).addClass('is-valid');
+            } else{
+                this.setCustomValidity('Phone is Invalid');
+                $(this).addClass('is-invalid');
+                $(this).removeClass('is-valid');
+            }
+        } else{
             this.setCustomValidity('');
             $(this).removeClass('is-invalid');
             $(this).addClass('is-valid');
-        } else{
-            this.setCustomValidity('Phone is Invalid');
-            $(this).addClass('is-invalid');
-            $(this).removeClass('is-valid');
         }
-        // alert(this.checkValidity());
     });
 
     $("#cred_form").submit(function(e) {
