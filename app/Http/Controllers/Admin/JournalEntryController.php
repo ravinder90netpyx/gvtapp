@@ -823,6 +823,7 @@ class JournalEntryController extends Controller{
             'to_month' => $journal_entry->to_month,
             'mode' => $journal_entry->payment_mode,
             'date' => $journal_entry->entry_date,
+            'reciept_date' => $journal_entry->reciept_date,
             'year' => $journal_entry->entry_year
         ];
         $pdf = PDF::loadView('include.make_pdf', $data);
@@ -872,6 +873,7 @@ class JournalEntryController extends Controller{
             'to_month' => $journal_entry->to_month,
             'mode' => $journal_entry->payment_mode,
             'date' => $journal_entry->entry_date,
+            'reciept_date' => $journal_entry->reciept_date,
             'year' => $journal_entry->entry_year
         ];
         $pdf = PDF::loadView('include.make_pdf',$data);
@@ -995,6 +997,20 @@ class JournalEntryController extends Controller{
         $next_num = $models->next_number;
         $response = response()->json(['serial_no'=>$series_num, 'next_num' =>$next_num]);
         return $response;
+    }
+
+    public function late_fee_calculator($date, $month){
+        $now = Carbon::now();
+        $date = Carbon::parse($date);
+        $day = $date->day;
+        $curr_month = $now->parse('Y-m');
+        $day_dif = $day - 12;
+        $late_fee =0;
+        if($day_dif>0 && $curr_month == $month){
+            $late_fee = $day*50;
+        } elseif($curr_month>$month){
+
+        }
     }
 
 //     public function sendPdfToWhatsapp($destination,$message, $org_id, $template){

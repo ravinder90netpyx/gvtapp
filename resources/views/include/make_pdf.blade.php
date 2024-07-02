@@ -32,7 +32,7 @@
                     </tr>
                     <tr>
                         <td>Receipt Date</td>
-                        <td>{{ $date }}</td>
+                        <td>{{ $reciept_date }}</td>
                     </tr>
                     <tr>
                         <td>Payment Date</td>
