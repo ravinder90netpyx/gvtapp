@@ -23,7 +23,7 @@ class Kernel extends ConsoleKernel{
         $schedule->call(function (){
 
             $now = Carbon::now();
-            $member_model = \App\Models\Members::where([['status','>','0'], ['delstatus','<','1'], ['group_id','=', '2']])->get();
+            $member_model = \App\Models\Members::where([['status','>','0'], ['delstatus','<','1']])->get();
 
             $type = 'document';
             $message = '';
