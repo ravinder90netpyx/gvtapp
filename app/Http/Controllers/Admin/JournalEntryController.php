@@ -939,6 +939,8 @@ class JournalEntryController extends Controller{
         }else{
            $mobile_msg_arr =[];
         }
+        dump($sublet_msg_arr);
+        dd($mobile_msg_arr);
 
         if(in_array('reciept',$mobile_msg_arr)){
              dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
