@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Journal_Entry as DefaultModel;
+use App\Models\Fine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
@@ -899,7 +900,9 @@ class JournalEntryController extends Controller{
         $message = array(
             'type' => $api['type'],
             $api['type'] => array(
-                'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
+                // 'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
+                'link' => 'https://gvtapp.netpyx.org/supanel/journal_entry/921/show',
+
                 'filename' => 'Reciept'
             )
         );
@@ -937,12 +940,12 @@ class JournalEntryController extends Controller{
            $mobile_msg_arr =[];
         }
 
-        if(in_array('reciept',json_decode($member->mobile_message))){
-            dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
+        if(in_array('reciept',$mobile_msg_arr)){
+             dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
             return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
             
         }
-        if(in_array('reciept',json_decode($member->sublet_message))){
+        if(in_array('reciept',$sublet_msg_arr)){
             $dest_mob_no = $member->sublet_number;
             if(!empty($dest_mob_no)){
                 dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
@@ -1003,14 +1006,16 @@ class JournalEntryController extends Controller{
         $now = Carbon::now();
         $date = Carbon::parse($date);
         $day = $date->day;
-        $curr_month = $now->parse('Y-m');
+        $curr_month = $now->format('Y-m');
         $day_dif = $day - 12;
         $late_fee =0;
-        if($day_dif>0 && $curr_month == $month){
+        $mon_dif = Carbon::parse($month)->diffInMonths($now);
+        if($day_dif>0 && $mon_dif==0){
             $late_fee = $day*50;
-        } elseif($curr_month>$month){
-
+        } else{
+            $late_fee =1000;
         }
+        return $late_fee;
     }
 
 //     public function sendPdfToWhatsapp($destination,$message, $org_id, $template){
