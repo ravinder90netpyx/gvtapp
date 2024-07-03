@@ -900,8 +900,8 @@ class JournalEntryController extends Controller{
         $message = array(
             'type' => $api['type'],
             $api['type'] => array(
-                // 'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
-                'link' => 'https://gvtapp.netpyx.org/supanel/journal_entry/921/show',
+                'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
+                // 'link' => 'https://gvtapp.netpyx.org/supanel/journal_entry/921/show',
 
                 'filename' => 'Reciept'
             )
