@@ -117,8 +117,8 @@ class MembersController extends Controller{
         $req['mobile_number']=trim($request->input('mobile_number'));
         $req['alternate_number']=trim($request->input('alternate_number'));
         $req['sublet_number']=trim($request->input('sublet_number'));
-        $req['mobile_message']=json_encode($request->input('mobile_message'));
-        $req['sublet_message']=json_encode($request->input('sublet_message'));
+        $req['mobile_message']=!empty($request->input('mobile_message'))? json_encode($request->input('mobile_message')) : null;
+        $req['sublet_message']=!empty($request->input('sublet_message'))? json_encode($request->input('sublet_message')) : null;
             // echo '<pre>';print_R($req);exit;
 
         // $request->merge([['mobile_number', trim($request->input('mobile_number'))], ['alternate_number', trim($request->input('alternate_number'))], ['sublet_number', trim($request->input('sublet_number'))],['sublet_message', $sublet_message], ['mobile_message',$mobile_message] ]);
@@ -158,8 +158,8 @@ class MembersController extends Controller{
         $req['mobile_number']=trim($request->input('mobile_number'));
         $req['alternate_number']=trim($request->input('alternate_number'));
         $req['sublet_number']=trim($request->input('sublet_number'));
-        $req['mobile_message']=json_encode($request->input('mobile_message'));
-        $req['sublet_message']=json_encode($request->input('sublet_message'));
+        $req['mobile_message']=!empty($request->input('mobile_message'))? json_encode($request->input('mobile_message')) : null;
+        $req['sublet_message']=!empty($request->input('sublet_message'))? json_encode($request->input('sublet_message')) : null;
         $modelfind->update($req);
     
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' updated successfully');
