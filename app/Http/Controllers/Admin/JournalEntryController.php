@@ -411,14 +411,14 @@ class JournalEntryController extends Controller{
             $templ_json = $helpers->make_temp_json($temp->id, $data);
             $message = json_encode($message,true);
             $destination = $member->mobile_number;
-            if(!empty($val->sublet_message) && $val->sublet_message!='null'){
-               $sublet_msg_arr =json_decode($val->sublet_message);
+            if(!empty($member->sublet_message) && $member->sublet_message!='null'){
+               $sublet_msg_arr =json_decode($member->sublet_message);
             }else{
                $sublet_msg_arr =[];
             }
 
-            if(!empty($val->mobile_message) && $val->mobile_message!='null'){
-               $mobile_msg_arr =json_decode($val->mobile_message);
+            if(!empty($member->mobile_message) && $member->mobile_message!='null'){
+               $mobile_msg_arr =json_decode($member->mobile_message);
             }else{
                $mobile_msg_arr =[];
             }
@@ -707,14 +707,14 @@ class JournalEntryController extends Controller{
             $member = \App\Models\Members::find($member_id);
             $destination = $member->mobile_number;
             $message = json_encode($message,true);
-            if(!empty($val->sublet_message) && $val->sublet_message!='null'){
-               $sublet_msg_arr =json_decode($val->sublet_message);
+            if(!empty($member->sublet_message) && $member->sublet_message!='null'){
+               $sublet_msg_arr =json_decode($member->sublet_message);
             }else{
                $sublet_msg_arr =[];
             }
 
-            if(!empty($val->mobile_message) && $val->mobile_message!='null'){
-               $mobile_msg_arr =json_decode($val->mobile_message);
+            if(!empty($member->mobile_message) && $member->mobile_message!='null'){
+               $mobile_msg_arr =json_decode($member->mobile_message);
             }else{
                $mobile_msg_arr =[];
             }
@@ -939,8 +939,6 @@ class JournalEntryController extends Controller{
         }else{
            $mobile_msg_arr =[];
         }
-        dump($sublet_msg_arr);
-        dd($mobile_msg_arr);
 
         if(in_array('reciept',$mobile_msg_arr)){
              dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
