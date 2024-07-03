@@ -928,14 +928,14 @@ class JournalEntryController extends Controller{
         $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
         $templ_json = $helpers->make_temp_json($temp->id, $data);
         $message = json_encode($message, true);
-        if(!empty($val->sublet_message) && $val->sublet_message!='null'){
-           $sublet_msg_arr =json_decode($val->sublet_message);
+        if(!empty($member->sublet_message) && $member->sublet_message!='null'){
+           $sublet_msg_arr =json_decode($member->sublet_message);
         }else{
            $sublet_msg_arr =[];
         }
 
-        if(!empty($val->mobile_message) && $val->mobile_message!='null'){
-           $mobile_msg_arr =json_decode($val->mobile_message);
+        if(!empty($member->mobile_message) && $member->mobile_message!='null'){
+           $mobile_msg_arr =json_decode($member->mobile_message);
         }else{
            $mobile_msg_arr =[];
         }
