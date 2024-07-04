@@ -335,10 +335,10 @@ $(function(){
                             <th>{{ __('Month') }}</th>
                             <th>{{__('Mode') }}</th>
                             <th>{{ __('Amount') }}</th>
+                            <th>{{ __('Advance') }}</th>
                             <th>{{ __('Reciept Number') }}</th>
                             <th>{{ __('Reciept Date') }}</th>
                             <th>{{ __('Payment Date') }}</th>
-                            <th>{{ __('Advance') }}</th>
                         </tr>
                     </thead>
 

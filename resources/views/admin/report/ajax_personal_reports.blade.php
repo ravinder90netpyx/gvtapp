@@ -7,10 +7,10 @@
             <th>{{ __('Month') }}</th>
             <th>{{__('Mode') }}</th>
             <th>{{ __('Amount') }}</th>
+            <th>{{ __('Advance') }}</th>
             <th>{{ __('Reciept Number') }}</th>
             <th>{{ __('Reciept Date') }}</th>
             <th>{{ __('Payment Date') }}</th>
-            <th>{{ __('Advance') }}</th>
         </tr>
     </thead>
 
@@ -65,14 +65,14 @@
 
                         <td>{{ $mode }}</td>
                         <td>&#8377;{{ $charge }}</td>
-                        <td>{{ $reciept_no }}</td>
-                        <td>{{ $payment_date }}</td>
-                        <td>{{ $reciept_date }}</td>
                         @if($advance == 'N/A' || $advance == '-')
                         <td>{{ $advance }}</td>
                         @else
                         <td>&#8377;{{ $advance }}</td>
                         @endif
+                        <td>{{ $reciept_no }}</td>
+                        <td>{{ $payment_date }}</td>
+                        <td>{{ $reciept_date }}</td>
                     </tr>
                 @endforeach
             @endforeach
