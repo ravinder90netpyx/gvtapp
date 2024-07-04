@@ -50,7 +50,8 @@ class Journal_Entry extends Base_Model{
         'check_number',
         'name',
         'reciept_date',
-        'charge_type_id'
+        'charge_type_id',
+        'count' // number of times reciept send.
     ];
 
     public static function getPaymentMode(){
