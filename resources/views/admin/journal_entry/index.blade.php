@@ -587,6 +587,7 @@ $(function(){
                             <th style="width:180px">{{ __('admin.text_actions') }}</th>
                             <th>{{ __('Member Name') }}</th>
                             <th>{{ __('Unit Number') }}</th>
+                            <th>{{ __('Message Send') }}</th>
                             <th>{{ __('Serial Number') }}</th>
                             <th>{{ __('Payment Date') }}</th>
                             <th style="width:150px">{{ __('admin.text_date_created') }}</th>
@@ -662,6 +663,7 @@ $(function(){
                                     @endphp
                                     <td>{{ $member->name }}</td>
                                     <td>{{ $member->unit_number }}</td>
+                                    <td>{{ $item['count'] ?? '0' }}</td>
                                     <td>{{ $item['series_number'] }}</td>
                                     <td>{{ $item['entry_date'] }}</td>
                                     <td>{{ $row_time }}</td>
