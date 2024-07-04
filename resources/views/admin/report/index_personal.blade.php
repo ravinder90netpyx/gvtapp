@@ -338,6 +338,7 @@ $(function(){
                             <th>{{ __('Reciept Number') }}</th>
                             <th>{{ __('Reciept Date') }}</th>
                             <th>{{ __('Payment Date') }}</th>
+                            <th>{{ __('Advance') }}</th>
                         </tr>
                     </thead>
 

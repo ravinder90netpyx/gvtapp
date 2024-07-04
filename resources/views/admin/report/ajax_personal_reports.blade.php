@@ -10,6 +10,7 @@
             <th>{{ __('Reciept Number') }}</th>
             <th>{{ __('Reciept Date') }}</th>
             <th>{{ __('Payment Date') }}</th>
+            <th>{{ __('Advance') }}</th>
         </tr>
     </thead>
 
@@ -43,11 +44,21 @@
                             $journal_entry_id = $report->journal_entry_id;
                             $charge = $report->money_paid;
                             $jrl_model = \App\Models\Journal_Entry::find($journal_entry_id);
+                            $advance = 'N/A';
                             if(!empty($jrl_model)){
                                 $mode = $jrl_model->payment_mode ?? 'N/A';
                                 $payment_date = $jrl_model->entry_date ?? 'N/A';
                                 $reciept_date = $jrl_model->reciept_date ?? '-';
                                 $reciept_no = $jrl_model->series_number ?? '-';
+                                $advance = ($jrl_model->charge != $charge) ? $jrl_model->charge : '-';
+                                if(!empty($payment_date) && $payment_date != 'N/A'){
+                                    $payment_arr = explode(' ', $payment_date);
+                                    $payment_date = $payment_arr[0];
+                                }
+                                if(!empty($reciept_date) && $reciept_date != '-'){
+                                    $reciept_date = explode(' ', $reciept_date);
+                                    $reciept_date = $reciept_date[0];
+                                }
                             }
                         }
                         @endphp
@@ -57,7 +68,11 @@
                         <td>{{ $reciept_no }}</td>
                         <td>{{ $payment_date }}</td>
                         <td>{{ $reciept_date }}</td>
-
+                        @if($advance == 'N/A' || $advance == '-')
+                        <td>{{ $advance }}</td>
+                        @else
+                        <td>&#8377;{{ $advance }}</td>
+                        @endif
                     </tr>
                 @endforeach
             @endforeach
