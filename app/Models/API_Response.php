@@ -4,7 +4,7 @@ namespace App\Models;
 use App\Models\Base_Model;
 #use Illuminate\Support\Facades\DB;
 
-class Samplem extends Base_Model{
+class API_Response extends Base_Model{
     protected $table = 'api_response';
     #protected $columnPrefix = '';
     protected $primaryKey = 'id';

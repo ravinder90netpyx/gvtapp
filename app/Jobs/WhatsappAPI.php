@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\API_Response;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,18 +20,19 @@ class WhatsappAPI implements ShouldQueue
     protected $message;
     protected $org_id;
     protected $template;
-
+    protected $je_id;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($destination,$message, $org_id, $template)
+    public function __construct($destination,$message, $org_id, $template, $je_id =null)
     {
         $this->destination = $destination;
         $this->message = $message;
         $this->org_id = $org_id;
         $this->template = $template;
+        $this->je_id = $je_id;
     }
 
     /**
@@ -52,6 +54,7 @@ class WhatsappAPI implements ShouldQueue
         $message = $this->message;
         $org_id = $this->org_id;
         $template = $this->template;
+        $je_id = $this->je_id ?? null;
 
         $model = new \App\Models\Organization_Settings();
         $group = 'whatsapp_settings';
@@ -90,5 +93,20 @@ class WhatsappAPI implements ShouldQueue
         $response = curl_exec($curl);
         curl_close($curl);
         echo $response;
+        if(!empty($je_id)){
+            $res_arr = json_decode($response);
+            // dd($res_arr->status);
+            if($res_arr->status == 'submitted'){
+                $api_arr = [];
+                $api_arr['journal_entry_id'] = $je_id;
+                $api_arr['response'] = $response;
+                $je_model = \App\Models\Journal_Entry::find($je_id);
+                $count = $je_model->count ?? 0;
+                $count++;
+                $upd = $je_model->update(['count' => $count]);
+                $model = new API_Response();
+                $model->create($api_arr);
+            }
+        }
     }
 }
