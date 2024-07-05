@@ -40,11 +40,11 @@
                         $report=\App\Models\Report::where([['member_id','=',$item['id']],['month','=',$mt]])->first();
                         $reciept_date = $payment_date = $mode = $reciept_no = 'N/A';
                         $charge = 0;
+                        $advance = 'N/A';
                         if(!empty($report)){
                             $journal_entry_id = $report->journal_entry_id;
                             $charge = $report->money_paid;
                             $jrl_model = \App\Models\Journal_Entry::find($journal_entry_id);
-                            $advance = 'N/A';
                             if(!empty($jrl_model)){
                                 $mode = $jrl_model->payment_mode ?? 'N/A';
                                 $payment_date = $jrl_model->entry_date ?? 'N/A';
