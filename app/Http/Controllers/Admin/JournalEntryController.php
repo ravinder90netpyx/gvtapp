@@ -433,12 +433,12 @@ class JournalEntryController extends Controller{
                $mobile_msg_arr =[];
             }
             if(in_array('reciept',$mobile_msg_arr)){
-                dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+                dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $fetch_data->id) )->onConnection('sync');
             }
             if(in_array('reciept',$sublet_msg_arr)){
                 $destination = $member->sublet_number;
                 if(!empty($destination)){
-                    dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+                    dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $fetch_data->id) )->onConnection('sync');
                 }
             }
             // dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
@@ -729,12 +729,12 @@ class JournalEntryController extends Controller{
                $mobile_msg_arr =[];
             }
             if(in_array('reciept',$mobile_msg_arr)){
-                dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+                dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $id) )->onConnection('sync');
             }
             if(in_array('reciept',$sublet_msg_arr)){
                 $destination = $member->sublet_number;
                 if(!empty($destination)){
-                    dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+                    dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $id) )->onConnection('sync');
                 }
             }
             // dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');

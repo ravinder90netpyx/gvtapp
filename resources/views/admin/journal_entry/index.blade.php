@@ -2,7 +2,7 @@
 $auth_user = \Illuminate\Support\Facades\Auth::user();
 $roles = $auth_user->roles()->pluck('id')->toArray();
 
-$unit_search_query = $unit_no_search ?? '';
+$unit_no = $unit_no ?? '';
 $current_url = Request::url();
 
 @endphp
@@ -269,6 +269,7 @@ $(function(){
         @if($mode =='show' || in_array(1,$roles))
         $('#series_id').prop('disabled', true);
         $('#member_mob').prop('disabled', true);
+        $('#fine_amt').prop('disabled', true);
         @endif
         @if(!in_array(1, $roles))
             autocomplete_trigger('{{ $auth_user->organization_id}}');
@@ -589,7 +590,7 @@ $(function(){
                                 @php
                                     $group_mod = \App\Models\Group::where([['delstatus', '<', '1'], ['status','>','0']])->get();
                                 @endphp
-                                {!! Form::input('search', 'unit_search', $unit_search_query, ['class' => 'form-control', 'id'=>'unit_search', 'placeholder'=>__('Unit Number Search')]); !!}
+                                {!! Form::input('search', 'unit_search', $unit_no, ['class' => 'form-control', 'id'=>'unit_search', 'placeholder'=>__('Unit Number Search')]); !!}
 
                                 <span class="input-group-append">
                                     <button class="btn btn-dark" name="unit_btn_search" id="unit_btn_search"><i class="fas fa-search"></i></button>
@@ -713,7 +714,7 @@ $(function(){
                 <div class="col pagination-wrap">
                     <div class="float-right">
                         <div class="row">
-                            <div class="col"> {!! $data->appends(compact('perpage', 'query'))->links() !!}</div>
+                            <div class="col"> {!! $data->appends(compact('perpage', 'query', 'unit_no'))->links() !!}</div>
                         </div>
                     </div>
                 </div>

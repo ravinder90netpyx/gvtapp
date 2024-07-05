@@ -1,6 +1,6 @@
 @php
     $current_url = Request::url();
-    $grp = $group ?? '';
+    $group = $group ?? '';
 @endphp
 @extends($folder['folder_name'].'.layouts.master')
 
@@ -94,7 +94,7 @@
                                 <select name="group" id="group" class="custom-select">
                                     <option value="">{{ __('admin.text_select') }}</option>
                                     @foreach($group_mod as $gr)
-                                        <option value="{!! $gr->id !!}" @if($gr->id == $grp) selected @endif>{!! $gr->name !!}</option>
+                                        <option value="{!! $gr->id !!}" @if($gr->id == $group) selected @endif>{!! $gr->name !!}</option>
                                     @endforeach
                                 </select>
 
@@ -224,7 +224,7 @@
                 <div class="col pagination-wrap">
                     <div class="float-right">
                         <div class="row">
-                            <div class="col"> {!! $data->appends(compact('perpage', 'query'))->links() !!}</div>
+                            <div class="col"> {!! $data->appends(compact('perpage', 'query', 'group'))->links() !!}</div>
                         </div>
                     </div>
                 </div>
