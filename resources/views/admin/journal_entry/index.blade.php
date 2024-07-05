@@ -1,6 +1,10 @@
 @php
 $auth_user = \Illuminate\Support\Facades\Auth::user();
 $roles = $auth_user->roles()->pluck('id')->toArray();
+
+$unit_search_query = $unit_no_search ?? '';
+$current_url = Request::url();
+
 @endphp
 @extends($folder['folder_name'].'.layouts.master')
 
@@ -287,6 +291,15 @@ $(function(){
         $('#exampleModalLabel').text("{{ $title_shown }}");
     });
 
+    $(document).on('click','#fine_wave_off',function(){
+        val = $(this).prop('checked');
+        if(val){
+            $('#fine_amt').prop('disabled', false);
+        } else{
+            $('#fine_amt').prop('disabled', true);
+        }
+    });
+
     datetimepicker_month('from_month');
     datetimepicker_month('to_month');
     custom_datetimepicker_month('custom_month');
@@ -417,6 +430,12 @@ $(function(){
     //     // });
         
     // });
+
+    $('#unit_btn_search').on('click', function(e){
+        e.preventDefault();
+        grp = $('#unit_search').val();
+        document.location.href = "{!! $current_url.'?unit_no=' !!}"+grp;
+    });
 
     $(document).on('change','#member_mob', function(){
         $('#charge').val('');
@@ -562,6 +581,22 @@ $(function(){
                         </div>
                     </div>
                     @endcan
+
+                    <div class="col-auto mt-1 mb-1">
+                        <div class="form-group">
+                            <div class="input-group input-group-sm">
+
+                                @php
+                                    $group_mod = \App\Models\Group::where([['delstatus', '<', '1'], ['status','>','0']])->get();
+                                @endphp
+                                {!! Form::input('search', 'unit_search', $unit_search_query, ['class' => 'form-control', 'id'=>'unit_search', 'placeholder'=>__('Unit Number Search')]); !!}
+
+                                <span class="input-group-append">
+                                    <button class="btn btn-dark" name="unit_btn_search" id="unit_btn_search"><i class="fas fa-search"></i></button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
 
                     @include('include.search', [ 'query'=>( $query ?? '' ) ])
                 </div>

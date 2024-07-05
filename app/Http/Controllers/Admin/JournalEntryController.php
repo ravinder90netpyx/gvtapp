@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Journal_Entry as DefaultModel;
 use App\Models\Fine;
+use App\Models\API_Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
@@ -64,6 +65,7 @@ class JournalEntryController extends Controller{
     public function index(Request $request, DefaultModel $model, helpers $helpers){
         $carbon = new Carbon();
         $module = $this->module;
+        // dump($request->input());
         // $this->test_api();
         // $api = $this->whatsapp_api;
         // $org_id = '1';
@@ -122,11 +124,19 @@ class JournalEntryController extends Controller{
         else $model_get = $model_get->latest();
         
         $query = $request->get('query') ?? '';
+        $unit_no_search = $request->get('unit_no') ?? '';
         if($query!=''){
             $model_get = $model_get->where('series_number', 'LIKE', '%'.$query.'%')->orwhere('name', 'LIKE', '%'.$query.'%');
             $model_get = $model_get->orWhere(function($q) use ($query) {
                 $q->whereHas('memberSearch', function($q2) use ($query) {
                     $q2->where('unit_number', 'LIKE', '%'.$query.'%');
+                });
+            });
+        }
+        if($unit_no_search !=''){
+            $model_get = $model_get->where(function($q) use ($unit_no_search) {
+                $q->whereHas('memberSearch', function($q2) use ($unit_no_search) {
+                    $q2->where('unit_number', 'LIKE', '%'.$unit_no_search.'%');
                 });
             });
         }
@@ -136,7 +146,7 @@ class JournalEntryController extends Controller{
         $title_shown = 'Manage '.$module['main_heading'];
         $folder = $this->folder;
 
-        return view($module['main_view'].'.index', compact('data', 'action', 'method', 'act', 'model', 'mode', 'carbon', 'module', 'perpage', 'folder', 'title_shown', 'title_showns', 'query', 'financial_years'))->with('i', ($request->input('page', 1) - 1) * $perpage);
+        return view($module['main_view'].'.index', compact('data', 'action', 'method', 'act', 'model', 'mode', 'carbon', 'module', 'perpage', 'folder', 'title_shown', 'title_showns', 'query', 'financial_years', 'unit_no_search'))->with('i', ($request->input('page', 1) - 1) * $perpage);
     }
 
     public function create(DefaultModel $model, helpers $helpers){
@@ -941,14 +951,14 @@ class JournalEntryController extends Controller{
         }
 
         if(in_array('reciept',$mobile_msg_arr)){
-             dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
+             dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json,$je_id) )->onConnection('sync');
             return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
             
         }
         if(in_array('reciept',$sublet_msg_arr)){
             $dest_mob_no = $member->sublet_number;
             if(!empty($dest_mob_no)){
-                dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
+                dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json,$je_id) )->onConnection('sync');
                 return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
             }
         }
@@ -964,8 +974,7 @@ class JournalEntryController extends Controller{
         $org_id = $request->input('org_id');
         $arr=[];
         $models =new \App\Models\Members();
-        $name = $models->select('id', 'name', 'unit_number', 'mobile_number')->where([['delstatus', '<', '1'],['status', '>', '0'], ['organization_id', '=', $org_id]])->where(DB::raw("CONCAT_WS(' ', name, unit_number, mobile_number, alternate_name_1, alternate_name_2, alternate_number, sublet_name)"), 'like', '%'.$input.'%')
-            ->get()->toArray();
+        $name = $models->select('id', 'name', 'unit_number', 'mobile_number')->where([['delstatus', '<', '1'],['status', '>', '0'], ['organization_id', '=', $org_id]])->where(DB::raw("CONCAT_WS(' ', name, unit_number, mobile_number, alternate_name_1, alternate_name_2, alternate_number, sublet_name)"), 'like', '%'.$input.'%')->get()->toArray();
         $count=0;
         foreach($name as $nm){
             $arr[$count]['id']= $nm['id'];
@@ -1010,12 +1019,31 @@ class JournalEntryController extends Controller{
         $day_dif = $day - 12;
         $late_fee =0;
         $mon_dif = Carbon::parse($month)->diffInMonths($now);
-        if($day_dif>0 && $mon_dif==0){
-            $late_fee = $day*50;
+        if($mon_dif == 0){
+            if($day_dif>0 ){
+                $late_fee = $day*50;
+            }
         } else{
             $late_fee =1000;
         }
         return $late_fee;
+    }
+
+    public function fine_store($fr_month, $to_month, $pay_date, $je_id){
+        $now = Carbon::now();
+        $month_arr = helpers::get_financial_month_year($fr_month, $to_month, 'Y-m');
+        $fine_arr = [];
+        $je_model = DefaultModel::find($je_id);
+        foreach($month_arr as $mn){
+            $late_fee = $this->late_fee_calculator($pay_date, $mn);
+            $fine_arr['month'] = $mn;
+            $fine_arr['journal_entry_id'] = $je_id;
+            $fine_arr['member_id'] = $je_model->member_id;
+            $fine_arr['fine_pending'] = $late_fee;
+            $fine_arr['member_id'] = $je_model->member_id;
+            $fine_arr['member_id'] = $je_model->member_id;
+            $fine_arr['member_id'] = $je_model->member_id;
+        }
     }
 
 //     public function sendPdfToWhatsapp($destination,$message, $org_id, $template){
