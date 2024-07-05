@@ -124,7 +124,7 @@ class JournalEntryController extends Controller{
         else $model_get = $model_get->latest();
         
         $query = $request->get('query') ?? '';
-        $unit_no_search = $request->get('unit_no') ?? '';
+        $unit_no = $request->get('unit_no') ?? '';
         if($query!=''){
             $model_get = $model_get->where('series_number', 'LIKE', '%'.$query.'%')->orwhere('name', 'LIKE', '%'.$query.'%');
             $model_get = $model_get->orWhere(function($q) use ($query) {
@@ -133,10 +133,10 @@ class JournalEntryController extends Controller{
                 });
             });
         }
-        if($unit_no_search !=''){
-            $model_get = $model_get->where(function($q) use ($unit_no_search) {
-                $q->whereHas('memberSearch', function($q2) use ($unit_no_search) {
-                    $q2->where('unit_number', 'LIKE', '%'.$unit_no_search.'%');
+        if($unit_no !=''){
+            $model_get = $model_get->where(function($q) use ($unit_no) {
+                $q->whereHas('memberSearch', function($q2) use ($unit_no) {
+                    $q2->where('unit_number', 'LIKE', '%'.$unit_no.'%');
                 });
             });
         }
@@ -146,7 +146,7 @@ class JournalEntryController extends Controller{
         $title_shown = 'Manage '.$module['main_heading'];
         $folder = $this->folder;
 
-        return view($module['main_view'].'.index', compact('data', 'action', 'method', 'act', 'model', 'mode', 'carbon', 'module', 'perpage', 'folder', 'title_shown', 'title_showns', 'query', 'financial_years', 'unit_no_search'))->with('i', ($request->input('page', 1) - 1) * $perpage);
+        return view($module['main_view'].'.index', compact('data', 'action', 'method', 'act', 'model', 'mode', 'carbon', 'module', 'perpage', 'folder', 'title_shown', 'title_showns', 'query', 'financial_years', 'unit_no'))->with('i', ($request->input('page', 1) - 1) * $perpage);
     }
 
     public function create(DefaultModel $model, helpers $helpers){
