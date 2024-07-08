@@ -3,6 +3,7 @@ $auth_user = \Illuminate\Support\Facades\Auth::user();
 $roles = $auth_user->roles()->pluck('id')->toArray();
 
 $unit_no = $unit_no ?? '';
+$query = $query ?? '';
 $current_url = Request::url();
 
 @endphp
@@ -229,6 +230,18 @@ function regenerate_file(id){
 function send_pdf(id){
     if(confirm("Do you really want to send the receipt? Please confirm")){
         document.location.href = "/supanel/journal_entry/"+id+"/send";
+        // $.ajax({
+        //     url: '{{ route("supanel.journal_entry.send_msg") }}',
+        //     method: "POST",
+        //     data: {'_token': '{!! csrf_token() !!}', 'je_id' : id},
+        //     success: function(response){
+        //         $('#next_number').val(response.next_num);
+        //         $('#next_number').closest('.form-group-multi-input').find('label').append(' (S. NO.- '+response.serial_no+')');
+        //     },
+        //     error: function(error) {
+        //         console.error('Error fetching folder content:', error);
+        //     }
+        // });
     }
 }
 
@@ -587,9 +600,6 @@ $(function(){
                         <div class="form-group">
                             <div class="input-group input-group-sm">
 
-                                @php
-                                    $group_mod = \App\Models\Group::where([['delstatus', '<', '1'], ['status','>','0']])->get();
-                                @endphp
                                 {!! Form::input('search', 'unit_search', $unit_no, ['class' => 'form-control', 'id'=>'unit_search', 'placeholder'=>__('Unit Number Search')]); !!}
 
                                 <span class="input-group-append">
@@ -606,7 +616,7 @@ $(function(){
         
         <div class="card-body">
             <div class="row">
-                <div class="col-auto perpage-wrap">@include('include.perpage', ['perpage'=>$perpage, 'default_perpage'=>$module['default_perpage']])</div>
+                <div class="col-auto perpage-wrap">@include('include.perpage', ['perpage'=>$perpage, 'default_perpage'=>$module['default_perpage'], 'query' => $query, 'unit_no' => $unit_no])</div>
                 <div class="col pagination-wrap">
                     <div class="float-right">
                         <div class="row">
@@ -677,7 +687,7 @@ $(function(){
                                         @endphp
 
                                         @if($wht_model>0)
-                                        <a href='' onclick="send_pdf({{ $row_id }})" title="Send Reciept on Whatsapp" rel="tab">
+                                        <a href='#' onclick="send_pdf({{ $row_id }})" title="Send Reciept on Whatsapp" rel="tab">
                                             <i class="fas fa-lg fa-external-link-alt"></i>
                                         </a>
                                         @endif
@@ -697,7 +707,7 @@ $(function(){
                                     @php $series= \App\Models\Series::find($item['series_id']);
                                         $member = \App\Models\Members::find($item['member_id']);
                                     @endphp
-                                    <td>{{ $member->name }}</td>
+                                    <td>{{ $item['name'] }}</td>
                                     <td>{{ $member->unit_number }}</td>
                                     <td>{{ $item['count'] ?? '0' }}</td>
                                     <td>{{ $item['series_number'] }}</td>
