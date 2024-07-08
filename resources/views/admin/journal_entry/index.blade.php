@@ -229,19 +229,25 @@ function regenerate_file(id){
 
 function send_pdf(id){
     if(confirm("Do you really want to send the receipt? Please confirm")){
-        document.location.href = "/supanel/journal_entry/"+id+"/send";
-        // $.ajax({
-        //     url: '{{ route("supanel.journal_entry.send_msg") }}',
-        //     method: "POST",
-        //     data: {'_token': '{!! csrf_token() !!}', 'je_id' : id},
-        //     success: function(response){
-        //         $('#next_number').val(response.next_num);
-        //         $('#next_number').closest('.form-group-multi-input').find('label').append(' (S. NO.- '+response.serial_no+')');
-        //     },
-        //     error: function(error) {
-        //         console.error('Error fetching folder content:', error);
-        //     }
-        // });
+        // document.location.href = "/supanel/journal_entry/"+id+"/send";
+        $.ajax({
+            url: '{{ route("supanel.journal_entry.send_msg") }}',
+            method: "POST",
+            data: {'_token': '{!! csrf_token() !!}', 'je_id' : id},
+            success: function(response){
+                if(response != 'fail'){
+                    $('.header-body').append('<div class="alert alert-success alert-block"><button type="button" class="close" data-dismiss="alert">×</button><strong>Message Send Successfully</strong></div>');
+                } else{
+                    $('.header-body').append('<div class="alert alert-info alert-block"><button type="button" class="close" data-dismiss="alert">×</button> <strong>Message can\'t be sent</strong></div>');
+                }
+                setTimeout(function() {
+                    $(".alert").alert('close');
+                }, 3000);
+            },
+            error: function(error) {
+                console.error('Error fetching folder content:', error);
+            }
+        });
     }
 }
 
@@ -319,7 +325,6 @@ $(function(){
     custom_datetimepicker_month('custom_month');
     reciept_datetimepicker();
 
-    
     $(document).on("click","#custom_toggle",function() {
         is_check = $(this).prop('checked');
         $('#from_month').val('');

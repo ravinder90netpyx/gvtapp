@@ -898,8 +898,9 @@ class JournalEntryController extends Controller{
         return view('include.show_pdf',compact('name'));
     }
 
-    public function send_msg($je_id, helpers $helpers){
+    public function send_msg(Request $request, helpers $helpers){
         $module = $this->module;
+        $je_id = $request->input('je_id');
         $api = $this->whatsapp_api;
         $model = \App\Models\Journal_Entry::find($je_id);
         $org_id = $model->organization_id;
@@ -951,19 +952,23 @@ class JournalEntryController extends Controller{
         }
 
         if(in_array('reciept',$mobile_msg_arr)){
-             dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json,$je_id) )->onConnection('sync');
-            return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+            dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json,$je_id) )->onConnection('sync');
+
+            // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+            return '';
             
         }
         if(in_array('reciept',$sublet_msg_arr)){
             $dest_mob_no = $member->sublet_number;
             if(!empty($dest_mob_no)){
                 dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json,$je_id) )->onConnection('sync');
-                return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+                // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+                return '';
             }
         }
 
-        return redirect()->route($module['main_route'].'.index')->with('info', "Message can't be sent");
+        // return redirect()->route($module['main_route'].'.index')->with('info', "Message can't be sent");
+        return 'fail';
 
         // dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
 
