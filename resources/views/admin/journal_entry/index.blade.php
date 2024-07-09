@@ -621,7 +621,14 @@ $(function(){
         
         <div class="card-body">
             <div class="row">
-                <div class="col-auto perpage-wrap">@include('include.perpage', ['perpage'=>$perpage, 'default_perpage'=>$module['default_perpage'], 'query' => $query, 'unit_no' => $unit_no])</div>
+                @php
+                    $data_arr = [
+                        'unit_no='.$unit_no ?? '',
+                        'query='.$query ?? ''
+                    ];
+                @endphp
+                <div class="col-auto perpage-wrap">@include('include.perpage', ['perpage'=>$perpage, 'default_perpage'=>$module['default_perpage'], 'data_arr' => $data_arr])
+                    {{--{!! $data->appends(compact('perpage', 'query', 'unit_no'))->links() !!} --}}</div>
                 <div class="col pagination-wrap">
                     <div class="float-right">
                         <div class="row">

@@ -1,3 +1,6 @@
+@php
+$data_arr = $data_arr ?? [];
+@endphp
 <label>
 	@php
 		$perpage_select = '<select id="perpage" class="custom-select">
@@ -15,7 +18,8 @@
  
 <script>
 document.getElementById('perpage').onchange = function(){
+	{{-- @php dd($data_arr); @endphp --}}
 	Cookies.set('perpage', this.value);
-	window.location = "{!! current(explode('?', $data->url(1))) !!}?perpage=" + this.value; 
+	window.location = "{!! current(explode('?', $data->url(1))) !!}?perpage=" + this.value+"&{!!implode('&', $data_arr)!!}"; 
 }
 </script>

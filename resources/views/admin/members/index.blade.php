@@ -120,7 +120,13 @@
         
         <div class="card-body">
             <div class="row">
-                <div class="col-auto perpage-wrap">@include('include.perpage', ['perpage'=>$perpage, 'default_perpage'=>$module['default_perpage']])</div>
+                @php
+                    $data_arr = [
+                        'group='.$group ?? '',
+                        'query='.$query ?? ''
+                    ];
+                @endphp
+                <div class="col-auto perpage-wrap">@include('include.perpage', ['perpage'=>$perpage, 'default_perpage'=>$module['default_perpage'], 'data_arr' =>$data_arr])</div>
                 <div class="col pagination-wrap">
                     <div class="float-right">
                         <div class="row">
