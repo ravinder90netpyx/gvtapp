@@ -30,7 +30,7 @@ return new class extends Migration
 
             $table->foreign('member_id')->references('id')->on('members')->onUpdate('cascade')->onDelete('cascade');
 
-            $table->foreign('entrywise_fine_id')->references('entrywise_fine')->on('id')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign('entrywise_fine_id')->references('id')->on('entrywise_fine')->onUpdate('cascade')->onDelete('cascade');
 
         });
     }
