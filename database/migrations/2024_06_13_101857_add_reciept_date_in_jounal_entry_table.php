@@ -16,6 +16,8 @@ return new class extends Migration
         Schema::table('journal_entry', function (Blueprint $table) {
             $table->timestamp('reciept_date')->nullable();
             $table->unsignedBigInteger('charge_type_id')->nullable();
+
+            $table->foreign('charge_type_id')->references('id')->on('charge_type')->onUpdate('cascade')->onDelete('set null');
         });
     }
 
