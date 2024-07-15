@@ -316,7 +316,7 @@ class JournalEntryController extends Controller{
 
             $entry_charge_arr =[];
             $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
-            $request_data['partial'] =0;
+            $request_data['partial'] ='0';
             $date = $request_data['entry_date'];
             $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
             // if(strtotime($date) > strtotime($pre_date)){
@@ -655,7 +655,7 @@ class JournalEntryController extends Controller{
             $entrywise_model = Entrywise_Fine::where([['member_id','=',$request_data['member_id']],['status','>','0'],['delstatus','<','0']])->orderBy('id','DESC')->first();
             if($entrywise_model->journal_entry_id == $id){
                 $entry_charge_arr =[];
-                $request_data['partial'] = 0;
+                // $request_data['partial'] = 0;
                 $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
                 $date = $request_data['entry_date'];
                 $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
