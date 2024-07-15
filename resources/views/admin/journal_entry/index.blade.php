@@ -215,6 +215,48 @@ function autocomplete_trigger(org_id){
     });
 }
 
+function make_table(data){
+    var table_data = '<table class="table table-striped table-hover table-bordered table-sm mb-2 main-listing-table"><thead><tr> <th>Member Name</th> <th>Serial Number</th> <th>Month</th> <th>Charge</th> <th>Payment Date</th></tr></thead><tbody>';
+    data.forEach(dt =>{
+        table_data += '<tr><td>'+dt.name ?? ''+'</td>';
+        table_data += '<td>'+dt.series_number+'</td>';
+        table_data += '<td>'+dt.month+'</td>';
+        table_data += '<td>'+dt.charge+'</td>';
+        table_data += '<td>'+dt.entry_date+'</td></tr>';
+    });
+    table_data +='</tbody></table>';
+
+    $('#table_div').html(table_data);
+}
+
+function fine_ajax(member_id){
+    $.ajax({
+        url: '{{ route("supanel.journal_entry.fine_ajax") }}',
+        method: "POST",
+        data: {'_token': '{!! csrf_token() !!}', 'member_id' : member_id},
+        success: function(response){
+            $('#fine_amt').val(response);
+        },
+        error: function(error) {
+            console.error('Error fetching folder content:', error);
+        }
+    });
+}
+
+function get_table(member_id){
+    $.ajax({
+        url: '{{ route("supanel.journal_entry.get_table") }}',
+        method: "POST",
+        data: {'_token': '{!! csrf_token() !!}', 'member_id' : member_id},
+        success: function(response){
+            make_table(response);
+        },
+        error: function(error) {
+            console.error('Error fetching folder content:', error);
+        }
+    });
+}
+
 function download_file(id){
     if(confirm("Are you sure to re-generate PDF?")){
         window.open("/supanel/journal_entry/"+id+"/make?redirect=1");
@@ -458,12 +500,60 @@ $(function(){
 
     $(document).on('change','#member_mob', function(){
         $('#charge').val('');
-        check = $('#unpaid').prop('checked');
-        
-        if(this.validationMessage === ''){
-            $('.charge').show();
+        $('#fine_amt').val('');
+        $('#table_div').html('');
+        var fine = $('#charge_type_id').val();
+        if(fine == '8'){
+            fine_ajax($(this).val());
+            get_table($(this).val());
         } else{
-            $('.charge').hide();
+            // alert($('#charge_type_id').val());
+            check = $('#unpaid').prop('checked');
+            
+            if(this.validationMessage === ''){
+                $('.charge').show();
+            } else{
+                $('.charge').hide();
+            }
+        }
+    });
+
+    $(document).on('change','#charge_type_id', function(){
+        var org_val = $('organization_id').val();
+        $('#fine_amt').val('');
+        $('#table_div').html('');
+        if($('#member_mob').val()!=''){
+            fine_ajax($('#member_mob').val());
+        }
+
+
+        if($(this).val()=='8'){
+            $('.from_month').hide();
+            $('.to_month').hide();
+            $('.custom_toggle').hide();
+            if($('#member_mob').val() != ''){
+                $('.charge').hide();
+                get_table($('#member_mob').val());
+            }
+
+            $('#from_month').prop('required',false);
+            $('#to_month').prop('required',false);
+            $('#from_month').prop('required',false);
+
+            $('.fine_amount').show();
+        } else if($(this).val() == '7'){
+            $('.from_month').show();
+            $('.to_month').show();
+            $('.custom_toggle').show();
+            if($('#member_mob').val() != ''){
+                $('.charge').show();
+            }
+
+            $('#from_month').prop('required',true);
+            $('#to_month').prop('required',true);
+            $('#from_month').prop('required',true);
+
+            $('.fine_amount').hide();
         }
     });
 
@@ -495,6 +585,7 @@ $(function(){
     });
 
     $('#entry_date').on('change', function(){
+
         val= $(this).val();
         var date = new Date(val);
         check = !isNaN(date.getTime()) && val !== '';
@@ -704,11 +795,18 @@ $(function(){
                                         </a>
                                         @endif
 
+                                        @php
+                                            $entrywise_model = \App\Models\Entrywise_Fine::where([['member_id','=',$item['member_id']],['status','>','0'],['delstatus','<','1']])->orderBy('id','DESC')->first();
+                                        @endphp
+
+                                        @if(empty($entrywise_model) || $entrywise_model->journal_entry_id == $row_id )
                                         @can($module['permission_group'].'.edit')
                                         <a href="{{ route($module['main_route'].'.edit', $row_id) }}" data-id="{{ $row_id }}" class="edit_but" title="{{ __('admin.text_edit') }}" rel="tab">
                                             <i class="text-primary fa-lg fas fa-edit"></i>
                                         </a>
                                         @endcan
+
+                                        @endif
 
                                         @can($module['permission_group'].'.delete')
                                             <a href="{{ route($module['main_route'].'.action', ['mode'=>'delete', 'id'=>$row_id]) }}" onclick="return confirm('Are you sure to delete?');" title="{{ __('admin.text_delete') }}">
@@ -758,6 +856,8 @@ $(function(){
                 <div class="modal-body" style="overflow:hidden;">
                     <div class="row" id="changable_div">
                         @include($module['main_view'].'.form_include',['bsmodal'=>true, 'module'=>$module, 'form_data'=>null])
+                    </div>
+                    <div class="row" id = "table_div">
                     </div>
                 </div>
                 <div class="modal-footer">

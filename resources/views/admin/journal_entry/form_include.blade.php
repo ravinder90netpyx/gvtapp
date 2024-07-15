@@ -103,6 +103,16 @@
     @endif
 </div>
 
+<div class="col-md-6 fine_amount">
+    @php 
+    $current_field = 'fine_amt';
+    $add_perm = ['vertical'=>true];
+    $apm = ['addon_check'=>'fine_wave_off', 'addon_check_title' => 'Wave off Fine'];
+    $add_perm = array_merge($add_perm, $apm);
+    @endphp
+    {!! Form::bsInput('number', $current_field, __('Fine Amount'), $form_data->$current_field ?? '', ['disabled'], $add_perm); !!}
+</div>
+
 <div class="col-md-6 charge" @if($mode == 'insert') style="display:none;" @endif>
     @php $current_field = 'charge';
         $add_perm = ['vertical'=>true];
@@ -123,7 +133,7 @@
     {!! Form::bsInput('text', $current_field, __('To'), $form_data->$current_field ?? '', [ 'required', 'autocomplete'=>'off', $disable ],  ['vertical'=>true]); !!}
 </div>
 
-<div class="col-md-6">
+<div class="col-md-6 custom_toggle">
     @php $current_field = 'custom_toggle'; @endphp
     {!! Form::bsToggle($current_field, 'Custom Month', '1', ( $form_data->$current_field ?? false ), [$disable], ['vertical'=>true]); !!}
 </div>

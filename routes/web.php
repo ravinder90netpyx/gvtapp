@@ -74,6 +74,8 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
         Route::get('journal_entry/{id}/show', [JournalEntryController::class, 'show_pdf'])->name('journal_entry.show_pdf');
         Route::get('journal_entry/{id}/make', [JournalEntryController::class, 'generate_pdf_file'])->name('journal_entry.generate_pdf_file');
         Route::post('journal_entry/send', [JournalEntryController::class, 'send_msg'])->name('journal_entry.send_msg');
+        Route::post('journal_entry/fine_get', [JournalEntryController::class, 'fine_ajax'])->name('journal_entry.fine_ajax');
+        Route::post('journal_entry/get_table', [JournalEntryController::class, 'get_table'])->name('journal_entry.get_table');
         Route::get('members/{id}/reminder', [MembersController::class, 'send_reminder'])->name('members.send_reminder');
 
         $routes_arr = [

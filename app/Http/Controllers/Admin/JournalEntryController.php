@@ -2,7 +2,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Journal_Entry as DefaultModel;
-use App\Models\Fine;
+use App\Models\Monthwise_Fine;
+use App\Models\Entrywise_Fine;
 use App\Models\API_Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -165,9 +166,14 @@ class JournalEntryController extends Controller{
         // dd($request->input());
         $module = $this->module;
         $auth_user = Auth::user();
+        $charge_name = '';
+        if(!empty($request->input('charge_type_id'))){
+            $charge_mod = \App\Models\ChargeType::find($request->input('charge_type_id'));
+            $charge_name = $charge_mod->name;
+        }
         $roles = $auth_user->roles()->pluck('name','id')->toArray();
         $rules= [
-            'series_id' => 
+            'series_id' =>
             [
                 'required',
                 'numeric',
@@ -183,9 +189,10 @@ class JournalEntryController extends Controller{
             // 'form_data.member_mob' => 'required',
             'member_id' => 'required|numeric',
             'payment_mode' => 'required|in:online,cash,cheque',
+            'charge_type_id' => 'required',
             'from_month' => 
             [
-                empty($request->input('custom_month'))? 'required':'nullable',
+                empty($request->input('custom_month')) && $charge_name == 'Maintenance' ? 'required':'nullable',
                 function($attribute, $value, $fail){
                     $request = Request();
                     $helpers = new helpers();
@@ -220,7 +227,7 @@ class JournalEntryController extends Controller{
             ],
             'to_month' =>
             [
-                empty($request->input('custom_month'))? 'required':'nullable',
+                empty($request->input('custom_month')) && $charge_name == 'Maintenance' ? 'required':'nullable',
                 function($attribute, $value, $fail){
                     $hlp = new helpers;
                     $request = Request();
@@ -243,7 +250,7 @@ class JournalEntryController extends Controller{
 
             'custom_month' =>
             [
-                empty($request->input('from_month'))? 'required':'nullable',
+                empty($request->input('from_month')) && $charge_name == 'Maintenance' ? 'required':'nullable',
                 function($attribute, $value, $fail){
                     $val_arr = [];
                     $val_arr = explode(',',$value);
@@ -303,72 +310,124 @@ class JournalEntryController extends Controller{
 
         $member = \App\Models\Members::find($request_data['member_id']);
         $charge = \App\Models\Charges::find($member->charges_id)->rate;
-        $paid = $request_data['paid_money'];
-        // $month_arr = $helpers->get_financial_month_year($request->input('from_month'), $request->input('to_month'));
-        $paid_m = empty($paid) ? $charge*count($month_arr) : $paid;
-        // $pending_mon = $report_last_month['money_pending'] ?? 0;
-        
-        if(!empty($paid)){
-            $request_data['partial'] = ($paid%$charge > 0)? '1':'0';
-            $count=0;
-            $count =ceil($paid/$charge);
-        } else{
-            $report_model_last_mon = $report_model->where([['month', '=', $from_month], ['member_id', '=', $request_data['member_id']], ['delstatus','<','1'], ['status','>', '0']])->orderBy('month','DESC')->first();
-            $dedt_amt=0;
-            if(!empty($report_model_last_mon)) $dedt_amt = $report_model_last_mon->money_paid;
-            $request_data['paid_money'] = count($month_arr)*$charge - $dedt_amt;
-        }
+        $charge_type = \App\Models\ChargeType::find($request_data['charge_type_id']);
 
-        $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
-        $date = $request_data['entry_date'];
-        $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
-        // if(strtotime($date) > strtotime($pre_date)){
-        $series_num =$series_number->name.$series_number->number_separator.str_pad($series_number->next_number,$series_number->min_length,'0', STR_PAD_LEFT);
-        $next_number = $series_number->next_number;
-        $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
-        $request_data['charge'] = $request_data['paid_money'];
-        $request_data['name'] = $member['name'];
-        $request_data['series_next_number'] = $next_number;
-        $request_data['series_number'] = $series_num;
-        $fetch_data = $model->create($request_data);
-        // report --
+        if($charge_type->name == 'Fine'){
 
-        foreach($month_arr as $mt){
-            $report_models = $report_model->where([['month', '=',$mt], ['member_id','=',$request_data['member_id']], ['delstatus','<','1'],['status','>','0']])->first();
-            // $tempe_arr[] = $report_models->id;
-            $report_data['journal_entry_id'] = $fetch_data->id;
-            if(empty($report_models)){
-                $report_data['month'] = $mt;
+            $entry_charge_arr =[];
+            $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
+            $request_data['partial'] =0;
+            $date = $request_data['entry_date'];
+            $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
+            // if(strtotime($date) > strtotime($pre_date)){
+            $series_num =$series_number->name.$series_number->number_separator.str_pad($series_number->next_number,$series_number->min_length,'0', STR_PAD_LEFT);
+            $next_number = $series_number->next_number;
+            $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
+            $request_data['charge'] = $request_data['paid_money'];
+            $request_data['name'] = $member['name'];
+            $request_data['series_next_number'] = $next_number;
+            $request_data['series_number'] = $series_num;
+            $fetch_data = $model->create($request_data);
 
-                $report_data['member_id'] = $request_data['member_id'];
-                if($charge <= $paid_m){
-                    $report_data['money_paid'] = $charge;
-                    $report_data['money_pending'] = 0;
-                    $paid_m = $paid_m - $charge;
+            // Entry wise fine...
+
+            $monthwise_fine_model = new Monthwise_Fine();
+
+            $monthwise_model = $monthwise_fine_model->where([['member_id','=',$fetch_data->member_id],['delstatus','<','1'],['status','>','0']])->orderBy('month','DESC')->first();
+            $month = '2024-07';
+            if(!empty($monthwise_model->month) && $month<$monthwise_model->month){
+                $month = $monthwise_model->month;
+            }
+            $mon_arr = $helpers->get_financial_month_year('2024-07',$month,'Y-m');
+            $total_fine =0;
+            foreach($mon_arr as $ma){
+                $monthwise_mod = $monthwise_fine_model->where([['member_id','=',$fetch_data->member_id],['delstatus','<','1'],['status','>','0'],['month','=',$ma]])->first();
+                if(empty($monthwise_mod)){
+                    $total_fine += $this->late_fee_calculator($request_data['entry_date'],$ma,$fetch_data->member_id);
                 } else{
-                    $report_data['money_paid'] = $paid_m;
-                    $report_data['money_pending'] = $charge - $paid_m;
-                    $paid_m = 0;
-                }
-                $upd_rep = $report_model->create($report_data);
-            } else{
-                $money = $report_models->money_pending;
-                if(!empty($money)){
-                    $report_data['month'] = $mt;
-                    if($money <= $paid_m){
-                        $report_data['money_paid'] = $charge;
-                        $report_data['money_pending'] = 0;
-                        $paid_m = $paid_m - $money;
-                    } else{
-                        $report_data['money_paid'] = $paid_m + $report_models->money_paid;
-                        $report_data['money_pending'] = $money - $paid_m;
-                        $paid_m = 0;
-                    }
-                    $report_model->where('id','=',$report_models->id)->update($report_data);
+                    $total_fine += $monthwise_mod->fine_amount;
                 }
             }
-            $report_data =[];
+            $entrywise_model = new Entrywise_Fine();
+            $entrywise_arr =[];
+            $entrywise_arr['journal_entry_id'] = $fetch_data->id;
+            $entrywise_arr['member_id'] = $fetch_data->member_id;
+            $entrywise_arr['fine_paid'] = $request_data['fine_amt'];
+            $entrywise_arr['total_fine'] = $total_fine;
+            $create_data = $monthwise_fine_model->create($entrywise_arr);
+
+            $monthwise_model->where([['entrywise_fine_id', '=',null],['status','>','0'],['delstatus','<','1'],['fine_waveoff','=','0']])->update([['entrywise_fine_id','=',$create_data->id],['fine_waveoff','=','1']]);
+
+        } elseif($charge_type->name == 'Maintenance'){
+            $paid = $request_data['paid_money'];
+            // $month_arr = $helpers->get_financial_month_year($request->input('from_month'), $request->input('to_month'));
+            $paid_m = empty($paid) ? $charge*count($month_arr) : $paid;
+            // $pending_mon = $report_last_month['money_pending'] ?? 0;
+            
+            if(!empty($paid)){
+                $request_data['partial'] = ($paid%$charge > 0)? '1':'0';
+                $count=0;
+                $count =ceil($paid/$charge);
+            } else{
+                $report_model_last_mon = $report_model->where([['month', '=', $from_month], ['member_id', '=', $request_data['member_id']], ['delstatus','<','1'], ['status','>', '0']])->orderBy('month','DESC')->first();
+                $dedt_amt=0;
+                if(!empty($report_model_last_mon)) $dedt_amt = $report_model_last_mon->money_paid;
+                $request_data['paid_money'] = count($month_arr)*$charge - $dedt_amt;
+            }
+
+            $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
+            $date = $request_data['entry_date'];
+            $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
+            // if(strtotime($date) > strtotime($pre_date)){
+            $series_num =$series_number->name.$series_number->number_separator.str_pad($series_number->next_number,$series_number->min_length,'0', STR_PAD_LEFT);
+            $next_number = $series_number->next_number;
+            $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
+            $request_data['charge'] = $request_data['paid_money'];
+            $request_data['name'] = $member['name'];
+            $request_data['series_next_number'] = $next_number;
+            $request_data['series_number'] = $series_num;
+            $fetch_data = $model->create($request_data);
+            // report --
+
+            foreach($month_arr as $mt){
+                $this->late_fee_calculator($request_data['entry_date'],$mt,$fetch_data->member_id);
+                $report_models = $report_model->where([['month', '=',$mt], ['member_id','=',$request_data['member_id']], ['delstatus','<','1'],['status','>','0']])->first();
+                // $tempe_arr[] = $report_models->id;
+                $report_data['journal_entry_id'] = $fetch_data->id;
+                if(empty($report_models)){
+                    $report_data['month'] = $mt;
+
+                    $report_data['member_id'] = $request_data['member_id'];
+                    if($charge <= $paid_m){
+                        $report_data['money_paid'] = $charge;
+                        $report_data['money_pending'] = 0;
+                        $paid_m = $paid_m - $charge;
+                    } else{
+                        $report_data['money_paid'] = $paid_m;
+                        $report_data['money_pending'] = $charge - $paid_m;
+                        $paid_m = 0;
+                    }
+                    $upd_rep = $report_model->create($report_data);
+                } else{
+                    $money = $report_models->money_pending;
+                    if(!empty($money)){
+                        $report_data['month'] = $mt;
+                        if($money <= $paid_m){
+                            $report_data['money_paid'] = $charge;
+                            $report_data['money_pending'] = 0;
+                            $paid_m = $paid_m - $money;
+                        } else{
+                            $report_data['money_paid'] = $paid_m + $report_models->money_paid;
+                            $report_data['money_pending'] = $money - $paid_m;
+                            $paid_m = 0;
+                        }
+                        $report_model->where('id','=',$report_models->id)->update($report_data);
+                    }
+                }
+                $report_data =[];
+            }
         }
+
 
         // $now=Carbon::now();
         // $file_name = $fetch_data->id.'-'.$now->format('Y-m-d-H-i-s');
@@ -495,11 +554,16 @@ class JournalEntryController extends Controller{
         // dd($request->input());
         $modelfind = $model->find($id);
         $module = $this->module;
+        $charge_name = '';
+        if(!empty($request->input('charge_type_id'))){
+            $charge_mod = \App\Models\ChargeType::find($request->input('charge_type_id'));
+            $charge_name = $charge_mod->name;
+        }
         $request->validate([
             'entry_date' => 'required|date_format:Y-m-d H:i:s',
             'from_month' => 
             [
-                !empty($request->input('custom_month'))? 'required':'nullable',
+                empty($request->input('custom_month')) && $charge_name == 'Maintenance' ? 'required':'nullable',
                 function($attribute, $value, $fail) use($request, $id) {
                     $request = Request();
                     $helpers = new helpers();
@@ -533,7 +597,7 @@ class JournalEntryController extends Controller{
             ],
             'to_month' => 
             [
-                !empty($request->input('custom_month'))? 'required':'nullable',
+                empty($request->input('custom_month')) && $charge_name == 'Maintenance' ? 'required':'nullable',
                 function($attribute, $value, $fail){
                     $hlp = new helpers;
                     $request = Request();
@@ -554,7 +618,7 @@ class JournalEntryController extends Controller{
             ],
             'custom_month' => 
             [
-                empty($request->input('from_month'))? 'required':'nullable',
+                empty($request->input('from_month')) && $charge_name == 'Maintenance' ? 'required':'nullable',
                 function($attribute, $value, $fail){
                     $val_arr = [];
                     $val_arr = explode(',',$value);
@@ -586,46 +650,93 @@ class JournalEntryController extends Controller{
         $report_data = [];
         $member = \App\Models\Members::find($request_data['member_id']);
         $charge = \App\Models\Charges::find($member->charges_id)->rate;
-        $from_month = $request->input('from_month');
-        $to_month = $request->input('to_month');
-        $report_model = new Report();
+        $charge_type = \App\Models\ChargeType::find($request_data['charge_type_id']);
+        if($charge_type->name == 'Fine'){
+            $entrywise_model = Entrywise_Fine::where([['member_id','=',$request_data['member_id']],['status','>','0'],['delstatus','<','0']])->orderBy('id','DESC')->first();
+            if($entrywise_model->journal_entry_id == $id){
+                $entry_charge_arr =[];
+                $request_data['partial'] = 0;
+                $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
+                $date = $request_data['entry_date'];
+                $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
+                $request_data['charge'] = $request_data['paid_money'];
+                $request_data['name'] = $member['name'];
+                $fetch_data = $modelfind->update($request_data);
 
-        $month_arr =[];
-        if(!empty($request->input('from_month')) && !empty($request->input('to_month'))){
-            $month_arr = $helpers->get_financial_month_year($from_month,$to_month,'Y-m');
-        } else{
-            $month_arr = explode(',', $request->input('custom_month'));
-        }
+                // Entry wise fine...
 
-        $paid = empty($request->input('paid_money')) ? $charge*count($month_arr) : $request->input('paid_money');
+                $monthwise_fine_model = new Monthwise_Fine();
 
-        if(!empty($paid)){
-            $request_data['partial'] = ($paid%$charge > 0)? '1':'0';
-            $count=0;
-            $count =ceil($paid/$charge);
-        } else{
-            $report_model_last_mon = $report_model->where([['month', '=', $from_month], ['member_id', '=', $request_data['member_id']], ['delstatus','<','1'], ['status','>', '0']])->orderBy('month','DESC')->first();
-            $dedt_amt=0;
-            if(!empty($report_model_last_mon)) $dedt_amt = $report_model_last_mon->money_paid;
-            $request_data['paid_money'] = count($month_arr)*$charge - $dedt_amt;
-        }
+                $monthwise_model = $monthwise_fine_model->where([['member_id','=',$fetch_data->member_id],['delstatus','<','1'],['status','>','0']])->orderBy('month','DESC')->first();
+                $month = '2024-07';
+                if(!empty($monthwise_model->month) && $month<$monthwise_model->month){
+                    $month = $monthwise_model->month;
+                }
+                $mon_arr = $helpers->get_financial_month_year('2024-07',$month,'Y-m');
+                $total_fine =0;
+                $monthwise_fine_model = where([['entrywise_fine_id', '=',$entrywise_model->id]])->delete();
+                foreach($mon_arr as $ma){
+                    $monthwise_mod = $monthwise_fine_model->where([['member_id','=',$fetch_data->member_id],['delstatus','<','1'],['status','>','0'],['month','=',$ma]])->first();
+                    if(empty($monthwise_mod)){
+                        $total_fine += $this->late_fee_calculator($request_data['entry_date'],$ma,$fetch_data->member_id);
+                    } else{
+                        $total_fine += $monthwise_mod->fine_amount;
+                    }
+                }
+                $entrywise_model = Entrywise_Fine::where('journal_entry_id','=',$id)->first();
+                $entrywise_arr =[];
+                $entrywise_arr['member_id'] = $fetch_data->member_id;
+                $entrywise_arr['fine_paid'] = $request_data['fine_amt'];
+                $entrywise_arr['total_fine'] = $total_fine;
+                $create_data = $monthwise_fine_model->create($entrywise_arr);
 
-        $report_find = Report::where([['journal_entry_id','=',$id],['status','>','0'],['delstatus','<','1']])->orderBy('month', 'DESC')->get()->toArray();
-        $prev_paid_money = $modelfind->charge;
-        foreach(array_reverse($report_find) as $rf){
-            if($prev_paid_money >= $rf['money_paid']){
-                $prev_paid_money = $prev_paid_money-$rf['money_paid'];
-                $rep = Report::where('id','=',$rf['id'])->delete();
-            } else{
-                $journal_entry = $model->where([['to_month', '=', $rf['month']],['member_id','=', $rf['member_id']]])->orderBy('id','DESC')->first();
-                $chr = $rf['money_paid'] - $prev_paid_money;
-                $rep =Report::where('id', '=', $rf['id'])->update([['money_paid','=', $chr], ['journal_entry_id', '=', $journal_entry->id]]);
+                $monthwise_model->where([['entrywise_fine_id', '=',null],['status','>','0'],['delstatus','<','1'],['fine_waveoff','=','0']])->update([['entrywise_fine_id','=',$create_data->id],['fine_waveoff','=','1']]);
             }
-        }
+            else{
+                return redirect()->route($module['main_route'].'.index')->with('info', 'Only update last fine of a particular member');
+            }
+        } else if($charge_type->name == 'Maintenance'){
+            $from_month = $request->input('from_month');
+            $to_month = $request->input('to_month');
+            $report_model = new Report();
 
-        $request_data['charge'] = $request_data['paid_money'];
-        $request_data['name'] = $member['name'];
-        $modelfind->update($request_data);
+            $month_arr =[];
+            if(!empty($request->input('from_month')) && !empty($request->input('to_month'))){
+                $month_arr = $helpers->get_financial_month_year($from_month,$to_month,'Y-m');
+            } else{
+                $month_arr = explode(',', $request->input('custom_month'));
+            }
+
+            $paid = empty($request->input('paid_money')) ? $charge*count($month_arr) : $request->input('paid_money');
+
+            if(!empty($paid)){
+                $request_data['partial'] = ($paid%$charge > 0)? '1':'0';
+                $count=0;
+                $count =ceil($paid/$charge);
+            } else{
+                $report_model_last_mon = $report_model->where([['month', '=', $from_month], ['member_id', '=', $request_data['member_id']], ['delstatus','<','1'], ['status','>', '0']])->orderBy('month','DESC')->first();
+                $dedt_amt=0;
+                if(!empty($report_model_last_mon)) $dedt_amt = $report_model_last_mon->money_paid;
+                $request_data['paid_money'] = count($month_arr)*$charge - $dedt_amt;
+            }
+
+            $report_find = Report::where([['journal_entry_id','=',$id],['status','>','0'],['delstatus','<','1']])->orderBy('month', 'DESC')->get()->toArray();
+            $prev_paid_money = $modelfind->charge;
+            foreach(array_reverse($report_find) as $rf){
+                if($prev_paid_money >= $rf['money_paid']){
+                    $prev_paid_money = $prev_paid_money-$rf['money_paid'];
+                    $rep = Report::where('id','=',$rf['id'])->delete();
+                } else{
+                    $journal_entry = $model->where([['to_month', '=', $rf['month']],['member_id','=', $rf['member_id']]])->orderBy('id','DESC')->first();
+                    $chr = $rf['money_paid'] - $prev_paid_money;
+                    $rep =Report::where('id', '=', $rf['id'])->update([['money_paid','=', $chr], ['journal_entry_id', '=', $journal_entry->id]]);
+                }
+            }
+
+            $request_data['charge'] = $request_data['paid_money'];
+            $request_data['name'] = $member['name'];
+            $modelfind->update($request_data);
+        }
 
         $this->generate_pdf_file($id);
 
@@ -976,6 +1087,8 @@ class JournalEntryController extends Controller{
 
     public function ajax_member(Request $request) {
         $input=$request->input('q');
+        // dd($request->input());
+        
         $org_id = $request->input('org_id');
         $arr=[];
         $models =new \App\Models\Members();
@@ -1016,7 +1129,7 @@ class JournalEntryController extends Controller{
         return $response;
     }
 
-    public function late_fee_calculator($date, $month){
+    public function late_fee_calculator($date, $month,$member_id){
         $now = Carbon::now();
         $date = Carbon::parse($date);
         $day = $date->day;
@@ -1031,24 +1144,62 @@ class JournalEntryController extends Controller{
         } else{
             $late_fee =1000;
         }
+        $monthwise_model = new Monthwise_Fine();
+        $fine_arr = [];
+        $fine_arr['month'] = $month;
+        $fine_arr['member_id'] = $member_id;
+        $fine_arr['fine_amount'] = $late_fee;
+        $monthwise_model->create($fine_arr);
+
         return $late_fee;
     }
 
-    public function fine_store($fr_month, $to_month, $pay_date, $je_id){
+    public function fine_month_store($fr_month, $to_month, $pay_date, $je_id){
         $now = Carbon::now();
         $month_arr = helpers::get_financial_month_year($fr_month, $to_month, 'Y-m');
         $fine_arr = [];
+        $month_fine = new Monthwise_Fine();
         $je_model = DefaultModel::find($je_id);
         foreach($month_arr as $mn){
-            $late_fee = $this->late_fee_calculator($pay_date, $mn);
+            $late_fee = 0;
             $fine_arr['month'] = $mn;
             $fine_arr['journal_entry_id'] = $je_id;
             $fine_arr['member_id'] = $je_model->member_id;
-            $fine_arr['fine_pending'] = $late_fee;
-            $fine_arr['member_id'] = $je_model->member_id;
-            $fine_arr['member_id'] = $je_model->member_id;
-            $fine_arr['member_id'] = $je_model->member_id;
+            $fine_arr['fine_amount'] = $je_model->member_id;
+            $fine_arr['fine_waveoff'] = 0;
         }
+    }
+
+    public function fine_ajax(Request $request){
+        $member_id = $request->input('member_id');
+        $fine_model = Monthwise_Fine::where([['member_id','=',$member_id],['fine_waveoff','=','0'],['fine_amount','>','0'],['status','>','0'],['delstatus','<','1']])->get();
+        $total_fine =0;
+        if(!empty($fine_model)){
+            foreach($fine_model as $fm){
+                $total_fine = $total_fine+$fm->fine_amount;
+            }
+        }
+        return $total_fine;
+    }
+
+    public function get_table(Request $request){
+        $member_id = $request->input('member_id');
+        $je_model = DefaultModel::where([['member_id','=',$member_id],['status','>','0'],['delstatus','<','1']])->latest()->take(3)->get()->toArray();
+        $data_arr =[];
+        foreach($je_model as $jm){
+            $temp_arr =[];
+            $temp_arr['name'] = $jm['name'] ?? '';
+            $temp_arr['series_number'] = $jm['series_number'];
+            $temp_arr['entry_date'] = $jm['entry_date'];
+            $temp_arr['charge'] = $jm['charge'];
+            if(empty($jm['custom_month'])){
+                $temp_arr['month'] = $jm['from_month']!=$jm['to_month']? $jm['from_month'].' - '.$jm['to_month'] : $jm['from_month'];
+            } else{
+                $temp_arr['month'] = $jm['custom_month'];
+            }
+            $data_arr[] =$temp_arr;
+        }
+        return $data_arr;
     }
 
 //     public function sendPdfToWhatsapp($destination,$message, $org_id, $template){
@@ -1077,7 +1228,7 @@ class JournalEntryController extends Controller{
 //         // $post_field = 'channel='.$api['channel'].'&source='.$src_no.'&destination='.$destination.'&src.name='.$api['src_name'].'&template={"id":"'.$templ_id.'","params":'.$params.'}&message='.$message;
 //         // $post_field_encode = urlencode($post_field);
 //         // dd($post_field_encode);
-
+//
 //         $post_data = [];
 
 //         // $template_arr = [

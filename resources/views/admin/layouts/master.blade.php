@@ -112,8 +112,8 @@ $authentic_username = ucwords($authentic_user->first_name.' '.$authentic_user->l
 
   <div class="container-fluid">
     <div class="header-body pt-3">    
-        @include('admin.layouts.flash-message')  
         @yield('content')
+        @include('admin.layouts.flash-message')  
     </div>
   </div>  
 
