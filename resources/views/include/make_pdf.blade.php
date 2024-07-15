@@ -31,12 +31,16 @@
                         <td style="width:50%">{{ $series }}</td>
                     </tr>
                     <tr>
+                        @php
+                            $rec_date_arr = explode(' ', $reciept_date);
+                            $pay_date_arr = explode(' ', $date);
+                        @endphp
                         <td>Receipt Date</td>
-                        <td>{{ $reciept_date }}</td>
+                        <td>{{ $rec_date_arr[0] }}</td>
                     </tr>
                     <tr>
                         <td>Payment Date</td>
-                        <td>{{ $date }}</td>
+                        <td>{{ $pay_date_arr[0] }}</td>
                     </tr>
                     <tr>
                         <td>Customer Name</td>
@@ -58,8 +62,10 @@
                         $single = 0;
                         if($from_month == $to_month) $single =1;
                         @endphp
+                        @if(empty($from_month))
                         <td>Month(s) Cleared</td>
                         <td>{{ date("M Y", strtotime($from_month)) }} @if($single == 0) - {{ date("M Y", strtotime($to_month)) }} @endif</td>
+                        @endif
                     </tr>
                 </tbody>
             </table>

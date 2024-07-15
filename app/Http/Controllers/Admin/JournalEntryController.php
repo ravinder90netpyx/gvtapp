@@ -354,9 +354,9 @@ class JournalEntryController extends Controller{
             $entrywise_arr['member_id'] = $fetch_data->member_id;
             $entrywise_arr['fine_paid'] = $request_data['fine_amt'];
             $entrywise_arr['total_fine'] = $total_fine;
-            $create_data = $monthwise_fine_model->create($entrywise_arr);
+            $create_data = $entrywise_model->create($entrywise_arr);
 
-            $monthwise_model->where([['entrywise_fine_id', '=',null],['status','>','0'],['delstatus','<','1'],['fine_waveoff','=','0']])->update([['entrywise_fine_id','=',$create_data->id],['fine_waveoff','=','1']]);
+            $monthwise_model->where([['entrywise_fine_id', '=',null],['member_id','=',$fetch_data->member_id],['status','>','0'],['delstatus','<','1'],['fine_waveoff','=','0']])->update(['entrywise_fine_id' => $create_data->id, 'fine_waveoff' => '1']);
 
         } elseif($charge_type->name == 'Maintenance'){
             $paid = $request_data['paid_money'];
@@ -688,9 +688,9 @@ class JournalEntryController extends Controller{
                 $entrywise_arr['member_id'] = $fetch_data->member_id;
                 $entrywise_arr['fine_paid'] = $request_data['fine_amt'];
                 $entrywise_arr['total_fine'] = $total_fine;
-                $create_data = $monthwise_fine_model->create($entrywise_arr);
+                $create_data = $entrywise_model->update($entrywise_arr);
 
-                $monthwise_model->where([['entrywise_fine_id', '=',null],['status','>','0'],['delstatus','<','1'],['fine_waveoff','=','0']])->update([['entrywise_fine_id','=',$create_data->id],['fine_waveoff','=','1']]);
+                // $monthwise_model->where([['entrywise_fine_id', '=',null],['status','>','0'],['delstatus','<','1'],['fine_waveoff','=','0']])->update(['entrywise_fine_id','=',$create_data->id],['fine_waveoff','=','1']);
             }
             else{
                 return redirect()->route($module['main_route'].'.index')->with('info', 'Only update last fine of a particular member');
@@ -931,13 +931,14 @@ class JournalEntryController extends Controller{
             $now=Carbon::now();
             $file_name = $je_id.'-'.$now->format('Y-m-d-H-i-s');
         }
+        $charge_type_id = $journal_entry->charge_type_id;
         $rec_name = !empty($member->sublet_name) ? $member->sublet_name : $member->name;
         $data = [
             'org_name' => $name,
             'note' => $setting_model->getVal('pdf', 'pdf_note'),
             'line1' => $setting_model->getVal('pdf', 'line1'),
             'address' => $organization->address,
-            'name' => $rec_name,
+            'name' =>$rec_name,
             'mobile_number' => $member->mobile_number,
             'charge' => $journal_entry->charge,
             'series' => $journal_entry->series_number,
@@ -948,6 +949,10 @@ class JournalEntryController extends Controller{
             'reciept_date' => $journal_entry->reciept_date,
             'year' => $journal_entry->entry_year
         ];
+        if($charge_type_id == '8'){            
+            $data['from_month'] ='';
+            $data['to_month'] ='';
+        }
         $pdf = PDF::loadView('include.make_pdf', $data);
 
         $mpdf = $pdf->getMpdf();
@@ -1139,7 +1144,7 @@ class JournalEntryController extends Controller{
         $mon_dif = Carbon::parse($month)->diffInMonths($now);
         if($mon_dif == 0){
             if($day_dif>0 ){
-                $late_fee = $day*50;
+                $late_fee = ($day-12)*50;
             }
         } else{
             $late_fee =1000;
@@ -1184,7 +1189,7 @@ class JournalEntryController extends Controller{
 
     public function get_table(Request $request){
         $member_id = $request->input('member_id');
-        $je_model = DefaultModel::where([['member_id','=',$member_id],['status','>','0'],['delstatus','<','1']])->latest()->take(3)->get()->toArray();
+        $je_model = DefaultModel::where([['member_id','=',$member_id],['status','>','0'],['charge_type_id','=','7'],['delstatus','<','1']])->latest()->take(3)->get()->toArray();
         $data_arr =[];
         foreach($je_model as $jm){
             $temp_arr =[];
