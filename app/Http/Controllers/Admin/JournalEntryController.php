@@ -955,6 +955,9 @@ class JournalEntryController extends Controller{
             $data['from_month'] ='';
             $data['to_month'] ='';
             $data['charge'] = $entrywise_model->fine_paid;
+
+            $data['fine_days'] = $this->calculate_fine_days($entrywise_model->id);
+            $this->calculate_fine_days($entrywise_model->id);
         }
         $pdf = PDF::loadView('include.make_pdf', $data);
 
@@ -983,6 +986,21 @@ class JournalEntryController extends Controller{
         if(!empty($request->input('redirect_index'))){
             return redirect()->route($module['main_route'].'.index')->with('success', 'File regenerated Successfully');
         }
+    }
+
+    public function calculate_fine_days($fine_entry_id){
+        $monthwise_model = Monthwise_Fine::where('entrywise_fine_id',$fine_entry_id)->get()->toArray();
+        $fine_days = 0;
+        if(!empty($monthwise_model)){
+            foreach($monthwise_model as $mt){
+                if($mt['fine_amount'] != 1000){
+                    $fine_days += $mt['fine_amount']/50;
+                } else{
+                    $fine_days += 30;
+                }
+            }
+        }
+        return $fine_days;
     }
 
     public function view_pdf($je_id){
@@ -1146,21 +1164,35 @@ class JournalEntryController extends Controller{
         $late_fee =0;
         $mon_dif = Carbon::parse($month)->diffInMonths($now);
 
-        if($mon_dif == 0){
-            if($day_dif>0 ){
-                $late_fee = ($day-12)*50;
+        if($month>'2024-06'){
+            if($mon_dif == 0){
+                if($day_dif>0 ){
+                    $late_fee = ($day-12)*50;
+                }
+            } else{
+                $late_fee =1000;
             }
-        } else{
-            $late_fee =1000;
+            $monthwise_model = new Monthwise_Fine();
+            $check_model = $monthwise_model->where([['member_id', '=', $member_id], ['month','=',$month], ['status','>','0'], ['delstatus', '<', '1']])->first();
+            $fine_arr = [];
+            if(empty($check_model)){
+                $fine_arr['month'] = $month;
+                $fine_arr['member_id'] = $member_id;
+                $fine_arr['fine_amount'] = $late_fee;
+                $monthwise_model->create($fine_arr);
+            } else{
+                $fine_arr['month'] = $month;
+                $fine_arr['member_id'] = $member_id;
+                $fine_arr['fine_amount'] = $late_fee;
+                $monthwise_model->where('id',$check_model->id)->update($fine_arr);
+            }
         }
-        $monthwise_model = new Monthwise_Fine();
-        $fine_arr = [];
-        $fine_arr['month'] = $month;
-        $fine_arr['member_id'] = $member_id;
-        $fine_arr['fine_amount'] = $late_fee;
-        $monthwise_model->create($fine_arr);
 
         return $late_fee;
+    }
+
+    public function whatsapp_msg($je_id){
+
     }
 
     public function fine_month_store($fr_month, $to_month, $pay_date, $je_id){
