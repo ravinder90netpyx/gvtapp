@@ -738,7 +738,7 @@ class JournalEntryController extends Controller{
 
 
             foreach($month_arr as $mt){
-                $this->late_fee_calculator($request_data['entry_date'],$mt,$fetch_data->member_id);
+                $this->late_fee_calculator($request_data['entry_date'],$mt,$request_data['member_id']);
                 $report_models = $report_model->where([['month', '=',$mt], ['member_id','=',$request_data['member_id']], ['delstatus','<','1'],['status','>','0']])->first();
                 // $tempe_arr[] = $report_models->id;
                 $report_data['journal_entry_id'] = $id;
