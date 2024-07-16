@@ -247,7 +247,7 @@ class MembersController extends Controller{
         $je_model = \App\Models\Report::where([['member_id', '=',$mem_id],['month','=',$curr_month],['status','>','0'],['delstatus','<', '1']])->orderBy('id','DESC')->first();
         $now_date = $now->day(12);
         $month = $now->format('M Y');
-        // dd($month);
+        // dd($day);
         $date = Carbon::parse($now_date)->format('d-M-Y');
         // $day = $now->day;
         if(empty($je_model)){
@@ -259,17 +259,18 @@ class MembersController extends Controller{
                 'date' => $date,
                 'month' => $month
             ];
-            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
             if($day>12){
                 $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','overdue'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
             } elseif ($day == 12) {
+                $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            } else{
                 $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
             }
             $templ_json = $helpers->make_temp_json($temp->id, $data);
             $message = '';
             $message = json_encode($message, true);
-            $mobile_msg_arr =!empty($member->mobile_message)? json_decode($member->mobile_message): [];
-            $sublet_msg_arr =!empty($member->sublet_message)? json_decode($member->sublet_message): [];
+            $mobile_msg_arr =!empty($member->mobile_message) && $member->mobile_message != 'null' ? json_decode($member->mobile_message): [];
+            $sublet_msg_arr =!empty($member->sublet_message) && $member->sublet_message != 'null' ? json_decode($member->sublet_message): [];
             if(in_array('reminder',$mobile_msg_arr)){
                 dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
             }
@@ -310,17 +311,19 @@ class MembersController extends Controller{
                 'date' => $date,
                 'month' => $month
             ];
-            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
             if($day>12){
                 $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','overdue'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
             } elseif ($day == 12) {
+                $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','maitenance_last_day'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            } else{
                 $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
             }
             $templ_json = $helpers->make_temp_json($temp->id, $data);
             $message = '';
             $message = json_encode($message, true);
-            $mobile_msg_arr =!empty($member->mobile_message)? json_decode($member->mobile_message): [];
-            $sublet_msg_arr =!empty($member->sublet_message)? json_decode($member->sublet_message): [];
+            $mobile_msg_arr =!empty($member->mobile_message) && $member->mobile_message != 'null' ? json_decode($member->mobile_message): [];
+            $sublet_msg_arr =!empty($member->sublet_message) && $member->sublet_message != 'null' ? json_decode($member->sublet_message): [];
+
             if(in_array('reminder',$mobile_msg_arr)){
                 dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
             }
