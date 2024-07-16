@@ -654,7 +654,6 @@ class JournalEntryController extends Controller{
         if($charge_type->name == 'Fine'){
             $entrywise_model = Entrywise_Fine::where([['member_id','=',$request_data['member_id']],['status','>','0'],['delstatus','<','0']])->orderBy('id','DESC')->first();
             if($entrywise_model->journal_entry_id == $id){
-                $entry_charge_arr =[];
                 // $request_data['partial'] = 0;
                 $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
                 $date = $request_data['entry_date'];
@@ -736,46 +735,49 @@ class JournalEntryController extends Controller{
             $request_data['charge'] = $request_data['paid_money'];
             $request_data['name'] = $member['name'];
             $modelfind->update($request_data);
+
+
+            foreach($month_arr as $mt){
+                $this->late_fee_calculator($request_data['entry_date'],$mt,$fetch_data->member_id);
+                $report_models = $report_model->where([['month', '=',$mt], ['member_id','=',$request_data['member_id']], ['delstatus','<','1'],['status','>','0']])->first();
+                // $tempe_arr[] = $report_models->id;
+                $report_data['journal_entry_id'] = $id;
+                if(empty($report_models)){
+                    $report_data['month'] = $mt;
+
+                    $report_data['member_id'] = $request_data['member_id'];
+                    if($charge <= $paid){
+                        $report_data['money_paid'] = $charge;
+                        $report_data['money_pending'] = 0;
+                        $paid = $paid - $charge;
+                    } else{
+                        $report_data['money_paid'] = $paid;
+                        $report_data['money_pending'] = $charge - $paid;
+                        $paid = 0;
+                    }
+                    $upd_rep = $report_model->create($report_data);
+                } else{
+                    $money = $report_models->money_pending;
+                    if(!empty($money)){
+                        $report_data['month'] = $mt;
+                        if($money <= $paid){
+                            $report_data['money_paid'] = $charge;
+                            $report_data['money_pending'] = 0;
+                            $paid = $paid - $money;
+                        } else{
+                            $report_data['money_paid'] = $paid + $report_models->money_paid;
+                            $report_data['money_pending'] = $money - $paid;
+                            $paid = 0;
+                        }
+                        $report_model->where('id','=',$report_models->id)->update($report_data);
+                    }
+                }
+                $report_data =[];
+            }
         }
 
         $this->generate_pdf_file($id);
 
-        foreach($month_arr as $mt){
-            $report_models = $report_model->where([['month', '=',$mt], ['member_id','=',$request_data['member_id']], ['delstatus','<','1'],['status','>','0']])->first();
-            // $tempe_arr[] = $report_models->id;
-            $report_data['journal_entry_id'] = $id;
-            if(empty($report_models)){
-                $report_data['month'] = $mt;
-
-                $report_data['member_id'] = $request_data['member_id'];
-                if($charge <= $paid){
-                    $report_data['money_paid'] = $charge;
-                    $report_data['money_pending'] = 0;
-                    $paid = $paid - $charge;
-                } else{
-                    $report_data['money_paid'] = $paid;
-                    $report_data['money_pending'] = $charge - $paid;
-                    $paid = 0;
-                }
-                $upd_rep = $report_model->create($report_data);
-            } else{
-                $money = $report_models->money_pending;
-                if(!empty($money)){
-                    $report_data['month'] = $mt;
-                    if($money <= $paid){
-                        $report_data['money_paid'] = $charge;
-                        $report_data['money_pending'] = 0;
-                        $paid = $paid - $money;
-                    } else{
-                        $report_data['money_paid'] = $paid + $report_models->money_paid;
-                        $report_data['money_pending'] = $money - $paid;
-                        $paid = 0;
-                    }
-                    $report_model->where('id','=',$report_models->id)->update($report_data);
-                }
-            }
-            $report_data =[];
-        }
         //  api message function
         if(!empty($request_data['send'])){
             $modl_find = $model->find($fetch_data->id);
@@ -851,8 +853,7 @@ class JournalEntryController extends Controller{
             // dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
         }
 
-
-    
+        dump(1);
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' updated successfully');
     } 
 
@@ -1142,6 +1143,7 @@ class JournalEntryController extends Controller{
         $day_dif = $day - 12;
         $late_fee =0;
         $mon_dif = Carbon::parse($month)->diffInMonths($now);
+
         if($mon_dif == 0){
             if($day_dif>0 ){
                 $late_fee = ($day-12)*50;
@@ -1178,6 +1180,7 @@ class JournalEntryController extends Controller{
     public function fine_ajax(Request $request){
         $member_id = $request->input('member_id');
         $fine_model = Monthwise_Fine::where([['member_id','=',$member_id],['fine_waveoff','=','0'],['fine_amount','>','0'],['status','>','0'],['delstatus','<','1']])->get();
+
         $total_fine =0;
         if(!empty($fine_model)){
             foreach($fine_model as $fm){
