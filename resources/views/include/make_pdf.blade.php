@@ -58,15 +58,15 @@
                         <td>Paid Amount</td>
                         <td>&#8377;{{ $charge }}</td>
                     </tr>
+                    @if(!empty($from_month))
                     <tr>@php
                         $single = 0;
                         if($from_month == $to_month) $single =1;
                         @endphp
-                        @if(empty($from_month))
                         <td>Month(s) Cleared</td>
                         <td>{{ date("M Y", strtotime($from_month)) }} @if($single == 0) - {{ date("M Y", strtotime($to_month)) }} @endif</td>
-                        @endif
                     </tr>
+                    @endif
                 </tbody>
             </table>
         </div>

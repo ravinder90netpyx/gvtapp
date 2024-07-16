@@ -950,9 +950,11 @@ class JournalEntryController extends Controller{
             'reciept_date' => $journal_entry->reciept_date,
             'year' => $journal_entry->entry_year
         ];
-        if($charge_type_id == '8'){            
+        if($charge_type_id == '8'){
+            $entrywise_model = \App\Models\Entrywise_Fine::where('journal_entry_id','=',$je_id)->first();
             $data['from_month'] ='';
             $data['to_month'] ='';
+            $data['charge'] = $entrywise_model->fine_paid;
         }
         $pdf = PDF::loadView('include.make_pdf', $data);
 
