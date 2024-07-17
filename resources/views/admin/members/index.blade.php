@@ -147,7 +147,8 @@
                 @php
                     $data_arr = [
                         'group='.$group ?? '',
-                        'query='.$query ?? ''
+                        'query='.$query ?? '',
+                        'curr_month_stat='.$curr_month_stat ?? ''
                     ];
                 @endphp
                 <div class="col-auto perpage-wrap">@include('include.perpage', ['perpage'=>$perpage, 'default_perpage'=>$module['default_perpage'], 'data_arr' =>$data_arr])</div>
@@ -254,7 +255,7 @@
                 <div class="col pagination-wrap">
                     <div class="float-right">
                         <div class="row">
-                            <div class="col"> {!! $data->appends(compact('perpage', 'query', 'group'))->links() !!}</div>
+                            <div class="col"> {!! $data->appends(compact('perpage', 'query', 'group', 'curr_month_stat'))->links() !!}</div>
                         </div>
                     </div>
                 </div>
