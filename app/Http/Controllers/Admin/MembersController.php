@@ -65,6 +65,21 @@ class MembersController extends Controller{
         else $model_get = $model_get->latest();
         
         $group = $request->get('group') ?? null;
+        $curr_month_stat = $request->get('curr_month_stat') ?? null;
+        if(!empty($curr_month_stat)){
+            $curr_month = $carbon->now()->format('Y-m');
+            if($curr_month_stat == 'paid'){
+                $model_get = $model_get->orWhere(function($q) use ($curr_month) {
+                    $q->whereHas('report', function($q2) use ($curr_month) {
+                        $q2->where('month', '=',$curr_month);
+                    });
+                });
+            } else{
+                $model_get = $model_get->whereDoesntHave('report',function($q) use ($curr_month) {
+                    $q->where('month', $curr_month);
+                });
+            }
+        }
         if(!empty($group)) $model_get = $model_get->where('group_id', $group);
         $query = $request->get('query') ?? '';
         if($query!='') $model_get = $model_get->where('name', 'LIKE', '%'.$query.'%')->orwhere('unit_number','LIKE','%'.$query.'%' )->orwhere('mobile_number','LIKE','%'.$query.'%' );
@@ -74,7 +89,7 @@ class MembersController extends Controller{
         $title_shown = 'Manage '.$module['main_heading'].'s';
         $folder = $this->folder;
 
-        return view($module['main_view'].'.index', compact('data', 'model', 'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query', 'group'))->with('i', ($request->input('page', 1) - 1) * $perpage);
+        return view($module['main_view'].'.index', compact('data', 'model', 'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query', 'group', 'curr_month_stat'))->with('i', ($request->input('page', 1) - 1) * $perpage);
     }
 
     public function create(DefaultModel $model){

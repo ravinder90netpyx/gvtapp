@@ -1,6 +1,7 @@
 @php
     $current_url = Request::url();
     $group = $group ?? '';
+    $curr_month_stat = $curr_month_stat ?? '';
 @endphp
 @extends($folder['folder_name'].'.layouts.master')
 
@@ -25,6 +26,12 @@
             e.preventDefault();
             grp = $('#group').val();
             document.location.href = "{!! $current_url.'?group=' !!}"+grp;
+        });
+
+        $('#stat_but').on('click',function(e){
+            e.preventDefault();
+            grp = $('#curr_month_stat').val();
+            document.location.href = "{!! $current_url.'?curr_month_stat=' !!}"+grp;
         });
     });
 </script>
@@ -105,6 +112,23 @@
                         </div>
                     </div>
 
+                    <div class="col-auto mt-1 mb-1">
+                        <div class="form-group">
+                            <div class="input-group input-group-sm">
+                                <label for="curr_month_stat" class=" mt-1 mr-3 d-none d-sm-block">{!! __('Current Month Status') !!}</label>
+                                <select name="curr_month_stat" id="curr_month_stat" class="custom-select">
+                                    <option value="">{{ __('admin.text_select') }}</option>
+                                    <option value="paid" @if($curr_month_stat == "paid") selected @endif> Paid </option>
+                                    <option value="unpaid" @if($curr_month_stat == "unpaid") selected @endif> Unpaid </option>
+                                </select>
+
+                                <span class="input-group-append">
+                                    <input type="submit" class="btn btn-success" value="{{ __('admin.text_go') }}" id ="stat_but" name="btn_apply">
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
                     @can($module['permission_group'].'.add')
                     <div class="col-auto mt-1 mb-1">
                         <div class="form-group">
@@ -164,7 +188,7 @@
                                         <div class="custom-checkbox custom-control">
                                             <input class="custom-control-input data-checkboxes" type="checkbox" name="row_check[]" id="row_check_{{ $row_id }}" value="{{ $row_id }}">
                                             <label class="custom-control-label" for="row_check_{{ $row_id }}"></label>
-                                        </div>                  
+                                        </div>
                                     </td> 
 
                                     <td>
