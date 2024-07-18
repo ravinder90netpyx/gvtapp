@@ -103,7 +103,7 @@
     @endif
 </div>
 
-<div class="col-md-6 fine_amount">
+<div class="col-md-6 fine_amount" style="display:none;">
     @php 
     $current_field = 'fine_amt';
     $add_perm = ['vertical'=>true];

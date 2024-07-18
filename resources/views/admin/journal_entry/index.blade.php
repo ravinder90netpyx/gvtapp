@@ -410,6 +410,9 @@ $(function(){
         $('#cred_modal').modal('show');
         $('#cred_modal').modal({ backdrop:false });
         ajax_edit(id);
+
+        $('#form_btn_submit').show();
+        $('#form_btn_save_submit').show();
     });
 
     $('.show_but').on('click', function(e){
