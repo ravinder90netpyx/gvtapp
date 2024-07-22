@@ -806,7 +806,7 @@ $(function(){
                                         @if(empty($entrywise_model) || $entrywise_model->journal_entry_id == $row_id || $item['charge_type_id'] == '7' )
                                         @can($module['permission_group'].'.edit')
                                         <a href="{{ route($module['main_route'].'.edit', $row_id) }}" data-id="{{ $row_id }}" class="edit_but" title="{{ __('admin.text_edit') }}" rel="tab">
-                                            <i class="text-primary fa-lg fas fa-edit"></i>
+                                            <i class=" text-primary fa-lg fas fa-edit"></i>
                                         </a>
                                         @endcan
 

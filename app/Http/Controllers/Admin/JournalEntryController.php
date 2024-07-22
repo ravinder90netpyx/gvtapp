@@ -434,72 +434,7 @@ class JournalEntryController extends Controller{
         $this->generate_pdf_file($fetch_data->id);
         // $setting_model = new \App\Models\Settings();
         if(!empty($request_data['send'])){
-            $modl_find = $model->find($fetch_data->id);
-            $file_name = $modl_find->file_name;
-            $org_id = $modl_find->organization_id;
-            //  api message function
-            $api = $this->whatsapp_api;
-            $message = array(
-                'type' => $api['type'],
-                $api['type'] => array(
-                    'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
-                    'filename' => 'Reciept'
-                )
-            );
-            $date_arr = explode(' ', $fetch_data->entry_date);
-            $date = Carbon::parse($date_arr[0])->format('d-M-Y');
-            if(empty($fetch_data->from_month) && empty($fetch_data->to_month)){
-                if($fetch_data->from_month != $fetch_data->to_month){
-                    $month = Carbon::parse($fetch_data->from_month)->format('M Y')."-".Carbon::parse($fetch_data->to_month)->format('M Y');
-                } else{
-                    $month = Carbon::parse($fetch_data->from_month)->format('M Y');
-                }
-            } else{
-                $month = '';
-                $val_ar = explode(',',$fetch_data->custom_data);
-                $count = 0;
-                foreach($val_ar as $vl){
-                    $count++;
-                    if($count == count($val_ar)) $month = $month.Carbon::parse($vl)->format('M Y');
-                    else $month = $month.Carbon::parse($vl)->format('M Y').',';
-                }
-            }
-            $data = [
-                'name'=> $fetch_data->name,
-                'date'=> $date,
-                'year'=> $fetch_data->entry_year,
-                'mobile_number' => $member->mobile_number,
-                'charge' => $fetch_data->charge,
-                'month' => $month,
-                'serial_no' => $fetch_data->series_number,
-                'mode' =>$fetch_data->payment_mode,
-                'unit_no'=> $member->unit_number
-            ];
-            
-            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
-            $templ_json = $helpers->make_temp_json($temp->id, $data);
-            $message = json_encode($message,true);
-            $destination = $member->mobile_number;
-            if(!empty($member->sublet_message) && $member->sublet_message!='null'){
-               $sublet_msg_arr =json_decode($member->sublet_message);
-            }else{
-               $sublet_msg_arr =[];
-            }
-
-            if(!empty($member->mobile_message) && $member->mobile_message!='null'){
-               $mobile_msg_arr =json_decode($member->mobile_message);
-            }else{
-               $mobile_msg_arr =[];
-            }
-            if(in_array('reciept',$mobile_msg_arr)){
-                dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $fetch_data->id) )->onConnection('sync');
-            }
-            if(in_array('reciept',$sublet_msg_arr)){
-                $destination = $member->sublet_number;
-                if(!empty($destination)){
-                    dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $fetch_data->id) )->onConnection('sync');
-                }
-            }
+            $this->whatsapp_msg($fetch_data->id);
             // dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
         // }
          
@@ -780,77 +715,7 @@ class JournalEntryController extends Controller{
 
         //  api message function
         if(!empty($request_data['send'])){
-            $modl_find = $model->find($fetch_data->id);
-            $file_name = $modl_find->file_name;
-            $org_id = $modl_find->organization_id;
-            $api = $this->whatsapp_api;
-            $message = array(
-                'type' => $api['type'],
-                $api['type'] => array(
-                    'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
-                    'filename' => 'Reciept'
-                )
-            );
-            $date_arr = explode(' ', $fetch_data->entry_date);
-            $date = Carbon::parse($date_arr[0])->format('d-M-Y');
-            if(empty($fetch_data->from_month) && empty($fetch_data->to_month)){
-                if($fetch_data->from_month != $fetch_data->to_month){
-                    $month = Carbon::parse($fetch_data->from_month)->format('M Y')."-".Carbon::parse($fetch_data->to_month)->format('M Y');
-                } else{
-                    $month = Carbon::parse($fetch_data->from_month)->format('M Y');
-                }
-            } else{
-                $month = '';
-                $val_ar = explode(',',$fetch_data->custom_data);
-                $count = 0;
-                foreach($val_ar as $vl){
-                    $count++;
-                    if($count == count($val_ar)){
-                        $month = $month.Carbon::parse($vl)->format('M Y');
-                    } else{
-                        $month = $month.Carbon::parse($vl)->format('M Y').',';
-                    }
-                }
-            }
-            $data = [
-                'name'=> $fetch_data->name,
-                'date'=> $date,
-                'year'=> $fetch_data->entry_year,
-                'mobile_number' => $member->mobile_number,
-                'charge' => $fetch_data->charge,
-                'month' => $month,
-                'serial_no' => $fetch_data->series_number,
-                'mode' =>$fetch_data->payment_mode,
-                'unit_no'=> $member->unit_number
-            ];
-            
-            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
-            $templ_json = $helpers->make_temp_json($temp->id, $data);
-            $member_id = $fetch_data->member_id;
-            $member = \App\Models\Members::find($member_id);
-            $destination = $member->mobile_number;
-            $message = json_encode($message,true);
-            if(!empty($member->sublet_message) && $member->sublet_message!='null'){
-               $sublet_msg_arr =json_decode($member->sublet_message);
-            }else{
-               $sublet_msg_arr =[];
-            }
-
-            if(!empty($member->mobile_message) && $member->mobile_message!='null'){
-               $mobile_msg_arr =json_decode($member->mobile_message);
-            }else{
-               $mobile_msg_arr =[];
-            }
-            if(in_array('reciept',$mobile_msg_arr)){
-                dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $id) )->onConnection('sync');
-            }
-            if(in_array('reciept',$sublet_msg_arr)){
-                $destination = $member->sublet_number;
-                if(!empty($destination)){
-                    dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $id) )->onConnection('sync');
-                }
-            }
-            // dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+            $this->whatsapp_msg($id);
         }
 
         dump(1);
@@ -1073,34 +938,70 @@ class JournalEntryController extends Controller{
             'mode' =>$model->payment_mode,
             'unit_no'=> $member->unit_number
         ];
-        $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
-        $templ_json = $helpers->make_temp_json($temp->id, $data);
-        $message = json_encode($message, true);
-        if(!empty($member->sublet_message) && $member->sublet_message!='null'){
-           $sublet_msg_arr =json_decode($member->sublet_message);
-        }else{
-           $sublet_msg_arr =[];
-        }
+        $entrywise_model = \App\Models\Entrywise_Fine::where([['journal_entry_id', '=', $je_id], ['status','>','0'],['delstatus','<','1']])->first();
+        if(!empty($entrywise_model)){
+            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','fine'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            $templ_json = $helpers->make_temp_json($temp->id, $data);
+            $message = json_encode($message, true);
 
-        if(!empty($member->mobile_message) && $member->mobile_message!='null'){
-           $mobile_msg_arr =json_decode($member->mobile_message);
-        }else{
-           $mobile_msg_arr =[];
-        }
+            if(!empty($member->sublet_message) && $member->sublet_message!='null'){
+               $sublet_msg_arr =json_decode($member->sublet_message);
+            }else{
+               $sublet_msg_arr =[];
+            }
 
-        if(in_array('reciept',$mobile_msg_arr)){
-            dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json,$je_id) )->onConnection('sync');
+            if(!empty($member->mobile_message) && $member->mobile_message!='null'){
+               $mobile_msg_arr =json_decode($member->mobile_message);
+            }else{
+               $mobile_msg_arr =[];
+            }
 
-            // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
-            return '';
-            
-        }
-        if(in_array('reciept',$sublet_msg_arr)){
-            $dest_mob_no = $member->sublet_number;
-            if(!empty($dest_mob_no)){
+            if(in_array('reciept',$mobile_msg_arr)){
                 dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json,$je_id) )->onConnection('sync');
+
                 // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
                 return '';
+                
+            }
+            if(in_array('reciept',$sublet_msg_arr)){
+                $dest_mob_no = $member->sublet_number;
+                if(!empty($dest_mob_no)){
+                    dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json,$je_id) )->onConnection('sync');
+                    // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+                    return '';
+                }
+            }
+
+        } else{
+            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            $templ_json = $helpers->make_temp_json($temp->id, $data);
+            $message = json_encode($message, true);
+            if(!empty($member->sublet_message) && $member->sublet_message!='null'){
+               $sublet_msg_arr =json_decode($member->sublet_message);
+            }else{
+               $sublet_msg_arr =[];
+            }
+
+            if(!empty($member->mobile_message) && $member->mobile_message!='null'){
+               $mobile_msg_arr =json_decode($member->mobile_message);
+            }else{
+               $mobile_msg_arr =[];
+            }
+
+            if(in_array('reciept',$mobile_msg_arr)){
+                dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json,$je_id) )->onConnection('sync');
+
+                // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+                return '';
+                
+            }
+            if(in_array('reciept',$sublet_msg_arr)){
+                $dest_mob_no = $member->sublet_number;
+                if(!empty($dest_mob_no)){
+                    dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json,$je_id) )->onConnection('sync');
+                    // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+                    return '';
+                }
             }
         }
 
@@ -1192,7 +1093,108 @@ class JournalEntryController extends Controller{
     }
 
     public function whatsapp_msg($je_id){
+        $model = new DefaultModel();
+        $modl_find = $model->find($je_id);
+        $file_name = $modl_find->file_name;
+        $org_id = $modl_find->organization_id;
+        $api = $this->whatsapp_api;
+        $helpers = new helpers();
+        $member = \App\Models\Members::find($modl_find->member_id);
+        $message = array(
+            'type' => $api['type'],
+            $api['type'] => array(
+                'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
+                'filename' => 'Reciept'
+            )
+        );
+        $date_arr = explode(' ', $modl_find->entry_date);
+        $date = Carbon::parse($date_arr[0])->format('d-M-Y');
+        if(empty($modl_find->from_month) && empty($modl_find->to_month)){
+            if($modl_find->from_month != $modl_find->to_month){
+                $month = Carbon::parse($modl_find->from_month)->format('M Y')."-".Carbon::parse($modl_find->to_month)->format('M Y');
+            } else{
+                $month = Carbon::parse($modl_find->from_month)->format('M Y');
+            }
+        } else{
+            $month = '';
+            $val_ar = explode(',',$modl_find->custom_data);
+            $count = 0;
+            foreach($val_ar as $vl){
+                $count++;
+                if($count == count($val_ar)){
+                    $month = $month.Carbon::parse($vl)->format('M Y');
+                } else{
+                    $month = $month.Carbon::parse($vl)->format('M Y').',';
+                }
+            }
+        }
+        $data = [
+            'name'=> $modl_find->name,
+            'date'=> $date,
+            'year'=> $modl_find->entry_year,
+            'mobile_number' => $member->mobile_number,
+            'charge' => $modl_find->charge,
+            'month' => $month,
+            'serial_no' => $modl_find->series_number,
+            'mode' =>$modl_find->payment_mode,
+            'unit_no'=> $member->unit_number
+        ];
+        $entrywise_model = \App\Models\Entrywise_Fine::where([['journal_entry_id', '=', $je_id], ['status','>','0'],['delstatus','<','1']])->first();
+        if(!empty($entrywise_model)){
+            $data['fine_days'] = $this->calculate_fine_days($entrywise_model->id);
+            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','fine'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            $destination = $member->mobile_number;
+            $message = json_encode($message,true);
 
+            if(!empty($member->sublet_message) && $member->sublet_message!='null'){
+               $sublet_msg_arr =json_decode($member->sublet_message);
+            }else{
+               $sublet_msg_arr =[];
+            }
+
+            if(!empty($member->mobile_message) && $member->mobile_message!='null'){
+               $mobile_msg_arr =json_decode($member->mobile_message);
+            }else{
+               $mobile_msg_arr =[];
+            }
+            if(in_array('reciept',$mobile_msg_arr)){
+                dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $id) )->onConnection('sync');
+            }
+            if(in_array('reciept',$sublet_msg_arr)){
+                $destination = $member->sublet_number;
+                if(!empty($destination)){
+                    dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $id) )->onConnection('sync');
+                }
+            }
+
+        } else{
+            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            $templ_json = $helpers->make_temp_json($temp->id, $data);
+            $member_id = $modl_find->member_id;
+            $member = \App\Models\Members::find($member_id);
+            $destination = $member->mobile_number;
+            $message = json_encode($message,true);
+            if(!empty($member->sublet_message) && $member->sublet_message!='null'){
+               $sublet_msg_arr =json_decode($member->sublet_message);
+            }else{
+               $sublet_msg_arr =[];
+            }
+
+            if(!empty($member->mobile_message) && $member->mobile_message!='null'){
+               $mobile_msg_arr =json_decode($member->mobile_message);
+            }else{
+               $mobile_msg_arr =[];
+            }
+            if(in_array('reciept',$mobile_msg_arr)){
+                dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $id) )->onConnection('sync');
+            }
+            if(in_array('reciept',$sublet_msg_arr)){
+                $destination = $member->sublet_number;
+                if(!empty($destination)){
+                    dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $id) )->onConnection('sync');
+                }
+            }
+        }
     }
 
     public function fine_month_store($fr_month, $to_month, $pay_date, $je_id){
