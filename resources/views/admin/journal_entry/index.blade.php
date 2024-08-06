@@ -736,14 +736,16 @@ $(function(){
                 <table class="table table-striped table-hover table-bordered table-sm mb-2 main-listing-table">
                     <thead>
                         <tr>
-                            <th style="width:40px">{{ __('admin.text_idcheck') }}</th>
+                            <th style="width:20px">{{ __('admin.text_idcheck') }}</th>
                             <th style="width:180px">{{ __('admin.text_actions') }}</th>
                             <th>{{ __('Member Name') }}</th>
                             <th>{{ __('Unit Number') }}</th>
+                            <th>{{ __('Type') }}</th>
                             <th>{{ __('Message Send') }}</th>
                             <th>{{ __('Serial Number') }}</th>
+                            <th>{{ __('Amount') }}</th>
                             <th>{{ __('Payment Date') }}</th>
-                            <th style="width:150px">{{ __('admin.text_date_created') }}</th>
+                            {{-- <th style="width:150px">{{ __('admin.text_date_created') }}</th> --}}
                         </tr>
                     </thead>
 
@@ -820,13 +822,22 @@ $(function(){
                                     </td>
                                     @php $series= \App\Models\Series::find($item['series_id']);
                                         $member = \App\Models\Members::find($item['member_id']);
+                                        $type = \App\Models\ChargeType::find($item['charge_type_id']);
+                                        if(!empty($item['charge'])){
+                                            $amount = $item['charge']; 
+                                        } else{
+                                            $fine = \App\Models\Entrywise_Fine::where('journal_entry_id', '=',$row_id)->first();
+                                            $amount = $fine->fine_paid;
+                                        }
                                     @endphp
                                     <td>{{ $item['name'] }}</td>
                                     <td>{{ $member->unit_number }}</td>
+                                    <td>{{ $type->name }}</td>
                                     <td>{{ $item['count'] ?? '0' }}</td>
                                     <td>{{ $item['series_number'] }}</td>
+                                    <td>&#8377;{{ $amount }}</td>
                                     <td>{{ $item['entry_date'] }}</td>
-                                    <td>{{ $row_time }}</td>
+                                    {{-- <td> {{ $row_time }} </td> --}}
                                 </tr>
                             @endforeach
                         </tbody>
