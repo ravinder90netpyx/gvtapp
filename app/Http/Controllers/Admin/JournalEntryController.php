@@ -67,7 +67,6 @@ class JournalEntryController extends Controller{
         $carbon = new Carbon();
         $module = $this->module;
         // dump($request->input());
-        // $this->test_api();
         // $api = $this->whatsapp_api;
         // $org_id = '1';
         // // dd(url('upload/pdf_files/14-2024-05-29-09-49-42.pdf'));
@@ -1158,12 +1157,12 @@ class JournalEntryController extends Controller{
                $mobile_msg_arr =[];
             }
             if(in_array('reciept',$mobile_msg_arr)){
-                dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $id) )->onConnection('sync');
+                dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $je_id) )->onConnection('sync');
             }
             if(in_array('reciept',$sublet_msg_arr)){
                 $destination = $member->sublet_number;
                 if(!empty($destination)){
-                    dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $id) )->onConnection('sync');
+                    dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $je_id) )->onConnection('sync');
                 }
             }
 
@@ -1186,12 +1185,12 @@ class JournalEntryController extends Controller{
                $mobile_msg_arr =[];
             }
             if(in_array('reciept',$mobile_msg_arr)){
-                dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $id) )->onConnection('sync');
+                dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $je_id) )->onConnection('sync');
             }
             if(in_array('reciept',$sublet_msg_arr)){
                 $destination = $member->sublet_number;
                 if(!empty($destination)){
-                    dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $id) )->onConnection('sync');
+                    dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $je_id) )->onConnection('sync');
                 }
             }
         }
