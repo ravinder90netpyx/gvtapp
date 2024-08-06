@@ -279,9 +279,9 @@ function send_pdf(id){
             data: {'_token': '{!! csrf_token() !!}', 'je_id' : id},
             success: function(response){
                 if(response != 'fail'){
-                    $('.header-body').append('<div class="alert alert-success alert-block"><button type="button" class="close" data-dismiss="alert">×</button><strong>Message Send Successfully</strong></div>');
+                    $('.header-body').append('<div class="alert alert-success alert-block"><button type="button" class="close" data-dismiss="alert">×</button><strong>Message Sent Successfully</strong></div>');
                 } else{
-                    $('.header-body').append('<div class="alert alert-info alert-block"><button type="button" class="close" data-dismiss="alert">×</button> <strong>Message can\'t be sent</strong></div>');
+                    $('.header-body').append('<div class="alert alert-info alert-block"><button type="button" class="close" data-dismiss="alert">×</button> <strong>Message can\'t be send</strong></div>');
                 }
                 setTimeout(function() {
                     $(".alert").alert('close');
@@ -740,11 +740,11 @@ $(function(){
                             <th style="width:180px">{{ __('admin.text_actions') }}</th>
                             <th>{{ __('Member Name') }}</th>
                             <th>{{ __('Unit Number') }}</th>
-                            <th>{{ __('Type') }}</th>
-                            <th>{{ __('Message Send') }}</th>
-                            <th>{{ __('Serial Number') }}</th>
-                            <th>{{ __('Amount') }}</th>
+                            <th>{{ __('SR/Receipt Number') }}</th>
                             <th>{{ __('Payment Date') }}</th>
+                            <th>{{ __('Charge Type') }}</th>
+                            <th>{{ __('Amount Paid') }}</th>
+                            <th>{{ __('Message Sent') }}</th>
                             {{-- <th style="width:150px">{{ __('admin.text_date_created') }}</th> --}}
                         </tr>
                     </thead>
@@ -832,11 +832,11 @@ $(function(){
                                     @endphp
                                     <td>{{ $item['name'] }}</td>
                                     <td>{{ $member->unit_number }}</td>
-                                    <td>{{ $type->name }}</td>
-                                    <td>{{ $item['count'] ?? '0' }}</td>
                                     <td>{{ $item['series_number'] }}</td>
-                                    <td>&#8377;{{ $amount }}</td>
                                     <td>{{ $item['entry_date'] }}</td>
+                                    <td>{{ $type->name }}</td>
+                                    <td>&#8377;{{ $amount }}</td>
+                                    <td>{{ $item['count'] ?? '0' }}</td>
                                     {{-- <td> {{ $row_time }} </td> --}}
                                 </tr>
                             @endforeach
