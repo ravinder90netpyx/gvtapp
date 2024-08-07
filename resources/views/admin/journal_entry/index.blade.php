@@ -834,7 +834,7 @@ $(function(){
                                     <td>{{ $member->unit_number }}</td>
                                     <td>{{ $item['series_number'] }}</td>
                                     <td>{{ $item['entry_date'] }}</td>
-                                    <td>{{ $type->name }}</td>
+                                    <td>{{ $type->name ?? '' }}</td>
                                     <td>&#8377;{{ $amount }}</td>
                                     <td>{{ $item['count'] ?? '0' }}</td>
                                     {{-- <td> {{ $row_time }} </td> --}}
