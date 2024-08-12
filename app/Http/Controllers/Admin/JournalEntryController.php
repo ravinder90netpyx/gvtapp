@@ -532,14 +532,14 @@ class JournalEntryController extends Controller{
             'to_month' => 
             [
                 empty($request->input('custom_month')) && $charge_name == 'Maintenance' ? 'required':'nullable',
-                function($attribute, $value, $fail){
+                function($attribute, $value, $fail) use($id) {
                     $hlp = new helpers;
                     $request = Request();
                     $member = \App\Models\Members::find($request->input('member_id'));
                     $charge = \App\Models\Charges::find($member->charges_id)->rate;
                     $mon_arr = $hlp->get_financial_month_year($request->from_month, $value,'Y-m');
                     // $mon_arr = $helpers->get_financial_month_year($request->from_month, $value);
-                    $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('month', 'ASC')->first();
+                    $report_model2 = Report::where([['member_id','=',$request->input('member_id')],['journal_entry_id','<>' ,$id], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orderBy('month', 'ASC')->first();
                     $pending_money = $report_model2->money_pending ?? 0;
                     $count= count($mon_arr);
                     if(!empty($report_model2->money_pending)) $count =$count-1;
