@@ -206,7 +206,7 @@ class JournalEntryController extends Controller{
                     $report_model = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','=', '0']])->orderBy('month', 'DESC')->first();
                     $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orwhere([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0']])->orderBy('month', 'DESC')->first();
                     $last_month = $report_model->month ?? '0000-00';
-                    $act_from_mon = $report_model2->month ?? '9999-11';
+                    $act_from_mon = $report_model2->month ?? '9999-12';
                     if(empty($report_model2->money_pending)){
                         $date = Carbon::createFromFormat('Y-m', $act_from_mon);
                         $date->addMonth();
@@ -511,7 +511,7 @@ class JournalEntryController extends Controller{
                     $report_model = Report::where([['journal_entry_id','!=',$id], ['delstatus','<', '1'], ['status', '>', '0']])->orderBy('month', 'DESC')->get()->toArray();
                     $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orwhere([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0']])->orderBy('month', 'DESC')->first();
                     $last_month = $report_model->month ?? '0000-00';
-                    $act_from_mon = $report_model2->month ?? '9999-11';
+                    $act_from_mon = $report_model2->month ?? '9999-12';
                     if(empty($report_model2->money_pending)){
                         $date = Carbon::createFromFormat('Y-m', $act_from_mon);
                         $date->addMonth();
