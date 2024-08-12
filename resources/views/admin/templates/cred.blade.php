@@ -44,7 +44,9 @@
 <script type="text/javascript">
     var rowCount = $('.temp1 .row').length;
 
+
 function add_row() {
+    rowCount ++;
     var newRow = '<div class="row py-1 params['+ rowCount +']">' +
         '<div class="col-sm">' +
         '<input type="text" name="params[' + rowCount + '][name]" placeholder = "name" class="form-control label">' +
@@ -57,7 +59,7 @@ function add_row() {
         '</div>' +
         '</div>';
     $('.temp1').append(newRow);
-    rowCount++; // Increment the row count for the next row
+    // rowCount++; // Increment the row count for the next row
 }
 
 // Bind the click event to add a new row

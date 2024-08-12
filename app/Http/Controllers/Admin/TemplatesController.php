@@ -169,6 +169,7 @@ class TemplatesController extends Controller{
             'template_id' => 'required'
         ]);
         $params = json_encode($request->input('params'));
+        // dd($request->input('params'));
         $request->merge( ['params' => $params ]);
         $modelfind = $model->find($id);
         $modelfind->update($request->all());
