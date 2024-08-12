@@ -320,6 +320,8 @@ class MembersController extends Controller{
         $month = $now->format('M Y');
 
         $date = Carbon::parse($now_date)->format('d-M-Y');
+        $ch_dt = $now->day(13);
+        $ch_date = Carbon::parse($ch_dt)->format('d-M-Y');
         if(empty($je_model)){
             $data = [
                 'name'=> $member->name,
@@ -327,7 +329,8 @@ class MembersController extends Controller{
                 'unit_no'=> $member->unit_number,
                 'charge' => $charge->rate,
                 'date' => $date,
-                'month' => $month
+                'month' => $month,
+                'charge_date' => $ch_date
             ];
             if($day>12){
                 $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','overdue'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();

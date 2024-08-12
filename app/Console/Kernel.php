@@ -34,6 +34,8 @@ class Kernel extends ConsoleKernel{
             $month = $now->format('M Y');
             $now_date = $now->day(12);
             $date = Carbon::parse($now_date)->format('d-M-Y');
+            $ch_dt = $now->day(13);
+            $ch_date = Carbon::parse($ch_dt)->format('d-M-Y');
             foreach ($member_model as $val){
                 $send_notification = 1;
                 $org_model = new \App\Models\Organization_Settings();
@@ -45,7 +47,8 @@ class Kernel extends ConsoleKernel{
                     'unit_no'=> $val->unit_number,
                     'charge' => $charge->rate,
                     'date' => $date,
-                    'month' => $month
+                    'month' => $month,
+                    'charge_date' => $ch_date
                 ];
                 $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reminder'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
                 if($day>12){
