@@ -937,8 +937,10 @@ class JournalEntryController extends Controller{
             'mode' =>$model->payment_mode,
             'unit_no'=> $member->unit_number
         ];
+
         $entrywise_model = \App\Models\Entrywise_Fine::where([['journal_entry_id', '=', $je_id], ['status','>','0'],['delstatus','<','1']])->first();
         if(!empty($entrywise_model)){
+            $data['fine_days'] = $this->calculate_fine_days($entrywise_model->id);
             $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','fine'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
             $templ_json = $helpers->make_temp_json($temp->id, $data);
             $message = json_encode($message, true);
@@ -955,6 +957,7 @@ class JournalEntryController extends Controller{
                $mobile_msg_arr =[];
             }
 
+
             if(in_array('reciept',$mobile_msg_arr)){
                 dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json,$je_id) )->onConnection('sync');
 
@@ -969,6 +972,7 @@ class JournalEntryController extends Controller{
                     // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
                     return '';
                 }
+
             }
 
         } else{
@@ -1147,13 +1151,13 @@ class JournalEntryController extends Controller{
 
             if(!empty($member->sublet_message) && $member->sublet_message!='null'){
                $sublet_msg_arr =json_decode($member->sublet_message);
-            }else{
+            } else{
                $sublet_msg_arr =[];
             }
 
             if(!empty($member->mobile_message) && $member->mobile_message!='null'){
                $mobile_msg_arr =json_decode($member->mobile_message);
-            }else{
+            } else{
                $mobile_msg_arr =[];
             }
             if(in_array('reciept',$mobile_msg_arr)){
