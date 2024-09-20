@@ -139,7 +139,7 @@ $authentic_username = ucwords($authentic_user->first_name.' '.$authentic_user->l
 <script src="{{ asset('dashboard/js/select2.min.js') }}"></script>
 <script src="{{ asset('dashboard/js/bootstrap-tagsinput.min.js') }}"></script>
 <script src="{{ asset('dashboard/js/custom.js') }}"></script>
-@yield('scripts')
+
 <script>
 function sticky_header(){
   scrollTop = $(document).scrollTop();
@@ -173,5 +173,6 @@ $(document).ready(function(){
 });
 </script>
 <script src="{{ asset('dashboard/js/argon-modified.min.js') }}"></script>
+@yield('scripts')
 </body>
 </html>

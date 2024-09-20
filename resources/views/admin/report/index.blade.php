@@ -47,7 +47,6 @@
 "></script>
 <script type="text/javascript">
 
-
 /*function datetimepicker_month(id){
     $('#'+id).datetimepicker({
         showClear : true,

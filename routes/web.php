@@ -70,6 +70,7 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
         Route::post('organization_configs/', [OrganizationConfigController::class, 'store'])->name('organization_configs.store');
         Route::get('general_configs/', [GeneralConfigController::class, 'index'])->name('general_configs.index');
         Route::post('general_configs/', [GeneralConfigController::class,'store'])->name('general_configs.store');
+        
         Route::get('journal_entry/{id}/view', [JournalEntryController::class, 'view_pdf'])->name('journal_entry.view_pdf');
         Route::get('journal_entry/{id}/show', [JournalEntryController::class, 'show_pdf'])->name('journal_entry.show_pdf');
         Route::get('journal_entry/{id}/make', [JournalEntryController::class, 'generate_pdf_file'])->name('journal_entry.generate_pdf_file');
@@ -77,6 +78,8 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
         Route::post('journal_entry/fine_get', [JournalEntryController::class, 'fine_ajax'])->name('journal_entry.fine_ajax');
         Route::post('journal_entry/get_table', [JournalEntryController::class, 'get_table'])->name('journal_entry.get_table');
         Route::get('members/{id}/reminder', [MembersController::class, 'send_reminder'])->name('members.send_reminder');
+
+        Route::post('dashboard', [DashboardController::class, 'ajax_year'])->name('dashboard.ajax_year');
 
         $routes_arr = [
             'sample'=>'SampleController',
