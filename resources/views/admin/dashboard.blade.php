@@ -161,7 +161,7 @@ var myNewChart = new Chart(ctx2, {
                             <div class="row">
                                 <div class="col">
                                     <h5 class="card-title text-uppercase text-muted mb-0">Total Fine Collection</h5>
-                                    <span class="h2 font-weight-bold mb-0">924</span>
+                                    <span class="h2 font-weight-bold mb-0">{{$fine_val}}</span>
                                 </div>
                                 <div class="col-auto">
                                     <div class="icon icon-shape bg-gradient-green text-white rounded-circle shadow">
@@ -247,7 +247,7 @@ var myNewChart = new Chart(ctx2, {
                             <div class="row align-items-center">
                                 <div class="col">
                                     <h6 class="text-uppercase text-muted ls-1 mb-1">Performance</h6>
-                                    <h5 class="h3 mb-0">Total Paid Member</h5>
+                                    <h5 class="h3 mb-0">Paid Member</h5>
                                 </div>
                             </div>
                         </div>
