@@ -207,4 +207,16 @@ class ReportController extends Controller{
         $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown, ]);
         return $response;
     }
+
+    public function searchData(Request $request){
+        $term = $request->q;
+        $member = \App\Models\Members::where([['status','>','0'],['delstatus','<','1']]);
+        $member = $member->where([['name', 'LIKE','%'.$term.'%']])->orwhere([['unit_number','LIKE','%'.$term.'%']])->get();
+        $mem_data=[];
+        foreach($member as $mem){
+            $mem_data[$mem->id] = $mem->name;
+        }
+        return $mem_data;
+    }
+
 }
