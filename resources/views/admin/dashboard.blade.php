@@ -35,10 +35,10 @@ var myNewChart = new Chart(ctx, {
             label: 'Paid Member', // Label for the dataset
             data: [{!! implode(',', $paid_val) !!}], // Data points for the bar chart
             backgroundColor: [
-                'rgba(255, 99, 132, 0.2)'
+                'rgba(75, 100, 223, 0.2)'
             ],
             borderColor: [
-                'rgba(255, 99, 132, 1)'
+                'rgba(75, 100, 223, 1)'
             ],
             borderWidth: 1 // Width of the border around the bars
         }]
@@ -69,17 +69,30 @@ var myNewChart = new Chart(ctx2, {
             borderColor: [
                 'rgba(249, 245, 239, 1)'
             ],
-            borderWidth: 1 // Width of the border around the bars
+            borderWidth: 2 // Width of the border around the bars
         }]
     },
     options: {
         scales: {
             y: {
-                beginAtZero: true // Ensure the Y-axis starts at zero
+                beginAtZero: true, // Ensure the Y-axis starts at zero
+                ticks: {
+                    color: 'rgba(249, 245, 239, 1)' // Change Y-axis label font color
+                }
             },
             x: {
                 display: true, // Show the label for the Y-axis
-                text: '2024'
+                label: '2024',
+                ticks: {
+                    color: 'rgba(249, 245, 239, 1)' // Change Y-axis label font color
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: 'rgba(249, 245, 239, 1)' // Change the label color for the legend
+                }
             }
         }
     }
@@ -194,22 +207,6 @@ var myNewChart = new Chart(ctx2, {
                                 <div class="col">
                                     <h6 class="text-light text-uppercase ls-1 mb-1">Overview</h6>
                                     <h5 class="h3 text-white mb-0">Collection Monthwise</h5>
-                                </div>
-                                <div class="col">
-                                    <ul class="nav nav-pills justify-content-end">
-                                        <li class="nav-item mr-2 mr-md-0" data-toggle="chart" data-target="#chart-sales-dark" data-update="{&quot;data&quot;:{&quot;datasets&quot;:[{&quot;data&quot;:[70, 20, 10, 30, 15, 40, 20, 60, 60]}]}}" data-prefix="$" data-suffix="k">
-                                            <a href="#" class="nav-link py-2 px-3 active" data-toggle="tab">
-                                            <span class="d-none d-md-block">Month</span>
-                                            <span class="d-md-none">M</span>
-                                            </a>
-                                        </li>
-                                        <li class="nav-item" data-toggle="chart" data-target="#chart-sales-dark" data-update="{&quot;data&quot;:{&quot;datasets&quot;:[{&quot;data&quot;:[70, 20, 5, 25, 10, 30, 15, 40, 40]}]}}" data-prefix="$" data-suffix="k">
-                                            <a href="#" class="nav-link py-2 px-3" data-toggle="tab">
-                                            <span class="d-none d-md-block">Week</span>
-                                            <span class="d-md-none">W</span>
-                                            </a>
-                                        </li>
-                                    </ul>
                                 </div>
                             </div>
                         </div>
