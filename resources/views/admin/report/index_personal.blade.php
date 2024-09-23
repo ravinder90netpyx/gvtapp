@@ -171,7 +171,7 @@ $(function(){
     
     var options = [
         @foreach($data_select as $ds)
-            { label: "{{ $ds->name }}", value: "{{ $ds->id }}" },
+            { label: "{{ $ds->name }}", value: "{{ $ds->id }}", alias: "{{ $ds->unit_number }}" },
         @endforeach
     ];
     VirtualSelect.init({ 

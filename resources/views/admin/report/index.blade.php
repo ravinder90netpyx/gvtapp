@@ -17,10 +17,9 @@
 @endsection
 
 @section('css')
-<link href="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.44/dist/virtual-select.min.css
-" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.44/dist/virtual-select.min.css" rel="stylesheet">
 <style>
-    .submit_bttn {
+.submit_bttn {
     padding: 0 !important;
 /*    margin: -30px 0 0 0px !important;*/
 }
@@ -169,15 +168,16 @@ $(function(){
 
     var options = [
         @foreach($data_select as $ds)
-            { label: "{{ $ds->name }}", value: "{{ $ds->id }}" },
+            { label: "{{ $ds->name }}", value: "{{ $ds->id }}", alias: "{{ $ds->unit_number }}" },
         @endforeach
     ];
+    console.log(options);
     VirtualSelect.init({ 
         ele: '#member_id',
         options: options,
         multiple: true,
         search: true,
-        noOptionsText: "{{__('No results found')}}"
+        noOptionsText: "No results found",
     });
     
     $('#member_id').on('change',function(){
@@ -190,7 +190,7 @@ $(function(){
     /** Order By Date Start **/
     $('#cf-form').submit(function(e) {
         e.preventDefault();
-       var formData = {
+        var formData = {
             from_date: $("#from_date").val(),
             to_date: $("#to_date").val(),
             memberIds: $("#member_id").val(),

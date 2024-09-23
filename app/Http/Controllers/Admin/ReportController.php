@@ -209,12 +209,16 @@ class ReportController extends Controller{
     }
 
     public function searchData(Request $request){
-        $term = $request->q;
+        $term = $request->search;
         $member = \App\Models\Members::where([['status','>','0'],['delstatus','<','1']]);
         $member = $member->where([['name', 'LIKE','%'.$term.'%']])->orwhere([['unit_number','LIKE','%'.$term.'%']])->get();
         $mem_data=[];
+        $temp_data = [];
         foreach($member as $mem){
-            $mem_data[$mem->id] = $mem->name;
+            $temp_data['label'] = $mem->name;
+            $temp_data['value'] = $mem->id;
+            $mem_data[] = $temp_data;
+            $temp_data =[];
         }
         return $mem_data;
     }
