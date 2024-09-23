@@ -29,7 +29,7 @@ class DashboardController extends Controller{
         $paid_val = $this->paid_member($sixMonthsAgo,$now);
         $month_val = $this->find_month_val($sixMonthsAgo,$now);
         $fine_val =0;
-        $je_rep = \App\Models\Journal_Entry::where([['status','>','0'],['delstatus','<','1'],['charge_type_id','=','8'],['reciept_date', 'LIKE', '%'.$now.'%']]);
+        $je_rep = \App\Models\Journal_Entry::where([['status','>','0'],['delstatus','<','1'],['charge_type_id','=','8'],['reciept_date', 'LIKE', '%'.$now.'%']])->get();
         foreach($je_rep as $fv){
             $fine = \App\Models\Entrywise_Fine::where([['status','>','0'],['delstatus','<','1'],['journal_entry_id', '=',$fv->id]])->first();
             $fine_val = $fine_val+ $fine->fine_paid;
@@ -66,10 +66,12 @@ class DashboardController extends Controller{
         $fine_val =0;
         foreach($month_arr as $mt){
             $month_val[$mt] = \App\Models\Report::where([['month','=',$mt],['status','>','0'], ['delstatus','<','1']])->sum('money_paid');
-            $je_rep = \App\Models\Journal_Entry::where([['status','>','0'],['delstatus','<','1'],['charge_type_id','=','8'],['reciept_date', 'LIKE', '%'.$mt.'%']]);
+            $je_rep = \App\Models\Journal_Entry::where([['status','>','0'],['delstatus','<','1'],['charge_type_id','=','8'],['reciept_date', 'LIKE', '%'.$mt.'%']])->get();
             foreach($je_rep as $jr){
-                $fine_total = \App\Models\Report::where([['status','>','0'],['delstatus','<','1'],['journal_entry_id','=',$jr->id]])->first();
-                $fine_val = $fine_val+$fine_total->fine_paid;
+                if(!empty($jr)){
+                    $fine_total = \App\Models\Entrywise_Fine::where([['status','>','0'],['delstatus','<','1'],['journal_entry_id','=',$jr->id]])->first();
+                    $fine_val = isset($fine_total->fine_paid)? $fine_val+$fine_total->fine_paid : 0;
+                }
             }
             $month_val[$mt]= $month_val[$mt]+$fine_val;
         }
