@@ -171,7 +171,6 @@ $(function(){
             { label: "{{ $ds->name }}", value: "{{ $ds->id }}", alias: "{{ $ds->unit_number }}" },
         @endforeach
     ];
-    console.log(options);
     VirtualSelect.init({ 
         ele: '#member_id',
         options: options,
