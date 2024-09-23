@@ -51,7 +51,6 @@ class DashboardController extends Controller{
         $end_yr_month = $end_yr_month->format('Y-m');
         $mon_arr = $helpers->get_financial_month_year($strt_yr_month,$end_yr_month);
         $total_collection = \App\Models\Report::where([['month','>', $strt_yr_month],['month','<=', $end_yr_month],['status','>','0'],['delstatus','<','1']])->sum('money_paid');
-        
         return $total_collection;
     }
 
@@ -63,17 +62,17 @@ class DashboardController extends Controller{
         $helpers = new helpers();
         $month_arr = $helpers->get_financial_month_year($start_month, $end_month);
         $month_val = [];
-        $fine_val =0;
+        $fine_total =0;
         foreach($month_arr as $mt){
             $month_val[$mt] = \App\Models\Report::where([['month','=',$mt],['status','>','0'], ['delstatus','<','1']])->sum('money_paid');
             $je_rep = \App\Models\Journal_Entry::where([['status','>','0'],['delstatus','<','1'],['charge_type_id','=','8'],['reciept_date', 'LIKE', '%'.$mt.'%']])->get();
             foreach($je_rep as $jr){
                 if(!empty($jr)){
-                    $fine_total = \App\Models\Entrywise_Fine::where([['status','>','0'],['delstatus','<','1'],['journal_entry_id','=',$jr->id]])->first();
-                    $fine_val = isset($fine_total->fine_paid)? $fine_val+$fine_total->fine_paid : 0;
+                    $fine_val = \App\Models\Entrywise_Fine::where([['status','>','0'],['delstatus','<','1'],['journal_entry_id','=',$jr->id]])->first();
+                    $fine_total =$fine_total+ isset($fine_val->fine_paid)? $fine_val->fine_paid : 0;
                 }
             }
-            $month_val[$mt]= $month_val[$mt]+$fine_val;
+            $month_val[$mt]= $month_val[$mt]+$fine_total;
         }
         return $month_val;
     }
