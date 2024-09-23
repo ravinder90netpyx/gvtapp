@@ -181,8 +181,8 @@ var myNewChart = new Chart(ctx2, {
                         <div class="card-body">
                             <div class="row">
                                 <div class="col">
-                                    <h5 class="card-title text-uppercase text-muted mb-0">Unpaid Member</h5>
-                                    <span class="h2 font-weight-bold mb-0">{{$unpaid}}</span>
+                                    <h5 class="card-title text-uppercase text-muted mb-0">Unpaid Member(s)</h5>
+                                    <span class="h2 font-weight-bold mb-0">{{ $unpaid }}</span>
                                 </div>
                                 <div class="col-auto">
                                     <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
@@ -192,7 +192,7 @@ var myNewChart = new Chart(ctx2, {
                             </div>
                             <p class="mt-3 mb-0 text-sm">
                             <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 3.48%</span>
-                            <span class="text-nowrap">Unpaid User this month</span>
+                            <span class="text-nowrap">Unpaid Member(s) this month</span>
                             </p>
                         </div>
                     </div>
