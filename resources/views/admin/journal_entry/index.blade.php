@@ -827,7 +827,7 @@ $(function(){
                                             $amount = $item['charge']; 
                                         } else{
                                             $fine = \App\Models\Entrywise_Fine::where('journal_entry_id', '=',$row_id)->first();
-                                            $amount = $fine->fine_paid;
+                                            $amount = $fine->fine_paid ?? 0;
                                         }
                                     @endphp
                                     <td>{{ $item['name'] }}</td>
