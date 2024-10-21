@@ -659,6 +659,7 @@ class JournalEntryController extends Controller{
                 } else{
                     $journal_entry = $model->where([['to_month', '=', $rf['month']],['member_id','=', $rf['member_id']]])->orderBy('id','DESC')->first();
                     $chr = $rf['money_paid'] - $prev_paid_money;
+                    dd($chr);
                     $rep =Report::where('id', '=', $rf['id'])->update([['money_paid','=', $chr], ['journal_entry_id', '=', $journal_entry->id]]);
                 }
             }
@@ -700,6 +701,7 @@ class JournalEntryController extends Controller{
                             $report_data['money_pending'] = $money - $paid;
                             $paid = 0;
                         }
+                        dd($report_data);
                         $report_model->where('id','=',$report_models->id)->update($report_data);
                     }
                 }
