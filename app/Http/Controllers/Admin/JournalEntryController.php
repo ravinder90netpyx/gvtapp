@@ -427,9 +427,6 @@ class JournalEntryController extends Controller{
             }
         }
 
-
-        // $now=Carbon::now();
-        // $file_name = $fetch_data->id.'-'.$now->format('Y-m-d-H-i-s');
         $this->generate_pdf_file($fetch_data->id);
         // $setting_model = new \App\Models\Settings();
         if(!empty($request_data['send'])){
