@@ -768,25 +768,25 @@ $(function(){
                                     <td class="link-icons">
                                         @can($module['permission_group'].'.status')
                                             @if($item[$model->getStatusColumn()]=='1')
-                                            <a href="{{ route($module['main_route'].'.action', ['mode'=>'deactivate', 'id'=>$row_id]) }}" title="{{ __('admin.text_deactivate') }}">
+                                            <a href="{{ route($module['main_route'].'.action', ['mode'=>'deactivate', 'id'=>$row_id]) }}" title="{{ __('admin.text_deactivate') }}" class="px-1">
                                                 <i class="{{ config('custom.icons.active') }}"></i>
                                             </a>
                                             @elseif($item[$model->getStatusColumn()]=='0')
-                                            <a href="{{ route($module['main_route'].'.action', ['mode'=>'activate', 'id'=>$row_id]) }}" title="{{ __('admin.text_activate') }}">
+                                            <a href="{{ route($module['main_route'].'.action', ['mode'=>'activate', 'id'=>$row_id]) }}" title="{{ __('admin.text_activate') }}" class="px-1">
                                                 <i class="{{ config('custom.icons.inactive') }}"></i>
                                             </a>
                                             @endif
                                         @endcan
 
-                                        <a href="{{ route($module['main_route'].'.show', $row_id) }}" data-id="{{ $row_id }}" class="show_but" title="{{ __('admin.text_show') }}" rel="tab">
+                                        <a href="{{ route($module['main_route'].'.show', $row_id) }}" data-id="{{ $row_id }}" class="show_but" title="{{ __('admin.text_show') }}" rel="tab" class="px-1">
                                             <i class="{{ config('custom.icons.info') }}"></i>
                                         </a>
 
-                                        <a href='' onclick="download_file({{ $row_id }})" title="Download Reciept" rel="tab">
+                                        <a href='' onclick="download_file({{ $row_id }})" title="Download Reciept" rel="tab" class="px-1">
                                             <i class="fa fa-lg fa-download"></i>
                                         </a>
 
-                                        <a href='' onclick="regenerate_file({{ $row_id }})" title="Regenerate File" rel="tab">
+                                        <a href='' onclick="regenerate_file({{ $row_id }})" title="Regenerate File" rel="tab" class="px-1">
                                             <i class="fa fa-lg fa-redo"></i>
                                         </a>
 
@@ -796,8 +796,8 @@ $(function(){
                                         @endphp
 
                                         @if($wht_model>0)
-                                        <a href='#' onclick="send_pdf({{ $row_id }})" title="Send Reciept on Whatsapp" rel="tab">
-                                            <i class="fas fa-lg fa-external-link-alt"></i>
+                                        <a href='#' onclick="send_pdf({{ $row_id }})" title="Send Reciept on Whatsapp" rel="tab" class="px-1">
+                                            <i class="fab fa-lg fa-whatsapp"></i>
                                         </a>
                                         @endif
 
@@ -807,7 +807,7 @@ $(function(){
 
                                         @if(empty($entrywise_model) || $entrywise_model->journal_entry_id == $row_id || $item['charge_type_id'] == '7' )
                                         @can($module['permission_group'].'.edit')
-                                        <a href="{{ route($module['main_route'].'.edit', $row_id) }}" data-id="{{ $row_id }}" class="edit_but" title="{{ __('admin.text_edit') }}" rel="tab">
+                                        <a href="{{ route($module['main_route'].'.edit', $row_id) }}" data-id="{{ $row_id }}" class="edit_but" title="{{ __('admin.text_edit') }}" rel="tab" class="px-1">
                                             <i class=" text-primary fa-lg fas fa-edit"></i>
                                         </a>
                                         @endcan
@@ -815,7 +815,7 @@ $(function(){
                                         @endif
 
                                         @can($module['permission_group'].'.delete')
-                                            <a href="{{ route($module['main_route'].'.action', ['mode'=>'delete', 'id'=>$row_id]) }}" onclick="return confirm('Are you sure to delete?');" title="{{ __('admin.text_delete') }}">
+                                            <a href="{{ route($module['main_route'].'.action', ['mode'=>'delete', 'id'=>$row_id]) }}" onclick="return confirm('Are you sure to delete?');" title="{{ __('admin.text_delete') }}" class="px-1">
                                                 <i class="text-danger fas fa-lg fa-trash-alt"></i>
                                             </a>
                                         @endcan

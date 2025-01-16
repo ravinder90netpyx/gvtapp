@@ -794,7 +794,7 @@ class JournalEntryController extends Controller{
             $file_name = $je_id.'-'.$now->format('Y-m-d-H-i-s');
         }
         $charge_type_id = $journal_entry->charge_type_id;
-        $rec_name = !empty($member->sublet_name) ? $member->sublet_name : $member->name;
+        $rec_name = $member->name;
         $data = [
             'org_name' => $name,
             'note' => $setting_model->getVal('pdf', 'pdf_note'),
