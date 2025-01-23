@@ -85,7 +85,7 @@ class ReportController extends Controller{
         return view($module['main_view'].'.index', compact('data', 'model','month_arr' ,'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);
     }
 
-    public function getReportByDate(Request $request, DefaultModel $memberModel ,helpers $helpers,JournalEntryModel $journalEntryModel,ReportModel $reportModel){
+    public function getReportByDate(Request $request, DefaultModel $memberModel ,helpers $helpers,ReportModel $reportModel){
         $carbon = new Carbon();
         $module = $this->module;
         $title_shown = 'Manage '.$module['main_heading'].'s';
@@ -114,7 +114,7 @@ class ReportController extends Controller{
         }
     }
 
-    public function getPendingReport(Request $request, DefaultModel $model ,helpers $helpers,JournalEntryModel $journalEntryModel,ReportModel $reportModel){
+    public function getPendingReport(Request $request, DefaultModel $model ,helpers $helpers,JournalEntryModel $journalEntryModel){
         $carbon = new Carbon();
         $module = $this->module;
         $perpage = $request->perpage ?? $module['default_perpage'];
@@ -292,7 +292,7 @@ class ReportController extends Controller{
         $end_month = $carbon->now()->format('Y-m-d H:i:s');
         $model_get = $model_get->whereBetween('entry_date', [$start_month, $end_month]);
         $data = $model_get->paginate($perpage)->onEachSide(2);
-        $title_shown = 'Manage Fine'.$module['main_heading'].'s';
+        $title_shown = 'Manage Fine '.$module['main_heading'].'s';
         return view($module['main_view'].'.index_fine', compact(['module', 'folder', 'title_shown', 'data', 'model', 'perpage', 'carbon', 'query']))->with('i', ($request->input('page', 1) - 1) * $perpage);
         
     }
