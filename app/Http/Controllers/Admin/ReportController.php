@@ -185,10 +185,12 @@ class ReportController extends Controller{
     public function ajaxTransactionDetails(Request $request, JournalEntryModel $journalEntryModel, ReportModel $model){
         $module = $this->module;
         $carbon = new Carbon();
-        $from_date = $request->formData['from_date'];
-        $to_date = $request->formData['to_date'];
+        $from_date = $carbon->createFromFormat('Y-m',$request->formData['from_date']);
+        $from_date = $from_date->startOfMonth()->format('Y-m-d H:i:s');
+        $to_date = $carbon->createFromFormat('Y-m',$request->formData['to_date']);
+        $to_date = $to_date->endOfMonth();
         $memberIds = $request->formData['memberIds'];
-        $je_model = $journalEntryModel->whereIn('member_id', $memberIds)->where('delstatus','<','1')->where('status','>','0')->whereBetween('entry_date',[$from_date.'-01 00:00:00',$to_date.'-01 00:00:00'])->get();
+        $je_model = $journalEntryModel->whereIn('member_id', $memberIds)->where('delstatus','<','1')->where('status','>','0')->whereBetween('entry_date',[$from_date,$to_date->format('Y-m-d H:i:s')])->get();
         $title_shown = 'Transaction Details'.$module['main_heading'];
         $html_data =view($module['main_view'].'.ajax_transaction_report', compact('memberIds', 'model', 'je_model', 'module', 'carbon'))->render();
         $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown, ]);
@@ -299,11 +301,13 @@ class ReportController extends Controller{
         $module = $this->module;
         $folder = $this->folder;
         $carbon = new Carbon();
-        $from_date = $request->formData['from_date'];
-        $to_date = $request->formData['to_date'];
+        $from_date = $carbon->createFromFormat('Y-m',$request->formData['from_date']);
+        $from_date = $from_date->startOfMonth()->format('Y-m-d H:i:s');
+        $to_date = $carbon->createFromFormat('Y-m',$request->formData['to_date']);
+        $to_date = $to_date->endOfMonth();
         $memberIds = $request->formData['memberIds'];
         $model_get = $journalEntryModel->where('charge_type_id','=','8')->whereIn('member_id',$memberIds);
-        $model_get = $model_get->where([['status','>','0'],['delstatus','<','1']])->whereBetween('entry_date',[$from_date.'-01 00:00:00', $to_date.'-01 00:00:00'])->get();
+        $model_get = $model_get->where([['status','>','0'],['delstatus','<','1']])->whereBetween('entry_date',[$from_date, $to_date->format('Y-m-d H:i:s')])->get();
         $html_data= view($module['main_view'].'.ajax_fine_reports', compact(['module','folder','carbon','memberIds','model_get']))->render();
         $title_shown = 'Manage Fine '.$module['main_heading'];
         $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown]);
