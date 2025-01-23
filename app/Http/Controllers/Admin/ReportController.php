@@ -164,7 +164,7 @@ class ReportController extends Controller{
         $roles = $auth_user->roles()->pluck('id')->toArray();
         $end_month = Carbon::now()->format('Y-m-d H-i-s');
         $start_month = Carbon::now()->subMonth()->format('Y-m-d H-i-s');
-        $je_model = $journalEntryModel->where([['delstatus', '<', '1'], ['status', '>', '0'],['entry_date','>', $start_month], ['entry_date','<', $end_month]])->get();
+        $je_model = $journalEntryModel->where([['delstatus', '<', '1'], ['status', '>', '0'],['entry_date','>', $start_month], ['entry_date','<', $end_month]]);
         if(!in_array(1, $roles)){
             $organization_id = $auth_user->organization_id;
             $je_model = $je_model->where('organization_id', $organization_id)->get();
