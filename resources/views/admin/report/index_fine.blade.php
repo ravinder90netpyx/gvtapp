@@ -295,7 +295,8 @@ $(function(){
                         <tr>
                             <th>{{ __('admin.text_name') }}</th>
                             <th>{{ __('Unit Number') }}</th>
-                            <th>{{__('Mobile Number') }}</th>
+                            <th>{{__('Amount') }}</th>
+                            <th>{{__('Date and Time') }}</th>
                             {{-- @foreach($month_arr as $mn)
                                 <th>{{ date("Y M", strtotime($mn)) }}</th>
                             @endforeach --}}
@@ -309,15 +310,19 @@ $(function(){
                                 $row_id = $item[$model->getKeyName()];
                                 $dt_str = $carbon->createFromFormat('Y-m-d H:i:s', $item[$model::CREATED_AT]);
                                 $row_time = $dt_str->format(config('custom.datetime_format'));
-                                $report=\App\Models\Report::where('member_id',$item['id'])->get();
+                                $member = \App\Models\Members::where([['status','>','0'],['delstatus','<','1'],['id','=',$item['member_id']]])->first();
                                 @endphp
-                               
+                                @if($item['charge_type_id']=='8')
+                                @php
+                                $fine = \App\Models\Entrywise_Fine::where([['status','>','0'],['delstatus','<','1'], ['journal_entry_id','=', $item['id']]])->first();
+                                @endphp
                                 <tr>
                                     
 
-                                    <td>{{ $item['name'] }}</td>
-                                    <td>{{ $item['unit_number'] }}</td>
-                                    <td>{{ $item['mobile_number'] }}</td>
+                                    <td>{{ $member->name }}</td>
+                                    <td>{{ $member->unit_number }}</td>
+                                    <td>{{ $fine->fine_paid }}</td>
+                                    <td>{{ $item['entry_date'] }}</td>
                                     {{-- @php
                                         $match = '0';
                                         $mm = [];
@@ -344,7 +349,7 @@ $(function(){
                                         } @endphp --}}
                                     
                                 </tr>
-                               
+                               @endif
                             @endforeach
                         </tbody>
                     @endif

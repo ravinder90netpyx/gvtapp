@@ -2,54 +2,28 @@
     <thead>
         <tr>
             <th>{{ __('Name') }}</th>
-            <th >{{ __('Mobile Number') }}</th>
             <th >{{ __('Unit Number') }}</th>
-            @foreach($month_arr as $mn)
+            <th>{{__('Amount')}}</th>
+            <th>{{__('Date and Time')}}</th>
+            {{-- @foreach($month_arr as $mn)
                 <th>{{ date("Y M", strtotime($mn)) }}</th>
-            @endforeach
+            @endforeach --}}
         </tr>
     </thead>
 
-    @if($members)
+    @if($model_get)
         <tbody>
-            @foreach($members as $key => $item)
-                @php 
-                $row_id = $key;
-                
-                $entries=\App\Models\Journal_Entry::where('member_id',$key)->get();
-                $paid = [];
-                foreach($entries as $ent){
-                    array_push($paid,$ent['charge']);
-                }
-
-                @endphp
+            @foreach($model_get as $key => $item)
                 <tr>
+                    @php
+                    $member = \App\Models\Members::where('id',$item['member_id'])->first();
+                    $fine = \App\Models\Entrywise_Fine::where([['status','>','0'],['delstatus','<','1'],['journal_entry_id','=',$item['id']]])->first()->fine_paid;
+                    @endphp
 
-                    <td>{{ $item['name'] }}</td>
-                    <td>{{ $item['mobile_number'] }}</td>
-                    <td>{{ $item['unit_number'] }}</td>
-                        @php 
-                        $match = 0;
-                        $report=\App\Models\Report::where('member_id',$item['id'])->get();
-                        $mm = [];
-                        $money = [];
-                        foreach($report as $rp){
-                            $mm[] = $rp['month'];
-                            $money[] = $rp['money_paid'];
-                        }
-                        foreach($month_arr as $k => $v) {
-                            foreach($report as $ke => $rpt){
-                                if(in_array($v,$mm)) {
-                                    if($rpt['month'] == $v){
-                                        $match = $rpt['money_paid'];
-                                    }
-                                }else {
-                                    $match = "0";
-                                }
-                            }
-                            @endphp
-                                <td>&#8377;{{ $match }}</td>
-                        @php } @endphp
+                    <td>{{ $member->name }}</td>
+                    <td>{{ $member->unit_number }}</td>
+                    <td>{{ $fine }}</td>
+                    <td>{{ $item['entry_date'] }}</td>
                 </tr>
             @endforeach
         </tbody>

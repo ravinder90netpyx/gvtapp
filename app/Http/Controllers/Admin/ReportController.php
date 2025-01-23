@@ -288,7 +288,7 @@ class ReportController extends Controller{
         // $data = $model_get->paginate($perpage)->onEachSide(2);
         $start_month = $carbon->now()->subMonths()->format('Y-m-d H-i-s');
         $end_month = $carbon->now()->format('Y-m-d H:i:s');
-        $model_get = $model_get->whereBetween('entry_date', [$start_month, $end_month]);
+        $model_get = $model_get->whereBetween('entry_date', ['2024-01-01 00:00:00', $end_month]);
         $data = $model_get->paginate($perpage)->onEachSide(2);
         $title_shown = 'Manage Fine'.$module['main_heading'].'s';
         return view($module['main_view'].'.index_fine', compact(['module', 'folder', 'title_shown', 'data', 'model', 'perpage', 'carbon', 'query']))->with('i', ($request->input('page', 1) - 1) * $perpage);
@@ -302,6 +302,12 @@ class ReportController extends Controller{
         $from_date = $request->formData['from_date'];
         $to_date = $request->formData['to_date'];
         $memberIds = $request->formData['memberIds'];
+        $model_get = $journalEntryModel->where('charge_type_id','=','8')->whereIn('member_id',$memberIds);
+        $model_get = $model_get->where([['status','>','0'],['delstatus','<','1']])->whereBetween('entry_date',[$from_date.'-01 00:00:00', $to_date.'-01 00:00:00'])->get();
+        $html_data= view($module['main_view'].'.ajax_fine_reports', compact(['module','folder','carbon','memberIds','model_get']))->render();
+        $title_shown = 'Manage Fine '.$module['main_heading'];
+        $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown]);
+        return $response;
     }
 
 }
