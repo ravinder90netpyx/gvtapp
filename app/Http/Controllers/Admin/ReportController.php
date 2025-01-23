@@ -21,7 +21,7 @@ class ReportController extends Controller{
         'module_route' => 'report',
         'permission_group' => 'journal_entry',
         'main_heading' => 'Report',
-        'default_perpage' => 10
+        'default_perpage' => 15
     );
 
     public function __construct(Request $request){
@@ -64,8 +64,10 @@ class ReportController extends Controller{
             // $query->select(DB::raw(1))->from('journal_entry')->whereRaw('journal_entry.member_id = members.id');
         // })->get();
 
+        // dump($model_get->get()->toArray());
         // $data = $model_get->paginate($perpage)->onEachSide(2);
-        $data = $model_get->has('report')->paginate($perpage)->onEachSide(2);
+        $data = $model_get->has('report')->paginate($perpage);
+        // dump($data->toArray());  
 
         $format = "Y-m";
         $month_arr = [];
@@ -152,6 +154,47 @@ class ReportController extends Controller{
         return view($module['main_view'].'.index_pending', compact('data', 'model','month_arr' ,'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);
     }
 
+    public function getTransactionDetails(Request $request, DefaultModel $model, JournalEntryModel $journalEntryModel, ReportModel $reportModel){
+        $module =$this->module;
+        $carbon = new Carbon();
+        $perpage = $request->perpage ?? $module['default_perpage'];
+        if(!$request->perpage && !empty($request->cookie('perpage'))) $perpage = $request->cookie('perpage');
+        $model_get = $model;
+        $auth_user = Auth::user();
+        $roles = $auth_user->roles()->pluck('id')->toArray();
+        $end_month = Carbon::now()->format('Y-m-d H-i-s');
+        $start_month = Carbon::now()->subMonth()->format('Y-m-d H-i-s');
+        $je_model = $journalEntryModel->where([['delstatus', '<', '1'], ['status', '>', '0'],['entry_date','>', $start_month], ['entry_date','<', $end_month]])->get();
+        if(!in_array(1, $roles)){
+            $organization_id = $auth_user->organization_id;
+            $je_model = $je_model->where('organization_id', $organization_id)->get();
+        }
+        if($model->getDelStatusColumn()) $model_get = $model_get->where($model->getDelStatusColumn(), '<', '1');
+        if ($model->getSortOrderColumn()) $model_get = $model_get->orderBy($model->getSortOrderColumn(), 'ASC');
+        else $model_get = $model_get->latest();
+        $query = $request->get('query') ?? '';
+        if($query!='') $model_get = $model_get->where('name', 'LIKE', '%'.$query.'%');
+        $data = $model_get->paginate($perpage)->onEachSide(2);
+
+        $form_data = $journalEntryModel->where('from_month',$start_month)->get()->toArray();
+        $title_shown = 'Manage Transaction '.$module['main_heading'].'s';
+        $folder = $this->folder;
+        return view($module['main_view'].'.index_transaction', compact('data', 'model','carbon', 'module', 'perpage', 'folder', 'je_model', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);
+    }
+
+    public function ajaxTransactionDetails(Request $request, JournalEntryModel $journalEntryModel, ReportModel $model){
+        $module = $this->module;
+        $carbon = new Carbon();
+        $from_date = $request->formData['from_date'];
+        $to_date = $request->formData['to_date'];
+        $memberIds = $request->formData['memberIds'];
+        $je_model = $journalEntryModel->whereIn('member_id', $memberIds)->where('delstatus','<','1')->where('status','>','0')->whereBetween('entry_date',[$from_date.'-01 00:00:00',$to_date.'-01 00:00:00'])->get();
+        $title_shown = 'Transaction Details'.$module['main_heading'];
+        $html_data =view($module['main_view'].'.ajax_transaction_report', compact('memberIds', 'model', 'je_model', 'module', 'carbon'))->render();
+        $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown, ]);
+        return $response;
+    }
+
     public function getPersonalReport(Request $request, helpers $helpers,JournalEntryModel $journalEntryModel,ReportModel $model){
         $carbon = new Carbon();
         $module = $this->module;
@@ -221,6 +264,44 @@ class ReportController extends Controller{
             $temp_data =[];
         }
         return $mem_data;
+    }
+
+    public function getFineReport(Request $request, DefaultModel $model, JournalEntryModel $journalEntryModel){
+        $module = $this->module;
+        $folder = $this->folder;
+        $perpage = $request->perpage ?? $module['default_perpage'];
+        if(!$request->perpage && !empty($request->cookie('perpage'))) $perpage = $request->cookie('perpage');
+        $carbon = new Carbon();
+        $model_get = $journalEntryModel->where('charge_type_id','8');
+        $auth_user = Auth::user();
+        $roles = $auth_user->roles()->pluck('id')->toArray();
+        if(!in_array(1, $roles)){
+            $organization_id = $auth_user->organization_id;
+            $model_get = $model_get->where('organization_id',$organization_id);
+        }
+        if($model->getDelStatusColumn()) $model_get = $model_get->where($model->getDelStatusColumn(), '<', '1');
+        if($model->getSortOrderColumn()) $model_get= $model_get->orderBy($model->getSortOrderColumn(), 'ASC');
+        $model_get= $model_get->latest();
+
+        $query = $request->get('query') ?? '';
+        if($query!='') $model_get = $model_get->where('name', 'LIKE', '%'.$query.'%');
+        // $data = $model_get->paginate($perpage)->onEachSide(2);
+        $start_month = $carbon->now()->subMonths()->format('Y-m-d H-i-s');
+        $end_month = $carbon->now()->format('Y-m-d H:i:s');
+        $model_get = $model_get->whereBetween('entry_date', [$start_month, $end_month]);
+        $data = $model_get->paginate($perpage)->onEachSide(2);
+        $title_shown = 'Manage Fine'.$module['main_heading'].'s';
+        return view($module['main_view'].'.index_fine', compact(['module', 'folder', 'title_shown', 'data', 'model', 'perpage', 'carbon', 'query']))->with('i', ($request->input('page', 1) - 1) * $perpage);
+        
+    }
+
+    public function ajaxFine(Request $request, DefaultModel $model, helpers $helpers, JournalEntryModel $journalEntryModel){
+        $module = $this->module;
+        $folder = $this->folder;
+        $carbon = new Carbon();
+        $from_date = $request->formData['from_date'];
+        $to_date = $request->formData['to_date'];
+        $memberIds = $request->formData['memberIds'];
     }
 
 }

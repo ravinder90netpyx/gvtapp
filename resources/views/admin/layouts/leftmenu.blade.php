@@ -154,7 +154,7 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
 
         @canany([ 'charges.manage', 'members.manage', 'series.manage', 'journal_entry.manage','charge_type.manage', 'group.manage' ])
           <li class="nav-item">
-            <a {!! Str::contains(url()->current(), array('charges', 'members', 'series', 'journal_entry', 'report','chargetype', 'group', 'pending_report', 'personal_report')) ? 'class="nav-link active" aria-expanded="true"' : 'class="nav-link collapsed" aria-expanded="false"' !!} href="#leftMenu2" data-toggle="collapse" role="button" aria-controls="leftMenu2">
+            <a {!! Str::contains(url()->current(), array('charges', 'members', 'series', 'journal_entry', 'report','chargetype', 'group', 'pending_report', 'personal_report', 'transaction_report')) ? 'class="nav-link active" aria-expanded="true"' : 'class="nav-link collapsed" aria-expanded="false"' !!} href="#leftMenu2" data-toggle="collapse" role="button" aria-controls="leftMenu2">
               <i class="ni ni-single-02"></i>
               <span class="nav-link-text">Masters</span>
             </a>
@@ -238,6 +238,24 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
                   <a href="{{route($folder['route_folder_name'].'.personal_report')}}" class="nav-link{{ Str::contains(url()->current(), array('personal_report')) ? ' active' : '' }}">
                     <span class="sidenav-mini-icon"> DWR </span>
                     <span class="sidenav-normal"> Date-Wise Txn Report </span>
+                  </a>
+                </li>
+                @endcan
+
+                @can('journal_entry.report')
+                <li class="nav-item">
+                  <a href="{{route($folder['route_folder_name'].'.transaction_report')}}" class="nav-link{{ Str::contains(url()->current(), array('transaction_report')) ? ' active' : '' }}">
+                    <span class="sidenav-mini-icon"> TDR </span>
+                    <span class="sidenav-normal"> Transaction Detail Report </span>
+                  </a>
+                </li>
+                @endcan
+
+                @can('journal_entry.report')
+                <li class="nav-item">
+                  <a href="{{route($folder['route_folder_name'].'.transaction_report')}}" class="nav-link{{ Str::contains(url()->current(),array('transaction_report')) ? ' active':'' }}">
+                    <span class="sidenav-mini-icon"> FR </span>
+                    <span class="sidenav-normal"> Fine Report </span>
                   </a>
                 </li>
                 @endcan
