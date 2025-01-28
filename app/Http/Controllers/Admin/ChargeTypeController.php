@@ -88,7 +88,7 @@ class ChargeTypeController extends Controller
         $module = $this->module;
         // dd($request->input());
         $request->validate([
-            'name' => 'required|unique:charges,name'
+            'name' => 'required|unique:charge_type,name'
         ]);
 
         $model->create($request->all());
