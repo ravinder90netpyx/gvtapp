@@ -149,23 +149,38 @@ class ExpenseController extends Controller{
     public function update(Request $request, $id, DefaultModel $model){
         $module = $this->module;
         $request->validate([
-            'name' => empty($request->input('expense_type_id'))?'required':'nullable',
-            'expense_type_id' =>empty($request->input('name'))? 'required':'nullable',
+            'name' =>[
+            function($attribute, $value, $fail) use($request){
+                if(!empty($request->input('expense_type_id'))&& !empty($request->input('name'))){
+                    $fail("Either name or Expense Type is required you can't fill both of them");
+                } else if(empty($request->input('expense_type_id')) && empty($request->input('name'))){
+                    $fail("Either name or Expense Type is required");
+                }
+            }
+            ],
+            'expense_type_id' =>[
+            function($attribute, $value, $fail) use($request){
+                if(!empty($request->input('expense_type_id'))&& !empty($request->input('name'))){
+                    $fail("Either name or Expense Type is required you can't fill both of them");
+                } else if(empty($request->input('expense_type_id')) && empty($request->input('name'))){
+                    $fail("Either name or Expense Type is required");
+                }
+            }
+            ],
             'date'=>'required|date',
             'amount'=>'required|integer',
             'image' => 'image|mimes:jpg,bmp,png,jpeg,gif,avif,webp|max:2048'
         ]);
-
+        $imageName=null;
         $modelfind = $model->find($id);
         if(!empty($request->hasFile('image'))){
             $prev_img = public_path('upload/expense'.$modelfind->image);
-            unlink($prev_img); // unlinking existing image
+            if(is_file($prev_img)) unlink($prev_img); // unlinking existing image
             $imageName=time().'.'.$request->image->getClientOriginalExtension();
             $image = $request->file('image');
             $image->move(public_path('upload/expense/'), $imageName);
-            $request->merge(['image'=>$imageName]);
         }
-        $modelfind->update($request->all());
+        $modelfind->update(array_merge($request->all(),['image'=>$imageName]));
     
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' updated successfully');
     }
