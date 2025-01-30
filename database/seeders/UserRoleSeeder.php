@@ -86,6 +86,18 @@ class UserRoleSeeder extends Seeder
             [ 'name' => 'journal_entry.status' ],
             [ 'name' => 'journal_entry.report' ],
 
+            [ 'name' => 'expense.manage' ],
+            [ 'name' => 'expense.add' ],
+            [ 'name' => 'expense.edit' ],
+            [ 'name' => 'expense.delete' ],
+            [ 'name' => 'expense.status' ],
+
+            [ 'name' => 'expense_type.manage' ],
+            [ 'name' => 'expense_type.add' ],
+            [ 'name' => 'expense_type.edit' ],
+            [ 'name' => 'expense_type.delete' ],
+            [ 'name' => 'expense_type.status' ],
+
         ];
 
         $default_data = [ 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now() ];

@@ -152,14 +152,14 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
         </li>
         @endcanany
 
-        @canany([ 'charges.manage', 'members.manage', 'series.manage', 'journal_entry.manage','charge_type.manage', 'group.manage' ])
+        @canany([ 'charges.manage', 'members.manage', 'series.manage', 'journal_entry.manage','charge_type.manage', 'group.manage', 'expense_type.manage', 'expense.manage' ])
           <li class="nav-item">
-            <a {!! Str::contains(url()->current(), array('charges', 'members', 'series', 'journal_entry', 'report','chargetype', 'group', 'pending_report', 'personal_report', 'transaction_report', 'fine_report')) ? 'class="nav-link active" aria-expanded="true"' : 'class="nav-link collapsed" aria-expanded="false"' !!} href="#leftMenu2" data-toggle="collapse" role="button" aria-controls="leftMenu2">
+            <a {!! Str::contains(url()->current(), array('charges', 'members', 'series', 'journal_entry', 'report','chargetype', 'group', 'pending_report', 'personal_report', 'transaction_report', 'fine_report', 'expense_type', 'expense')) ? 'class="nav-link active" aria-expanded="true"' : 'class="nav-link collapsed" aria-expanded="false"' !!} href="#leftMenu2" data-toggle="collapse" role="button" aria-controls="leftMenu2">
               <i class="ni ni-single-02"></i>
               <span class="nav-link-text">Masters</span>
             </a>
 
-            <div class="collapse{{ Str::contains(url()->current(), array('charges', 'members', 'series', 'journal_entry', 'report', 'pending_report', 'personal_report', 'chargetype', 'group', 'transaction_report', 'fine_report')) ? ' show' : '' }}" id="leftMenu2" style="">
+            <div class="collapse{{ Str::contains(url()->current(), array('charges', 'members', 'series', 'journal_entry', 'report', 'pending_report', 'personal_report', 'chargetype', 'group', 'transaction_report', 'fine_report', 'expense_type', 'expense')) ? ' show' : '' }}" id="leftMenu2" style="">
               <ul class="nav nav-sm flex-column">
                 @can('charges.manage')
                 <li class="nav-item">
@@ -256,6 +256,24 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
                   <a href="{{route($folder['route_folder_name'].'.fine_report')}}" class="nav-link{{ Str::contains(url()->current(),array('fine_report')) ? ' active':'' }}">
                     <span class="sidenav-mini-icon"> FR </span>
                     <span class="sidenav-normal"> Fine Report </span>
+                  </a>
+                </li>
+                @endcan
+
+                @can('expense_type.manage')
+                <li class="nav-item">
+                  <a href="{{ route($folder['route_folder_name'].'.expense_type.index') }}" class="nav-link{{ Str::contains(url()->current(),array('expense_type')) ? ' active':'' }}">
+                    <span class="sidenav-mini-icon"> ET </span>
+                    <span class="sidenav-normal"> Expense Type </span>
+                  </a>
+                </li>
+                @endcan
+
+                @can('expense.manage')
+                <li class="nav-item">
+                  <a href="{{ route($folder['route_folder_name'].'.expense.index') }}" class="nav-link{{ Str::contains(url()->current(),array('expense')) ?' active':'' }}">
+                    <span class="sidenav-mini-icon"> E </span>
+                    <span class="sidenav-normal"> Expense </span>
                   </a>
                 </li>
                 @endcan

@@ -18,7 +18,9 @@ use App\Http\Controllers\Admin\{
     GeneralConfigController,
     OrganizationConfigController,
     TemplatesController,
-    GroupController
+    GroupController,
+    ExpenseTypeController,
+    ExpenseController
 };
 
 use App\Http\Controllers\CronController;
@@ -97,7 +99,9 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
             'journal_entry' => 'JournalEntryController',
             'templates' => 'TemplatesController',
             'chargetype'=>'ChargeTypeController',
-            'group'=>'GroupController'
+            'group'=>'GroupController',
+            'expense_type'=>'ExpenseTypeController',
+            'expense'=>'ExpenseController'
         ];
 
         foreach($routes_arr as $rak=>$rav){
