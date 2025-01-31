@@ -19,6 +19,7 @@
     function datetimepicker(id){
         date = new Date('2020-01-01');
         $('#'+id).datepicker({
+            useCurrent: true,
             format: "yyyy-mm-dd",
             startView: 0,
             minViewMode: 0,
@@ -28,24 +29,7 @@
     }
 
     function name_autocomplete(id){
-        val = $('#name').val();
-        {{-- $('#name').autoComplete({
-            source: function(request, response){
-                $.ajax({
-                    url: '{{route("supanel.expense.ajax_name")}}',
-                    type: 'POST',
-                    dataType:"json",
-                    data: {'_token': '{!! csrf_token() !!}', 'query' : val},
-                    success: function(data){
-                        callback(data);
-                    },
-                    error: function(error){
-                        console.error(error);
-                    }
-                });
-            }
-        }); --}}
-        $('#name').autoComplete({
+        $('#'+id).autoComplete({
             resolver: 'custom',
             minLength:1,
             events: {
