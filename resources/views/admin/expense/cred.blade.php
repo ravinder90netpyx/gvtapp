@@ -6,10 +6,15 @@
 @endsection
 
 @section('css')
+{{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-autocomplete/1.0.7/jquery.auto-complete.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.14.1/themes/base/jquery-ui.min.css" /> --}}
 @endsection
 
 @section('scripts')
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
+{{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.14.1/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-autocomplete/1.0.7/jquery.auto-complete.min.js"></script> --}}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-autocomplete@2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script>
 <script type="text/javascript">
     function datetimepicker(id){
         date = new Date('2020-01-01');
@@ -21,8 +26,51 @@
             autoclose: true
         });
     }
+
+    function name_autocomplete(id){
+        val = $('#name').val();
+        {{-- $('#name').autoComplete({
+            source: function(request, response){
+                $.ajax({
+                    url: '{{route("supanel.expense.ajax_name")}}',
+                    type: 'POST',
+                    dataType:"json",
+                    data: {'_token': '{!! csrf_token() !!}', 'query' : val},
+                    success: function(data){
+                        callback(data);
+                    },
+                    error: function(error){
+                        console.error(error);
+                    }
+                });
+            }
+        }); --}}
+        $('#name').autoComplete({
+            resolver: 'custom',
+            minLength:1,
+            events: {
+                search: function(query, callback){
+                    $.ajax({
+                        url:'{{route("supanel.expense.ajax_name")}}',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {'_token':'{!! csrf_token() !!}', 'query':query},
+                        success: function(data){
+                            callback(data);
+                        },
+                        error: function(error){
+                            console.error(error);
+                        }
+                    });
+                }
+            }
+        });
+    }
     $(function(){
         datetimepicker('date');
+        $('#name').on('input', function(){
+            name_autocomplete('name');
+        });
     });
 </script>
 @endsection
@@ -41,48 +89,14 @@
         <div class="main-card mb-3 card">
             <div class="card-body">
                 {!! Form::open(['url'=>$action, 'method'=>$method, 'class'=>'needs-validation', 'novalidate', 'files'=>true]) !!}
-                    {{-- @php $current_field = 'name'; 
-                        $secondary_field = 'charge_type_id';
-                        $row_data = [];
-                        $expense_type = \App\Models\Expense_Type::where([['delstatus','<','1'],['status','>','0']])->get();
-                        foreach($expense_type as $ds) $row_data[$ds->id] = $ds->name;
-                        $multi_data = array(
-                        ['type'=>'text','name'=>$current_field,'value'=>$form_data->$current_field ?? '','field_attributes'=>[]],
-                        ['type'=>'select','name'=>$secondary_field, 'value'=>$form_data->$secondary_field ?? '','field_attributes'=>[],'remove_blank_field'=>false, 'data'=>$row_data]);
-                    @endphp
-                    {!! Form::bsMultiInput($multi_data, 'Name') !!} --}}
-
                     @php
                     $current_field='name';
                     $secondary_field='expense_type_id';
                     $row_data=[];
                     $expense_type= \App\Models\Expense_Type::where([['delstatus','<','1'],['status','>','0']])->get();
                     @endphp
-                    <div class="position-relative form-group-multi-input form-group row">
-                        <label for="name" class="form-control-label col-md-3 col-form-label">Name</label>
-                        <div class="col-md-9">
-                            <div class="input-group ">
-                                <input class="form-control {{$errors->has($current_field) ? 'is-invalid':''}}" name="{{$current_field}}" type="text" value="{{$form_data->$current_field ?? ''}}" id="{{$current_field}}">
-                               
-                                <select class="custom-select {{$errors->has($secondary_field) ? 'is-invalid':''}}" name="{{ $secondary_field }}">
-                                    <option selected="selected" value="">- -Select Option- -</option>
-                                    @foreach($expense_type as $ds)
-                                    <option {{ !empty($form_data->$secondary_field) && ($form_data->$secondary_field == $ds->id)?'selected ':'' }} value="{{ $ds->id }}">{{ $ds->name }}</option>
-                                    @endforeach
-                                </select>
-                               
-                                <div class="invalid-feedback">@if($errors->has($secondary_field)) {{ $errors->first($secondary_field) }} @endif  </div>
-                           </div>
-                        </div>
-                    </div>
 
-
-                    {{-- @php $current_field = 'expense_type_id';
-                    $row_data = [];
-                    $data_select = DB::table('expense_type')->get();
-                    foreach($data_select as $ds) $row_data[$ds->id] = $ds->name;
-                    @endphp
-                    {!! Form::bsSelect($current_field, __('Expense Type'), $row_data, $form_data->$current_field ?? '', ['']); !!} --}}
+                    {!! Form::bsInput('search', $current_field, __('Name'), $form_data->$current_field ?? '', ['required']); !!}
 
                     @php $current_field = 'date'; @endphp
                     {!! Form::bsInput('text', $current_field, __('Date'), $form_data->$current_field ?? '', [ 'autocomplete'=>'off','required' ],  []); !!}
@@ -91,6 +105,11 @@
                     $current_field = 'amount';
                     @endphp
                     {!! Form::bsInput('number', $current_field, __('Amount'), $form_data->$current_field ?? '', [ 'autocomplete'=>'off','required' ],  []); !!}
+
+                    @php
+                    $current_field = 'remarks';
+                    @endphp
+                    {!! Form::bsTextArea($current_field, __('Remarks'), $form_data->$current_field ?? '', ['']); !!}
 
                     @php $current_field = 'image'; @endphp
                     {!! Form::bsInput('file',$current_field, __('Image'), $form_data->$current_field ?? '',[]); !!}

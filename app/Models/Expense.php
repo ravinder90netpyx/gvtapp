@@ -33,6 +33,7 @@ class Expense extends Base_Model{
         'expense_type_id',
         'date',
         'amount',
+        'remarks',
         'image'
     ];
 }

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->unsignedBigInteger('expense_type_id')->nullable();
             $table->date('date')->nullable();
             $table->unsignedInteger('amount')->nullable()->default(0);
+            $table->text('remarks')->nullable();
             $table->string('image')->nullable();
             // $table->string('fine_waveoff')->nullable()->default(0);
 

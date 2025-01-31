@@ -78,27 +78,8 @@ class ExpenseController extends Controller{
 
     public function store(Request $request, DefaultModel $model){
         $module = $this->module;
-        // dd($request->input());
         $request->validate([
-            'name' =>[
-            function($attribute, $value, $fail) use($request){
-                if(!empty($request->input('expense_type_id'))&& !empty($request->input('name'))){
-                    $fail("Either name or Expense Type is required you can't fill both of them");
-                } else if(empty($request->input('expense_type_id')) && empty($request->input('name'))){
-                    $fail("Either name or Expense Type is required");
-                }
-            }
-            ],
-            'expense_type_id' =>[
-            function($attribute, $value, $fail) use($request){
-                if(!empty($request->input('expense_type_id'))&& !empty($request->input('name'))){
-                    $fail("Either name or Expense Type is required you can't fill both of them");
-                } else if(empty($request->input('expense_type_id')) && empty($request->input('name'))){
-                    $fail("Either name or Expense Type is required");
-                }
-            }
-            ],
-
+            'name' => 'required',
             'date'=>'required|date',
             'amount'=>'required|integer',
             'image' => 'image|mimes:jpg,bmp,png,jpeg,gif,avif,webp|max:2048'
@@ -149,24 +130,7 @@ class ExpenseController extends Controller{
     public function update(Request $request, $id, DefaultModel $model){
         $module = $this->module;
         $request->validate([
-            'name' =>[
-            function($attribute, $value, $fail) use($request){
-                if(!empty($request->input('expense_type_id'))&& !empty($request->input('name'))){
-                    $fail("Either name or Expense Type is required you can't fill both of them");
-                } else if(empty($request->input('expense_type_id')) && empty($request->input('name'))){
-                    $fail("Either name or Expense Type is required");
-                }
-            }
-            ],
-            'expense_type_id' =>[
-            function($attribute, $value, $fail) use($request){
-                if(!empty($request->input('expense_type_id'))&& !empty($request->input('name'))){
-                    $fail("Either name or Expense Type is required you can't fill both of them");
-                } else if(empty($request->input('expense_type_id')) && empty($request->input('name'))){
-                    $fail("Either name or Expense Type is required");
-                }
-            }
-            ],
+            'name' => 'required',
             'date'=>'required|date',
             'amount'=>'required|integer',
             'image' => 'image|mimes:jpg,bmp,png,jpeg,gif,avif,webp|max:2048'
@@ -240,5 +204,15 @@ class ExpenseController extends Controller{
                 }
             }
         }
+    }
+
+    function ajax_name(Request $request){
+        $query = $request->input('query');
+        $model = \App\Models\Expense_Type::where([['delstatus','<','1'],['status','>','0'],['name','like','%'.$query.'%']])->get()->toArray();
+        $data =[];
+        foreach($model as $md){
+            $data[]= $md['name'];
+        }
+        return $data;
     }
 }
