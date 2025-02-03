@@ -22,4 +22,17 @@ $(function(){
       $('.main-listing-table tbody :checkbox').each(function(){ this.checked = this_check; });
     });
   }
+  // $("#div-sidenav").click(function(){ alert(); });
+  // $(document).on('click', '#div-sidenav', function(e){
+  //     alert(1);
+  //     e.preventDefault();
+  //     e.stopPropagation();
+  //     $('#sidenav-main').toggleClass('mobile-width');
+  //     if($('#sidenav-main'),hasClass('mobile-width')){
+  //       $('body').removeClass('g-sidenav-show');
+  //       $('#sidenav-main').removeClass('mobile-width');
+  //     } else{
+  //       $('#sidenav-main').addClass('mobile-width');
+  //     }
+  //   });
 });

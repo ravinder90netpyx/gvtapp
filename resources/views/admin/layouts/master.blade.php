@@ -105,6 +105,15 @@ $authentic_username = ucwords($authentic_user->first_name.' '.$authentic_user->l
               </a>
             </div>
           </li>
+          <li class="ml-2 pl-2">
+            <div class="sidenav-toggler d-none d-xl-block" data-action="sidenav-pin" data-target="#sidenav-main">
+              <div class="sidenav-toggler-inner" id="div-sidenav">
+                <i class="sidenav-toggler-line"></i>
+                <i class="sidenav-toggler-line"></i>
+                <i class="sidenav-toggler-line"></i>
+              </div>
+            </div>
+          </li>
         </ul>
       </div>
     </div>

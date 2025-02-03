@@ -235,13 +235,6 @@ background-color: #5e72e4 !important;
 .select2-container--default .select2-selection--single{
       border: 1px solid #ccc !important;
 }
-@media screen and (max-width: 768px)
-{
-	.left-40 {
-	    display: none;
-	}
-}
-
 .req:after {
     content: "*";
     display: inline-block;
@@ -312,6 +305,16 @@ body .main-content {
 body .custom-control-alternative .custom-control-label::before {
     border: 1px solid #bec5cc;
 }
+
+body.g-sidenav-show.g-sidenav-hidden a.navbar-brand {
+    display: none;    
+}
+
+body.g-sidenav-show.g-sidenav-hidden span.nav-link-text {
+    display: none;    
+}
+
+
 #productCarousel .carousel-control-next .carousel-control-next-icon,
 #productCarousel .carousel-control-prev .carousel-control-prev-icon {
     background-color: black;
@@ -381,6 +384,7 @@ select[invalid], input[invalid], textarea[invalid]{
     width: 100%;
 }
 
+
 /* mini sidebar navigation css changes */
 .g-sidenav-hidden:not(.g-sidenav-show) .nav>.nav-item>.show>.nav>.nav-item>a.nav-link {
     margin-left: -42px !important;
@@ -394,4 +398,19 @@ select[invalid], input[invalid], textarea[invalid]{
 
 .g-sidenav-hidden:not(.g-sidenav-show) nav.sidenav{
    max-width: 62px; 
+}
+
+
+/*** media ****/
+
+@media (max-width: 1199.98px) {
+.sidenav {transform: none !important;}
+.sidenav.fixed-left+.main-content {margin-left: 62px !important;}
+nav#sidenav-main:focus {max-width: 262px !important;}
+.sidenav-header .ml-auto {margin-left: 22px !important;}
+.sidenav-toggler.d-none {display: block !important;}
+}
+
+@media (max-width: 768px) {
+.left-40 {display: none;}
 }

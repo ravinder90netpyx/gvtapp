@@ -6,18 +6,18 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
 <div class="scrollbar-inner">
   <!-- Brand -->
   <div class="sidenav-header  d-flex  align-items-center">
-    <a class="navbar-brand" href="{{route($folder['route_folder_name'].'.dashboard')}}">
+    <a class="navbar-brand" href="#{{-- {{route($folder['route_folder_name'].'.dashboard')}} --}}">
       <h1>{{ $folder['module_name'] }}</h1>
     </a>
     <div class=" ml-auto ">
       <!-- Sidenav toggler -->
-      <div class="sidenav-toggler d-none d-xl-block" data-action="sidenav-pin" data-target="#sidenav-main">
-        <div class="sidenav-toggler-inner">
+      {{-- <div class="sidenav-toggler d-none d-xl-block" data-action="sidenav-pin" data-target="#sidenav-main">
+        <div class="sidenav-toggler-inner" id="div-sidenav">
           <i class="sidenav-toggler-line"></i>
           <i class="sidenav-toggler-line"></i>
           <i class="sidenav-toggler-line"></i>
         </div>
-      </div>
+      </div> --}}
     </div>
   </div>
   <div class="navbar-inner">
