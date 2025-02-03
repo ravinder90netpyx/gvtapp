@@ -314,6 +314,9 @@ body.g-sidenav-show.g-sidenav-hidden span.nav-link-text {
     display: none;    
 }
 
+body.g-sidenav-show.g-sidenav-hidden a.nav-link:after {
+    display: none !important;    
+}
 
 #productCarousel .carousel-control-next .carousel-control-next-icon,
 #productCarousel .carousel-control-prev .carousel-control-prev-icon {
