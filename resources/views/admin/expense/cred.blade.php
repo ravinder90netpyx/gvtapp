@@ -82,8 +82,10 @@
 
                     {!! Form::bsInput('search', $current_field, __('Name'), $form_data->$current_field ?? '', ['required']); !!}
 
-                    @php $current_field = 'date'; @endphp
-                    {!! Form::bsInput('text', $current_field, __('Date'), $form_data->$current_field ?? '', [ 'autocomplete'=>'off','required' ],  []); !!}
+                    @php $current_field = 'date';
+                    $now = \Carbon\Carbon::now()->format('Y-m-d');
+                    @endphp
+                    {!! Form::bsInput('text', $current_field, __('Date'), $form_data->$current_field ?? $now, [ 'autocomplete'=>'off','required' ],  []); !!}
                     
                     @php 
                     $current_field = 'amount';
