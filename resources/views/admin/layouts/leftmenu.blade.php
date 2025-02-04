@@ -159,7 +159,7 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
               <span class="nav-link-text"> Masters </span>
             </a>
 
-            <div class="collapse{{ Str::contains(url()->current(), array('charges', 'members', 'series', 'personal_report', 'chargetype', 'group', 'fine_report', 'expense_type')) ? ' show' : '' }}" id="leftMenu2" style="">
+            <div class="collapse{{ Str::contains(url()->current(), array('charges', 'members', 'series', 'chargetype', 'group', 'expense_type')) ? ' show' : '' }}" id="leftMenu2" style="">
               <ul class="nav nav-sm flex-column">
 
                 @can('series.manage')
