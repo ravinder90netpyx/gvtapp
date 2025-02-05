@@ -336,10 +336,18 @@ class ReportController extends Controller{
         $folder = $this->folder;
         $carbon = new Carbon();
         $perpage = $request->perpage ?? $module['default_perpage'];
-        $start_month = $carbon->createFromFormat('Y-m', $request->formData['from_date']);
-        $start_month = $start_month->startOfMonth()->format('Y-m-d H-i-s');
+        if(!empty($request->formData['from_date'])){
+            $start_month = $carbon->createFromFormat('Y-m', $request->formData['from_date']);
+            $start_month = $start_month->startOfMonth()->format('Y-m-d H-i-s');
+        } else{
+            $start_month = $carbon->now()->subMonths()->startOfMonth()->format('Y-m-d H-i-s');
+        }
 
-        $end_month = $carbon->createFromFormat('Y-m', $request->formData['to_date']);
+        if(!empty($request->formData['to_date'])){
+            $end_month = $carbon->createFromFormat('Y-m', $request->formData['to_date']);
+        } else{
+            $end_month = $carbon->now();
+        }
         $model_get = \App\Models\Expense::where([['status','>','0'],['delstatus','<','1']])->whereBetween('date',[$start_month, $end_month->format('Y-m-d H-i-s')])->get();
         $html_data= view($module['main_view'].'.ajax_expense_reports', compact(['module','folder','carbon','model_get']))->render();
         $title_shown = 'Manage Fine '.$module['main_heading'];
