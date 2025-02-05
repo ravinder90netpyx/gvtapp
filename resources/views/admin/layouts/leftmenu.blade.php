@@ -223,11 +223,11 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
 
         @canany(['journal_entry.manage', 'expense.manage'])
           <li class="nav-item">
-            <a {!! Str::contains(url()->current(), array('journal_entry', 'expense')) ? 'class="nav-link active" aria-expanded="true"' : 'class="nav-link collapsed" aria-expanded="false"' !!} href="#leftMenu3" data-toggle="collapse" role="button" aria-controls="leftMenu3">
+            <a {!! Str::contains(url()->current(), array('journal_entry', 'expenses')) ? 'class="nav-link active" aria-expanded="true"' : 'class="nav-link collapsed" aria-expanded="false"' !!} href="#leftMenu3" data-toggle="collapse" role="button" aria-controls="leftMenu3">
               <i class="ni ni-single-02"></i>
               <span class="nav-link-text">Transactions</span>
             </a>
-            <div class="collapse{{Str::contains(url()->current(), array('journal_entry', 'expense')) ? ' show':''}}" id="leftMenu3" style="">
+            <div class="collapse{{Str::contains(url()->current(), array('journal_entry', 'expenses')) ? ' show':''}}" id="leftMenu3" style="">
               <ul class="nav nav-sm flex-column">
 
                 @can('journal_entry.manage')
@@ -241,9 +241,9 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
 
                 @can('expense.manage')
                 <li class="nav-item">
-                  <a href="{{ route($folder['route_folder_name'].'.expense.index') }}" class="nav-link{{ Str::contains(url()->current(),array('expense')) ?' active':'' }}">
+                  <a href="{{ route($folder['route_folder_name'].'.expenses.index') }}" class="nav-link{{ Str::contains(url()->current(),array('expenses')) ?' active':'' }}">
                     <span class="sidenav-mini-icon"> E </span>
-                    <span class="sidenav-normal"> Manage Expense </span>
+                    <span class="sidenav-normal"> Manage Expenses </span>
                   </a>
                 </li>
                 @endcan
@@ -317,7 +317,6 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
           </div>
         </li>
         @endcanany
-
       </ul>               
     </div>
   </div>

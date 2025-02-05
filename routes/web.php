@@ -104,7 +104,7 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
             'chargetype'=>'ChargeTypeController',
             'group'=>'GroupController',
             'expense_type'=>'ExpenseTypeController',
-            'expense'=>'ExpenseController'
+            'expenses'=>'ExpenseController'
         ];
 
         foreach($routes_arr as $rak=>$rav){

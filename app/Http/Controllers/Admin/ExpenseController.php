@@ -14,7 +14,7 @@ use Spatie\Permission\Models\Permission;
 class ExpenseController extends Controller{
     public $module = array(
         'module_view' => 'expense',
-        'module_route' => 'expense',
+        'module_route' => 'expenses',
         'permission_group' => 'expense',
         'main_heading' => 'Expense',
         'default_perpage' => 10
