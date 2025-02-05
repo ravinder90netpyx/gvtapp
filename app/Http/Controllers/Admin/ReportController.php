@@ -314,4 +314,49 @@ class ReportController extends Controller{
         return $response;
     }
 
+    public function getExpenseReport(Request $request, DefaultModel $model, helpers $helpers, JournalEntryModel $journalEntryModel){
+        $module = $this->module;
+        $folder = $this->folder;
+        $perpage = $request->perpage ?? $module['default_perpage'];
+        $carbon = new Carbon();
+        $auth_user = Auth::user();
+        $query = $request->get('query') ?? '';
+        $start_month = $carbon->now()->subMonths()->startOfMonth()->format('Y-m-d H-i-s');
+        $end_month = $carbon->now()->format('Y-m-d H-i-s');
+        $user_array = $this->userArray($auth_user->id);
+        $exp_model = \App\Models\Expense::where([['status','>','0'],['delstatus','<','1']])->whereBetween('date',[$start_month,$end_month]);
+        $data = $exp_model->whereIn('user_id', $user_array)->get();
+        $roles = $auth_user->roles()->pluck('id')->toArray();
+        $title_shown = 'Manage Expense '.$module['main_heading'];
+        return view($module['main_view'].'.index_expense', compact(['module', 'folder', 'title_shown', 'data', 'model', 'perpage', 'carbon', 'query']))->with('i', ($request->input('page', 1) - 1) * $perpage);
+    }
+
+    public function ajaxExpense(Request $request, DefaultModel $model, helpers $helpers, JournalEntryModel $journalEntryModel){
+        $module = $this->module;
+        $folder = $this->folder;
+        $carbon = new Carbon();
+        $perpage = $request->perpage ?? $module['default_perpage'];
+        $start_month = $carbon->createFromFormat('Y-m', $request->formData['from_date']);
+        $start_month = $start_month->startOfMonth()->format('Y-m-d H-i-s');
+
+        $end_month = $carbon->createFromFormat('Y-m', $request->formData['to_date']);
+        $model_get = \App\Models\Expense::where([['status','>','0'],['delstatus','<','1']])->whereBetween('date',[$start_month, $end_month->format('Y-m-d H-i-s')])->get();
+        $html_data= view($module['main_view'].'.ajax_expense_reports', compact(['module','folder','carbon','model_get']))->render();
+        $title_shown = 'Manage Fine '.$module['main_heading'];
+        $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown]);
+        return $response;
+    }
+
+    public function userArray($user_id){
+        $user_array = [];
+        $user_array[] = $user_id;
+        $user = \App\Models\User::where([['status','>','0'],['created_by','=', $user_id]])->get()->toArray();
+        foreach($user as $us){
+            if(!in_array($us['id'], $user_array)){
+                $user_array[] = $us['id'];
+                $user_array = array_unique(array_merge($user_array, $this->userArray($us['id'])));
+            }
+        }
+        return $user_array;
+    }
 }
