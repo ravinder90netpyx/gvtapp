@@ -191,7 +191,7 @@ $(function(){
                     <div class="col-auto mt-1 mb-1">
                         <div class="form-group">
                             <div class="input-group input-group-sm">
-                                <label for="member_id[]" class="combined_action_label mt-1 mr-3 d-none d-sm-block">{!! __('From') !!}</label>
+                                <label for="from_date" class="combined_action_label mt-1 mr-3 d-none d-sm-block">{!! __('From') !!}</label>
                                 <input class="form-control" id="from_date" name="from_date" type="text" value="">
                             </div>
                         </div>
@@ -200,7 +200,7 @@ $(function(){
                     <div class="col-auto mt-1 mb-1">
                         <div class="form-group">
                             <div class="input-group input-group-sm">
-                                <label for="member_id[]" class="combined_action_label mt-1 mr-3 d-none d-sm-block">{!! __('To') !!}</label>
+                                <label for="to_date" class="combined_action_label mt-1 mr-3 d-none d-sm-block">{!! __('To') !!}</label>
                                 <input class="form-control" id="to_date" name="to_date" type="text" value="">
                             </div>
                         </div>
