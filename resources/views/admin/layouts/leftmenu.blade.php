@@ -298,7 +298,7 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
 
               @can('journal_entry.report')
               <li class="nav-item">
-                <a href="{{route($folder['route_folder_name'].'.fine_report')}}" class="nav-link{{ Str::contains(url()->current(), array('transaction_report')) ? ' active' : '' }}">
+                <a href="{{route($folder['route_folder_name'].'.fine_report')}}" class="nav-link{{ Str::contains(url()->current(), array('fine_report')) ? ' active' : '' }}">
                   <span class="sidenav-mini-icon"> FC </span>
                   <span class="sidenav-normal"> Fine Collection Report </span>
                 </a>
@@ -307,7 +307,7 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
               
               @can('journal_entry.report')
               <li class="nav-item">
-                <a href="{{route($folder['route_folder_name'].'.expense_report')}}" class="nav-link{{ Str::contains(url()->current(), array('transaction_report')) ? ' active' : '' }}">
+                <a href="{{route($folder['route_folder_name'].'.expense_report')}}" class="nav-link{{ Str::contains(url()->current(), array('expense_report')) ? ' active' : '' }}">
                   <span class="sidenav-mini-icon"> ER </span>
                   <span class="sidenav-normal"> Expense Report </span>
                 </a>
