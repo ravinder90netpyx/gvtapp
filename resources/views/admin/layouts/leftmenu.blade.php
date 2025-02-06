@@ -224,7 +224,7 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
         @canany(['journal_entry.manage', 'expense.manage'])
           <li class="nav-item">
             <a {!! Str::contains(url()->current(), array('journal_entry', 'expenses')) ? 'class="nav-link active" aria-expanded="true"' : 'class="nav-link collapsed" aria-expanded="false"' !!} href="#leftMenu3" data-toggle="collapse" role="button" aria-controls="leftMenu3">
-              <i class="ni ni-single-02"></i>
+              <i class="fas fa-coins"></i>
               <span class="nav-link-text">Transactions</span>
             </a>
             <div class="collapse{{Str::contains(url()->current(), array('journal_entry', 'expenses')) ? ' show':''}}" id="leftMenu3" style="">
@@ -255,7 +255,7 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
         @canany(['journal_entry.report'])
         <li class="nav-item">
           <a {!! Str::contains(url()->current(),array('report', 'pending_report', 'personal_report', 'transaction_report', 'fine_report', 'expense_report')) ? 'class="nav-link active" aria-expanded="true"': 'class="nav-link collapsed" aria-expended="false"' !!} href="#leftMenu4" data-toggle="collapse" role="button" aria-controls="leftMenu4">
-            <i class="ni ni-single-02"></i>
+            <i class="fas fa-book"></i>
             <span class="nav-link-text">Report</span>
           </a>
           <div class="collapse{{ Str::contains(url()->current(), array('report', 'pending_report', 'personal_report', 'transaction_report', 'fine_report', 'expense_report')) ? ' show':'' }}" id="leftMenu4" style="">
