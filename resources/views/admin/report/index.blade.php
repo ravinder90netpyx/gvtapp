@@ -42,8 +42,7 @@
 @section('scripts')
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.44/dist/virtual-select.min.js
-"></script>
+<script src="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.44/dist/virtual-select.min.js"></script>
 <script type="text/javascript">
 
 /*function datetimepicker_month(id){
@@ -111,7 +110,6 @@ $("#from_date").change(function(){
     } else{
         var to_date = myDate.getFullYear()+'-0'+month;
     }
-    // console.log(to_date);
     var date = new Date(to_date);
     $('#to_date').datepicker('setEndDate' , date);
     $('#to_date').datepicker('setStartDate' , from_date);
@@ -122,16 +120,14 @@ $("#from_date").change(function(){
 
 function download_csv_pdf(){
     abc = $("#repo_id").DataTable({
-        // "dom": "Bt",
-        // "dom":'Bfrtip',
         'dom': '<"top"lfB>rt<"bottom"ip><"clear">',
         'bPaginate': true,
         'paging' : true,
         // 'scrollY' : 'auto',
-        'lengthMenu': [1, 5, 10, 30, 50, 100],
+        'lengthMenu': [1, 5, 15, 30, 50, 100],
         // 'processing' : true,
         // 'iDisplayLength' : 10,
-        'pageLength': 10,
+        'pageLength': 15,
         'language': {
             'paginate': {
                 'first': '<< ',
@@ -157,6 +153,7 @@ function download_csv_pdf(){
             }
         ],
     });
+    // abc.columns.adjust();
 }
 
 $(function(){
@@ -317,7 +314,7 @@ $(function(){
 
         
         <div class="card-body">
-            <div class="row">
+            <div class="row" style="display: block;">
                 <div class="col-auto perpage-wrap">{{-- @include('include.perpage', ['perpage'=>$perpage, 'default_perpage'=>$module['default_perpage']]) --}}</div>
                 <div class="col pagination-wrap">
                     <div class="float-right">
@@ -376,11 +373,12 @@ $(function(){
                                                 }else {
                                                     $match = "0";
                                                 }
-                                        }
+                                            }
                                     @endphp
                                 <td>&#8377;{{ $match }}</td>
-                        @php
-                        $match = '0'; } @endphp
+                                @php
+                                $match = '0';   
+                                        } @endphp
                                     
                                 </tr>
                                

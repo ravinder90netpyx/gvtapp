@@ -89,9 +89,9 @@ class ReportController extends Controller{
         $carbon = new Carbon();
         $module = $this->module;
         $title_shown = 'Manage '.$module['main_heading'].'s';
-        $from_date = $request->formData['from_date'];
-        $to_date = $request->formData['to_date'];
-        $memberIds = $request->formData['memberIds'];
+        $from_date = $request->formData['from_date'] ?? $carbon->now()->subMonth()->format('Y-m');
+        $to_date = $request->formData['to_date'] ?? $carbon->now()->format('Y-m');
+        $memberIds = $request->formData['memberIds'] ?? [];
         $report_type = $request->formData['report_type'];
         
         $member_modal = new \App\Models\Members(); 

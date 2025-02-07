@@ -3,6 +3,7 @@
         <tr>
             
             <th style="width:120px">{{ __('Name') }}</th>
+            <th style="width:120px">{{ __('Unit Number') }}</th>
             <th style="width:120px">{{ __('Mobile Number') }}</th>
             <th style="width:120px">{{ __('Total Amount') }}</th>
             <th style="width:120px">{{ __('Amount Paid') }}</th>
@@ -21,6 +22,7 @@
                 @endphp
                 <tr>
                     <td>{{ $item['name'] }}</td>
+                    <td>{{ $item['unit_number'] }}</td>
                     <td>{{ $item['mobile_number'] }}</td>
 
                     @php 
