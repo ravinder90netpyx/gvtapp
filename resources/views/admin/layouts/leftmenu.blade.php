@@ -3,10 +3,27 @@ $dropbox_token = config('filesystems.disks.dropbox.token');
 $auth_user = Auth::user();
 $roles = $auth_user->roles()->pluck('id')->toArray();
 @endphp
+<style type="text/css">
+  .scroll-scrollx_visible .sidenav-mini-icon{
+    opacity:1 !important;
+  }
+
+  .scrollbar-inner.scroll-content.scroll-scrolly_visible:not(.scroll-scrollx_visible) .sidenav-normal {
+      opacity: 0 !important;
+  }
+
+  .scroll-scrollx_visible .sidenav-normal {
+    opacity:0 !important;
+  }
+
+  .scrollbar-inner.scroll-content.scroll-scrolly_visible:not(.scroll-scrollx_visible) .sidenav-normal {
+      opacity: 1 !important;
+  }
+</style>
 <div class="scrollbar-inner">
   <!-- Brand -->
   <div class="sidenav-header  d-flex  align-items-center">
-    <a class="navbar-brand" href="#{{-- {{route($folder['route_folder_name'].'.dashboard')}} --}}">
+    <a class="navbar-brand" href="{{route($folder['route_folder_name'].'.dashboard')}}">
       <h1>{{ $folder['module_name'] }}</h1>
     </a>
     <div class=" ml-auto ">
