@@ -5,18 +5,22 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
 @endphp
 <style type="text/css">
   .scroll-scrollx_visible .sidenav-mini-icon{
+    transition:.3s ease;
     opacity:1 !important;
   }
 
   .scrollbar-inner.scroll-content.scroll-scrolly_visible:not(.scroll-scrollx_visible) .sidenav-normal {
+    transition:.3s ease;
       opacity: 0 !important;
   }
 
   .scroll-scrollx_visible .sidenav-normal {
+    transition:.3s ease;
     opacity:0 !important;
   }
 
   .scrollbar-inner.scroll-content.scroll-scrolly_visible:not(.scroll-scrollx_visible) .sidenav-normal {
+    transition:.3s ease;
       opacity: 1 !important;
   }
 </style>
