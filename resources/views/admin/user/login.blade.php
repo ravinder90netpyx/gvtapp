@@ -26,6 +26,19 @@
 .alert{z-index:99;top:60px;right:18px;min-width:30%;position:fixed;animation:slide .5s forwards}@keyframes slide{100%{top:30px}}@media screen and (max-width:668px){.alert{left:10px;right:10px}}.error{width:100%;color:red;margin-top:5px}
 </style>
 </head>
+<style type="text/css">
+  body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/dashboard/img/gvt_background2.webp') no-repeat center center / cover;
+    opacity: 0.5;
+    z-index: -1;
+  }
+</style>
 <body class="login-gradient">
   <div class="main-content">
     <!-- Navbar -->
