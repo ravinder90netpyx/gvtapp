@@ -61,7 +61,6 @@ class SiteuserController extends Controller{
     public function index(Request $request, User $model){
         $carbon = new Carbon();
         $module = $this->module;
-
         $perpage = $request->perpage ?? $module['default_perpage'];
         if(!$request->perpage && !empty($request->cookie('perpage'))) $perpage = $request->cookie('perpage');
         
@@ -168,7 +167,7 @@ class SiteuserController extends Controller{
         $mail_replace_data = array('name'=>$eusername, 'login_url'=>$crloginurl, 'email'=>$euseremail, 'password'=>$crpassword);
         $mail_params = array('name'=>$eusername, 'email'=>$euseremail);
         Mail::send('emails.userCreated', $mail_replace_data, function($message) use ($mail_params){
-            $message->to($mail_params['email'], $mail_params['name'])->subject('Account is created ON API Integration Project');
+            $message->to($mail_params['email'], $mail_params['name'])->subject('Account is created ON Group Housing Ally Project');
         });
 
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
