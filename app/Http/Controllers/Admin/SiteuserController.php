@@ -160,15 +160,15 @@ class SiteuserController extends Controller{
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
         #Artisan::call('cache:clear');
 
-        $crloginurl = URL::route('supanel.login');
-        $eusername = $request->input('first_name').' '.$request->input('last_name');
-        $euseremail = $request->input('email');
-        $crpassword = $request->input('password');
-        $mail_replace_data = array('name'=>$eusername, 'login_url'=>$crloginurl, 'email'=>$euseremail, 'password'=>$crpassword);
-        $mail_params = array('name'=>$eusername, 'email'=>$euseremail);
-        Mail::send('emails.userCreated', $mail_replace_data, function($message) use ($mail_params){
-            $message->to($mail_params['email'], $mail_params['name'])->subject('Account is created ON Group Housing Ally Project');
-        });
+        // $crloginurl = URL::route('supanel.login');
+        // $eusername = $request->input('first_name').' '.$request->input('last_name');
+        // $euseremail = $request->input('email');
+        // $crpassword = $request->input('password');
+        // $mail_replace_data = array('name'=>$eusername, 'login_url'=>$crloginurl, 'email'=>$euseremail, 'password'=>$crpassword);
+        // $mail_params = array('name'=>$eusername, 'email'=>$euseremail);
+        // Mail::send('emails.userCreated', $mail_replace_data, function($message) use ($mail_params){
+        //     $message->to($mail_params['email'], $mail_params['name'])->subject('Account is created ON Group Housing Ally Project');
+        // });
 
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
     }
