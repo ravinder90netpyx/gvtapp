@@ -9,24 +9,14 @@
 @endsection
 
 @section('scripts')
+<script>
+    function regenerate_file(id){
+        document.location.href = "/supanel/tenancy/"+id+"/make?redirect_index=1";
+    }
+</script>
 @endsection
 
 @section('content')
-@php
-$roles = auth()->user()->roles()->pluck('id')->toArray();
-
-$usrModel = new App\Models\User;
-$orgModel = new App\Models\Organization;
-$allow_add = true;
-if(!in_array('1', $roles)){
-    $auth_org_id = auth()->user()->organization_id ?? '0';
-    $usrs_added = $usrModel->organization_user_count($auth_org_id);
-    $max_allowed = $orgModel->find($auth_org_id)->users_allowed;
-    if($usrs_added>=$max_allowed){
-        $allow_add = false;
-    }
-}
-@endphp
 <div class="app-page-title">
     <div class="page-title-wrapper">
         <div class="page-title-heading">
@@ -35,7 +25,7 @@ if(!in_array('1', $roles)){
     </div>
 </div>
 
-<form action="{{ route($module['main_route'].'.bulk') }}" method="POST">  
+<form action="{{ route($module['main_route'].'.bulk') }}" method="POST"> 
     <div class="card card-listing">
         <div class="card-header">   
             <div class="form-inline form-list-actions">
@@ -45,7 +35,6 @@ if(!in_array('1', $roles)){
                         <div class="form-group">
                             <div class="input-group input-group-sm">
                                 <label for="combined_action" class="combined_action_label mt-1 mr-3 d-none d-sm-block">{!! __('admin.text_action') !!}</label>
-
                                 <div class="input-group-prepend">
                                     <div class="input-group-text p-0 pl-2">
                                         <div class="custom-checkbox custom-control">
@@ -54,7 +43,7 @@ if(!in_array('1', $roles)){
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <select name="combined_action" id="combined_action" class="custom-select">
                                     <option value="">{{ __('admin.text_select') }}</option>
                                     @can($module['permission_group'].'.status')
@@ -77,13 +66,13 @@ if(!in_array('1', $roles)){
                     </div>
                     @endcanany
 
-                    @if(auth()->user()->can($module['permission_group'].'.add') && $allow_add )
+                    @can($module['permission_group'].'.add')
                     <div class="col-auto mt-1 mb-1">
                         <div class="form-group">
                             <a class="btn btn-primary btn-add btn-sm" rel="tab" href="{{ route($module['main_route'].'.create') }}" title="{{ __('admin.text_add') }}">{{ __('admin.text_add') }}</a>
                         </div>
                     </div>
-                    @endif
+                    @endcan
 
                     @include('include.search', [ 'query'=>( $query ?? '' ) ])
                 </div>
@@ -96,48 +85,31 @@ if(!in_array('1', $roles)){
                 <div class="col pagination-wrap">
                     <div class="float-right">
                         <div class="row">
-                            <div class="col-auto mt-2 pr-0"><span class="pagination-info">{{ __('admin.text_page_info', ['firstItem'=>$data->firstItem(), 'lastItem'=>$data->lastItem(), 'total'=>$data->total()]) }}</span></div>
-                            <div class="col pl-2"> {!! $data->appends(compact('perpage', 'query'))->links() !!}</div>
+                            <div class="col-auto mt-2"><span class="pagination-info">{{ __('admin.text_page_info', ['firstItem'=>$data->firstItem(), 'lastItem'=>$data->lastItem(), 'total'=>$data->total()]) }}</span></div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="table-responsive">
-                <table class="table table-striped table-hover table-sm main-listing-table">
+                <table class="table table-striped table-hover table-bordered table-sm mb-2 main-listing-table">
                     <thead>
                         <tr>
                             <th style="width:40px">{{ __('admin.text_idcheck') }}</th>
                             <th style="width:120px">{{ __('admin.text_actions') }}</th>
-                            
-                            @if(in_array('1', $roles))
-                            <th style="width:200px">Organization</th>
-                            @endif
-
-                            <th>{{ __('admin.text_name') }}</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-
-                            <th style="width:150px">{{ __('Created By') }}</th>                       
+                            <th>{{ __('Unit Number') }}</th>
+                            <th>{{ __('See Pdf') }}</th>
                             <th style="width:150px">{{ __('admin.text_date_created') }}</th>
                         </tr>
                     </thead>
-                    
+
                     @if($data->count())
                         <tbody>
                             @foreach($data as $item)
-                                @php
-                                $row_id = $item[$module['table_column_index']];
-                                $dt_str = $carbon->createFromFormat('Y-m-d H:i:s', $item[$module['table_column_created']]);
+                                @php 
+                                $row_id = $item[$model->getKeyName()];
+                                $dt_str = $carbon->createFromFormat('Y-m-d H:i:s', $item[$model::CREATED_AT]);
                                 $row_time = $dt_str->format(config('custom.datetime_format'));
-
-                                $usm = new \App\Models\User;
-                                $crby = '';
-                                if(!empty($item[$module['table_column_prefix'].'created_by'])){
-                                    $fstuser = $usm->where([ ['id', '=', $item[$module['table_column_prefix'].'created_by']] ])->select(['first_name', 'last_name'])->first();
-                                    $crby = $fstuser->first_name.' '.$fstuser->last_name;
-                                    #echo "<pre>"; print_r($fstuser->first_name); echo "</pre>"; exit;
-                                }
                                 @endphp
                                 <tr>
                                     <td>
@@ -145,21 +117,24 @@ if(!in_array('1', $roles)){
                                             <input class="custom-control-input data-checkboxes" type="checkbox" name="row_check[]" id="row_check_{{ $row_id }}" value="{{ $row_id }}">
                                             <label class="custom-control-label" for="row_check_{{ $row_id }}"></label>
                                         </div>                  
-                                    </td>        
+                                    </td> 
+
                                     <td>
-                                        @can($module['permission_group'].'.status')
-                                            @if(!in_array($row_id, $module['not_deactivateable']))
-                                                @if($item[$module['table_column_status']]=='1')
-                                                <a href="{{ route($module['main_route'].'.action', ['mode'=>'deactivate', 'id'=>$row_id]) }}" title="{{ __('admin.text_deactivate') }}">
-                                                    <i class="{{ config('custom.icons.active') }}"></i>
-                                                </a>
-                                                @elseif($item[$module['table_column_status']]=='0')
-                                                <a href="{{ route($module['main_route'].'.action', ['mode'=>'activate', 'id'=>$row_id]) }}" title="{{ __('admin.text_activate') }}">
-                                                    <i class="{{ config('custom.icons.inactive') }}"></i>
-                                                </a>
-                                                @endif
+                                        @can($module['permission_group'].'.status')  
+                                            @if($item[$model->getStatusColumn()]=='1')
+                                            <a href="{{ route($module['main_route'].'.action', ['mode'=>'deactivate', 'id'=>$row_id]) }}" title="{{ __('admin.text_deactivate') }}">
+                                                <i class="{{ config('custom.icons.active') }}"></i>
+                                            </a>
+                                            @elseif($item[$model->getStatusColumn()]=='0')
+                                            <a href="{{ route($module['main_route'].'.action', ['mode'=>'activate', 'id'=>$row_id]) }}" title="{{ __('admin.text_activate') }}">
+                                                <i class="{{ config('custom.icons.inactive') }}"></i>
+                                            </a>
                                             @endif
                                         @endcan
+
+                                        {{-- <a href="{{ route($module['main_route'].'.show', $row_id) }}" title="{{ __('admin.text_show') }}" rel="tab">
+                                            <i class="{{ config('custom.icons.info') }}"></i>
+                                        </a> --}}
 
                                         @can($module['permission_group'].'.edit')
                                         <a href="{{ route($module['main_route'].'.edit', $row_id) }}" title="{{ __('admin.text_edit') }}" rel="tab">
@@ -168,30 +143,19 @@ if(!in_array('1', $roles)){
                                         @endcan
 
                                         @can($module['permission_group'].'.delete')
-                                            @if(!in_array($row_id, $module['not_deleteable']))
-                                                <a href="{{ route($module['main_route'].'.action', ['mode'=>'delete', 'id'=>$row_id]) }}" onclick="return confirm('Are you sure to delete?');" title="{{ __('admin.text_delete') }}">
-                                                    <i class="{{ config('custom.icons.delete') }}"></i>
-                                                </a> 
-                                            @endif
+                                            <a href="{{ route($module['main_route'].'.action', ['mode'=>'delete', 'id'=>$row_id]) }}" onclick="return confirm('Are you sure to delete?');" title="{{ __('admin.text_delete') }}">
+                                                <i class="{{ config('custom.icons.delete') }}"></i>
+                                            </a>
                                         @endcan
-                                    </td>
+                                    </td>   
+                                    @php
+                                    $member = \App\Models\Members::where([['status','>','0'], ['delstatus','<','1'], ['id','=',$item['member_id']]])->first();
+                                    @endphp
 
-                                    @if(in_array('1', $roles))
-                                    <td>
-                                        @php
-                                        if(!empty($item['organization_id'])){
-                                            $crmdl = new \App\Models\Organization;
-                                            echo $crmdl->getNameById($item['organization_id']) ?? '';    
-                                        }
-                                        @endphp
-                                    </td>
-                                    @endif
-
-                                    <td>{{ $item['first_name'].' '.$item['last_name'] }}</td>
-                                    <td>{{ $item['email'] }}</td>
-                                    <td>{{ $item['phone'] }}</td>
-                                    
-                                    <td>{{ $crby }}</td>
+                                    <td>{{ $member->unit_number }}</td>
+                                    <td><a href='' target="_blank" onclick="regenerate_file({{ $row_id }})" title="See File" rel="tab" class="px-1">
+                                        View
+                                    </a></td>
                                     <td>{{ $row_time }}</td>
                                 </tr>
                             @endforeach
@@ -199,7 +163,17 @@ if(!in_array('1', $roles)){
                     @endif
                 </table>
             </div>
-            
+
+            <div class="row">
+                <div class="col pagination-wrap">
+                    <div class="float-right">
+                        <div class="row">
+                            <div class="col"> {!! $data->appends(compact('perpage', 'query'))->links() !!}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </form>

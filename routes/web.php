@@ -20,7 +20,9 @@ use App\Http\Controllers\Admin\{
     TemplatesController,
     GroupController,
     ExpenseTypeController,
-    ExpenseController
+    ExpenseController,
+    TenantController,
+    TenancyController
 };
 
 use App\Http\Controllers\CronController;
@@ -79,6 +81,10 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
         Route::post('organization_configs/', [OrganizationConfigController::class, 'store'])->name('organization_configs.store');
         Route::get('general_configs/', [GeneralConfigController::class, 'index'])->name('general_configs.index');
         Route::post('general_configs/', [GeneralConfigController::class,'store'])->name('general_configs.store');
+
+        Route::post('tenancy/get_member', [TenancyController::class,'get_member'])->name('tenancy.get_member');
+
+        Route::get('tenancy/{id}/make', [TenancyController::class, 'generate_file_'])->name('tenancy.generate_file_');
         
         Route::get('journal_entry/{id}/view', [JournalEntryController::class, 'view_pdf'])->name('journal_entry.view_pdf');
         Route::get('journal_entry/{id}/show', [JournalEntryController::class, 'show_pdf'])->name('journal_entry.show_pdf');
@@ -104,7 +110,9 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
             'chargetype'=>'ChargeTypeController',
             'group'=>'GroupController',
             'expense_type'=>'ExpenseTypeController',
-            'expenses'=>'ExpenseController'
+            'expenses'=>'ExpenseController',
+            'tenant'=>'TenantController',
+            'tenancy'=>'TenancyController'
         ];
 
         foreach($routes_arr as $rak=>$rav){

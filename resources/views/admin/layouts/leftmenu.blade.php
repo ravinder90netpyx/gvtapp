@@ -173,14 +173,14 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
         </li>
         @endcanany
 
-        @canany([ 'charges.manage', 'members.manage', 'series.manage', 'charge_type.manage', 'group.manage', 'expense_type.manage' ])
+        @canany([ 'charges.manage', 'members.manage', 'tenant.manage', 'series.manage', 'charge_type.manage', 'group.manage', 'expense_type.manage', 'tenancy.manage' ])
           <li class="nav-item">
-            <a {!! Str::contains(url()->current(), array('charges', 'members', 'series','chargetype', 'group', 'expense_type')) ? 'class="nav-link active" aria-expanded="true"' : 'class="nav-link collapsed" aria-expanded="false"' !!} href="#leftMenu2" data-toggle="collapse" role="button" aria-controls="leftMenu2">
+            <a {!! Str::contains(url()->current(), array('charges', 'members', 'series','chargetype', 'group', 'expense_type', 'tenant', 'tenancy')) ? 'class="nav-link active" aria-expanded="true"' : 'class="nav-link collapsed" aria-expanded="false"' !!} href="#leftMenu2" data-toggle="collapse" role="button" aria-controls="leftMenu2">
               <i class="ni ni-single-02"></i>
               <span class="nav-link-text"> Masters </span>
             </a>
 
-            <div class="collapse{{ Str::contains(url()->current(), array('charges', 'members', 'series', 'chargetype', 'group', 'expense_type')) ? ' show' : '' }}" id="leftMenu2" style="">
+            <div class="collapse{{ Str::contains(url()->current(), array('charges', 'members', 'series', 'chargetype', 'group', 'expense_type', 'tenant', 'tenancy')) ? ' show' : '' }}" id="leftMenu2" style="">
               <ul class="nav nav-sm flex-column">
 
                 @can('series.manage')
@@ -224,6 +224,24 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
                   <a href="{{route($folder['route_folder_name'].'.group.index')}}" class="nav-link{{ Str::contains(url()->current(), array('group')) ? ' active' : '' }}">
                     <span class="sidenav-mini-icon"> MG </span>
                     <span class="sidenav-normal"> Manage Members Group </span>
+                  </a>
+                </li>
+                @endcan
+
+                @can('tenant.manage')
+                <li class="nav-item">
+                  <a href="{{route($folder['route_folder_name'].'.tenant.index')}}" class="nav-link{{ Str::contains(url()->current(), array('tenant')) ? ' active' : '' }}">
+                    <span class="sidenav-mini-icon"> MT </span>
+                    <span class="sidenav-normal"> Manage Tenants </span>
+                  </a>
+                </li>
+                @endcan
+
+                @can('tenancy.manage')
+                <li class="nav-item">
+                  <a href="{{route($folder['route_folder_name'].'.tenancy.index')}}" class="nav-link{{ Str::contains(url()->current(), array('tenancy')) ? ' active' : '' }}">
+                    <span class="sidenav-mini-icon"> MT </span>
+                    <span class="sidenav-normal"> Manage Tenancy </span>
                   </a>
                 </li>
                 @endcan
