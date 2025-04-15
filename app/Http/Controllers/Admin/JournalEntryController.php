@@ -794,7 +794,7 @@ class JournalEntryController extends Controller{
             $file_name = $je_id.'-'.$now->format('Y-m-d-H-i-s');
         }
         $charge_type_id = $journal_entry->charge_type_id;
-        $rec_name = $member->name;
+        $rec_name = $journal_entry->name;
         $data = [
             'org_name' => $name,
             'note' => $setting_model->getVal('pdf', 'pdf_note'),
@@ -809,7 +809,8 @@ class JournalEntryController extends Controller{
             'mode' => $journal_entry->payment_mode,
             'date' => $journal_entry->entry_date,
             'reciept_date' => $journal_entry->reciept_date,
-            'year' => $journal_entry->entry_year
+            'year' => $journal_entry->entry_year,
+            'charge_type_id' => $journal_entry->charge_type_id
         ];
         if($charge_type_id == '8'){
             $entrywise_model = \App\Models\Entrywise_Fine::where('journal_entry_id','=',$je_id)->first();

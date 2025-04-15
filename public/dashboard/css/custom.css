@@ -403,6 +403,29 @@ select[invalid], input[invalid], textarea[invalid]{
    max-width: 62px; 
 }
 
+.temp1 .col-sm {
+    padding: 0 5px;
+  }
+  .temp1 .col-sm img {
+    width: 30px;
+    display: block;
+    margin: 7px auto 0;
+  }
+
+    .file-div {
+        margin: -12px 0 15px;
+    }
+
+.file-div span {
+    font-size: 12px;
+}
+
+ .file-div img {
+    width: 30px;
+    display: inline-block;
+    margin-right: 10px;
+  }
+
 
 /*** media ****/
 

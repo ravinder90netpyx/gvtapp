@@ -88,7 +88,8 @@ class ChargeTypeController extends Controller
         $module = $this->module;
         // dd($request->input());
         $request->validate([
-            'name' => 'required|unique:charge_type,name'
+            'name' => 'required|unique:charge_type,name',
+            'alias_name' => 'required'
         ]);
 
         $model->create($request->all());
@@ -105,15 +106,16 @@ class ChargeTypeController extends Controller
         $title_shown = 'Edit '.$module['main_heading'];
         $method = 'PUT';
         $mode = 'edit';
+        dd($form_data);
 
         return view($module['main_view'].'.cred')->with(compact('form_data', 'model', 'module', 'action', 'method', 'mode', 'folder', 'title_shown', 'id'));
     }
 
     public function update(Request $request, $id, DefaultModel $model){
-        echo '<pre>';print_R($request->all());
         $module = $this->module;
         $request->validate([
             'name' => 'required|unique:'.$model->getTable().',name,'.$id.','.$model->getKeyName(),
+            'alias_name' => 'required'
         ]);
 
         $modelfind = $model->find($id);

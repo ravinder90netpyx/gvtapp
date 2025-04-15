@@ -98,6 +98,7 @@
                             <th style="width:40px">{{ __('admin.text_idcheck') }}</th>
                             <th style="width:120px">{{ __('admin.text_actions') }}</th>
                             <th>{{ __('admin.text_name') }}</th>
+                            <th>{{ __('Alias Name') }}</th>
                             <th style="width:150px">{{ __('admin.text_date_created') }}</th>
                         </tr>
                     </thead>
@@ -145,6 +146,7 @@
                                     </td>       
 
                                     <td class="name-{{$item['id']}}">{{ $item['name'] }}</td>
+                                    <td class="name-{{$item['id']}}-alias">{{ $item['alias_name'] }}</td>
                                     <td>{{ $row_time }}</td>
                                 </tr>
                             @endforeach
@@ -179,9 +181,13 @@
                 </div>
                 <div class="modal-body" style="overflow:hidden;">
                     <div class="row" id="changable_div">
-                        <div class="col-md-12 to_month"  >
+                        <div class="col-md-12"  >
                              {!! Form::bsInput('text', 'name', __('Name'), $form_data->name ?? '', [ 'required', 'autocomplete'=>'off','class' => 'form-control charge_type_name' ],  ['vertical'=>true]); !!}
-                    </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            {!! Form::bsInput('text', 'alias_name', __('Alias Name'), $form_data->alias_name ?? '', [ 'required', 'autocomplete'=>'off','class' => 'form-control alias_name' ],  ['vertical'=>true]); !!}
+                        </div>
 
                     </div>
                 </div>
@@ -206,7 +212,9 @@
         var attr_id=$(this).attr('attr_id');
         if(attr_id){
             var name=$('.name-'+attr_id).text();
+            var alias=$('.name-'+attr_id+'-alias').text();
             $('.charge_type_name').val(name);
+            $('.alias_name').val(alias);
         }
         
         

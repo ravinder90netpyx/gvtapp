@@ -98,6 +98,18 @@ class UserRoleSeeder extends Seeder
             [ 'name' => 'expense_type.delete' ],
             [ 'name' => 'expense_type.status' ],
 
+            [ 'name' => 'tenancy.manage' ],
+            [ 'name' => 'tenancy.add' ],
+            [ 'name' => 'tenancy.edit' ],
+            [ 'name' => 'tenancy.delete' ],
+            [ 'name' => 'tenancy.status' ],
+
+            [ 'name' => 'tenant.manage' ],
+            [ 'name' => 'tenant.add' ],
+            [ 'name' => 'tenant.edit' ],
+            [ 'name' => 'tenant.delete' ],
+            [ 'name' => 'tenant.status' ],
+
         ];
 
         $default_data = [ 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now() ];
