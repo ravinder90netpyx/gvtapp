@@ -40,5 +40,6 @@ class Tenant_Master extends Base_Model{
         'acceptance',
         'aceeptance_name',
         'pdf_file'
+        
     ];
 }

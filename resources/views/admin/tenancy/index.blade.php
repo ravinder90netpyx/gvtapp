@@ -13,6 +13,7 @@
         document.location.href = "/supanel/tenancy/"+id+"/make?redirect_index=1";
     }
 </script>
+
 @endsection
 
 @section('content')

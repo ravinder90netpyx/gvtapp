@@ -44,5 +44,6 @@ class Tenant_Variant extends Base_Model{
         'isfamily',
         'police_verification',
         'police_verification_name'
+        
     ];
 }

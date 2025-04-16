@@ -458,7 +458,7 @@ class TenancyController extends Controller{
         // dd($file_name);
         $model1 = \App\Models\Tenant_Master::find($id);
         $model1->update(['pdf_file'=> $file_name]);
-        $name = $file_name;
+        $name = $file_name; 
         return view('include.show_tenant',compact('name'));
     }
 

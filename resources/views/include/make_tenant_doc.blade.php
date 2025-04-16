@@ -92,7 +92,7 @@ table th, table td {
 }
     </style>
 </head>
-<body>
+<body> 
 
     <div class="doc-detail">
     <h2>{{$org_name ?? 'Golf View Tower'}}</h2>
