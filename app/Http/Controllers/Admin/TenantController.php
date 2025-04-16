@@ -83,7 +83,10 @@ class TenantController extends Controller{
 
     public function store(Request $request, DefaultModel $model){
         $module = $this->module;
+        $auth_user = Auth::user();
+        $roles = $auth_user->roles()->pluck('id')->toArray();
         $request->validate([
+            'organization_id' =>in_array(1,$roles)? 'required':'nullable',
             'name' => 'required',
             'age' => 'required|numeric',
             'gender' => 'required|in:male,female,other',
@@ -97,6 +100,11 @@ class TenantController extends Controller{
         ]);
 
         $variant= [];
+        if(in_array(1,$roles)){
+            $variant['organization_id'] = $request->input('organization_id');
+        } else{
+            $variant['organization_id'] = $auth_user->organization_id;
+        }
         $variant['name'] = $request->input('name');
         $variant['age'] = $request->input('age');
         $variant['gender'] = $request->input('gender');

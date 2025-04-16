@@ -93,7 +93,7 @@ class TenancyController extends Controller{
             // 'acceptance' => 'file|mimes:pdf,txt,doc,docx|max:2048'
         ];
         $auth_user = Auth::user();
-        $roles = $auth_user->roles()->pluck('id','name')->toArray();
+        $roles = $auth_user->roles()->pluck('id')->toArray();
         if(in_array(1,$roles)){
             $rules['organization_id'] = 'required';
         }
@@ -109,6 +109,8 @@ class TenancyController extends Controller{
         // dd(1);
         if(in_array(1,$roles)){
             $master['organization_id'] = $request->input('organization_id');
+        } else{
+            $master['organization_id'] = $auth_user->organization_id;
         }
         $master['member_id'] = $request->input('member_id');
         $member = \App\Models\Members::where([['status','>','0'],['delstatus','<','1'],['id','=',$master['member_id']]])->first();

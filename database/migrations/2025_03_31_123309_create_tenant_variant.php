@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('tenant_variant', function (Blueprint $table) {
             $table->id();
 
+            $table->unsignedBigInteger('organization_id')->nullable();
             $table->unsignedBigInteger('tenant_master_id')->nullable();
             // $table->unsignedBigInteger('organization_id')->nullable();
             $table->string('name')->nullable();
@@ -43,6 +44,7 @@ return new class extends Migration
 
             $table->foreign('tenant_master_id')->references('id')->on('tenant_master')->onupdate('cascade')->onDelete('cascade');
             $table->foreign('tenant_variant_id')->references('id')->on('tenant_variant')->onupdate('cascade')->onDelete('cascade');
+            $table->foreign('organization_id')->references('id')->on('organization')->onUpdate('cascade')->onDelete('cascade');
 
         });
     }

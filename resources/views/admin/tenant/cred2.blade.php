@@ -25,7 +25,23 @@
                 </div>
 
                 <div class="card-body"> 
-                   <div class="row">    
+                   <div class="row">
+
+                        @php
+                        $auth_user = Illuminate\Support\Facades\Auth::user();
+                        $roles = $auth_user->roles()->pluck('id')->toArray();
+                        @endphp
+                        @if(in_array(1, $roles) && $mode!='edit')
+                        <div class="col-md-6">
+                            @php 
+                            $current_field = 'organization_id';
+                            $row_data=[];
+                            $data_select=\App\Models\Organization::select('id','name')->get();
+                            foreach($data_select as $ds) $row_data[$ds->id]=$ds->name;
+                            @endphp
+                            {!! Form::bsSelect($current_field, __('Organization'), $row_data, $form_data->$current_field ?? '', ['data-toggle'=> 'select', 'required'], ['vertical'=> true]); !!}
+                        </div>
+                        @endif    
                         
                         <div class="col-md-6">
                             @php $current_field = 'name'; @endphp

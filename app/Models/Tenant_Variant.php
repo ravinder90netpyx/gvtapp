@@ -27,6 +27,7 @@ class Tenant_Variant extends Base_Model{
     */
 
     protected $fillable = [
+        'organization_id',
         'tenant_master_id',
         'name',
         'age',
@@ -44,6 +45,6 @@ class Tenant_Variant extends Base_Model{
         'isfamily',
         'police_verification',
         'police_verification_name'
-        
+
     ];
 }
