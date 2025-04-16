@@ -41,6 +41,8 @@ class Tenant_Variant extends Base_Model{
         'city',
         'state',
         'pincode',
-        'isfamily'
+        'isfamily',
+        'police_verification',
+        'police_verification_name'
     ];
 }

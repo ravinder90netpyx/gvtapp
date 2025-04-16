@@ -1,5 +1,4 @@
 @extends($folder['folder_name'].'.layouts.master')
-
 @section('title') {{ __('admin.text_html_title', ['module_name'=>$folder['module_name'], 'title'=>$title_shown]) }} @endsection
 
 @section('bodyAttr')

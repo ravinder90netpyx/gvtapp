@@ -95,7 +95,7 @@ class TenancyController extends Controller{
         $auth_user = Auth::user();
         $roles = $auth_user->roles()->pluck('id','name')->toArray();
         if(in_array(1,$roles)){
-            // $rules['organization_id'] = 'nullable';
+            $rules['organization_id'] = 'required';
         }
 
         if($request->input('type') == 'family'){
@@ -107,6 +107,9 @@ class TenancyController extends Controller{
 
         $request->validate($rules);
         // dd(1);
+        if(in_array(1,$roles)){
+            $master['organization_id'] = $request->input('organization_id');
+        }
         $master['member_id'] = $request->input('member_id');
         $member = \App\Models\Members::where([['status','>','0'],['delstatus','<','1'],['id','=',$master['member_id']]])->first();
         $master['member_name'] = $member->name;
@@ -395,12 +398,13 @@ class TenancyController extends Controller{
     }
 
     public function generate_file_($id){
-        $model_var = \App\Models\Tenant_Variant::where([['status','>','0'], ['delstatus', '<','1'],['tenant_master_id','=',$id], ['isfamily','=','0']])->get()->toArray();
-        $model_family = \App\Models\Tenant_Variant::where([['status','>','0'], ['delstatus', '<','1'],['tenant_master_id','=',$id], ['isfamily','=','1']])->get()->toArray();
+        $model_var = \App\Models\Tenant_Variant::where([['status','>','0'], ['delstatus', '<','1'],['tenant_master_id','=',$id]])->get()->toArray();
         $model = \App\Models\Tenant_Master::find($id);
+        $organization = \App\Models\Organization::find($model->organization_id);
         $member = \App\Models\Members::find($model->member_id);
 
         $data =[];
+        $data['org_name'] = $organization->name;
         $data['unit_number'] = $member->unit_number;
         $data['owner_name'] = $model->member_name;
         $data['start_date'] = $model->start_date;
@@ -425,10 +429,10 @@ class TenancyController extends Controller{
         }
         $data['profile_data'] = $profile_data;
         $data['family_data'] = $family_data;
-        $data['rent_agreement'] = !empty($model->rent_agreement) ? 'Ok':'';
-        $data['undertaking'] = !empty($model->undertaking) ? 'Ok':'';
-        $data['police_verification'] = ($pvc==0) ? 'Ok':'';
-        $data['acceptance'] = !empty($model->acceptance) ? 'Ok':'';
+        $data['rent_agreement'] = !empty($model->rent_agreement) ? 'Ok':'N/A';
+        $data['undertaking'] = !empty($model->undertaking) ? 'Ok':'N/A';
+        $data['police_verification'] = ($pvc==0) ? 'Ok':'N/A';
+        $data['acceptance'] = !empty($model->acceptance) ? 'Ok':'N/A';
 
         $pdf = PDF::loadView('include.make_tenant_doc', $data);
 
@@ -451,7 +455,9 @@ class TenancyController extends Controller{
         // $mpdf->save(public_path("upload/pdf_files/{$file_name}.pdf"));
         // $models=$journal_entry->find($je_id);
         $mpdf->Output(public_path("upload/tenant/{$file_name}.pdf"), \Mpdf\Output\Destination::FILE);
-        $model->update(['pdf_file'=> $file_name]);
+        // dd($file_name);
+        $model1 = \App\Models\Tenant_Master::find($id);
+        $model1->update(['pdf_file'=> $file_name]);
         $name = $file_name;
         return view('include.show_tenant',compact('name'));
     }

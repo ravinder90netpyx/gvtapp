@@ -35,11 +35,10 @@ class Tenant_Master extends Base_Model{
         'start_date',
         'rent_agreement',
         'rent_agreement_name',
-        'police_verification',
-        'police_verification_name',
         'undertaking',
         'undertaking_name',
         'acceptance',
-        'aceeptance_name'
+        'aceeptance_name',
+        'pdf_file'
     ];
 }
