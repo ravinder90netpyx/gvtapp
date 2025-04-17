@@ -426,6 +426,12 @@ select[invalid], input[invalid], textarea[invalid]{
     margin-right: 10px;
   }
 
+  .fixed-header {
+    position: sticky;
+    top: 0;
+    z-index: 222;
+  }
+
 
 /*** media ****/
 

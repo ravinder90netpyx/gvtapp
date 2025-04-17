@@ -16,7 +16,7 @@
     <div class="row">
         <div class="offset-xl-2 col-xl-8 offset-lg-1 col-lg-10 col-md-12">
             <div class="main-card mb-3 card">
-                <div class="card-header bg-primary d-flex justify-content-between align-items-center">
+                <div class="card-header fixed-header bg-primary d-flex justify-content-between align-items-center">
                     <div>{{ $title_shown }}</div>
                     <div>
                         <button type="submit" class="mt-1 btn btn-dark btn-sm">{!! __('admin.text_button_submit') !!}</button>
@@ -91,25 +91,29 @@
 
                         <div class="col-md-6">
                             @php
-                                $current_field = 'document';
+                                $current_field = 'document[]';
                                 if($mode=='insert'){
-                                    $req_field = ['required'];
+                                    $req_field = ['multiple','required'];
                                 } else{
-                                    $req_field = [];
+                                    $req_field = ['multiple'];
                                 }
                             @endphp
-                            {!! Form::bsInput('file',$current_field, __('Unique Identifiction Document'), $form_data->$current_field ?? '', $req_field, ['vertical'=>true]); !!}
+                            {!! Form::bsInput('file',$current_field, __('Unique Identifiction Document'), $form_data->document ?? '', $req_field, ['vertical'=>true]); !!}
                             @if($mode =="edit")
+                            @php $doc = explode(',',$form_data->document);
+                            $doc_name = explode(',',$form_data->document_name); @endphp
+                            @foreach($doc as $ind=>$d)
                                 <div class="file-div">
-                                    <a target="_blank" href="{{ asset('upload/tenant/'.$form_data->$current_field) }}"><i class="text-danger far fa-lg fa-file-pdf"> </i><span> View {{$form_data->document_name}}</span> </a>
+                                    <a target="_blank" href="{{ asset('upload/tenant/'.$d) }}"><i class="text-danger far fa-lg fa-file-pdf"> </i><span> View {{ $doc_name[$ind] }}</span> </a>
                                 </div>
+                            @endforeach
                             @endif
                         </div>
 
                         <div class="col-md-6">
                             @php $current_field = 'locality'; @endphp
-
-                            {!! Form::bsText($current_field, __('Locality/Area'), $form_data->$current_field ?? '', ['required'], ['vertical'=>true]); !!}
+                            
+                            {!! Form::bsTextArea($current_field, __('Address'), $form_data->$current_field ?? '', ['required'], ['vertical'=>true]); !!}
                         </div>
 
                         <div class="col-md-6">

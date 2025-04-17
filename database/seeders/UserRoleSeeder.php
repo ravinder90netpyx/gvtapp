@@ -110,6 +110,12 @@ class UserRoleSeeder extends Seeder
             [ 'name' => 'tenant.delete' ],
             [ 'name' => 'tenant.status' ],
 
+            [ 'name' => 'custom_global_variable.manage' ],
+            [ 'name' => 'custom_global_variable.add' ],
+            [ 'name' => 'custom_global_variable.edit' ],
+            [ 'name' => 'custom_global_variable.delete' ],
+            [ 'name' => 'custom_global_variable.status' ],
+
         ];
 
         $default_data = [ 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now() ];

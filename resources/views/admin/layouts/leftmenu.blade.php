@@ -112,14 +112,14 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
         @endcan
         --}}
 
-        @canany([ 'user_roles.manage', 'users.manage', 'organization.manage', 'organization.manage', 'templates.manage' ])
+        @canany([ 'user_roles.manage', 'users.manage', 'organization.manage', 'organization.manage', 'templates.manage', 'custom_global_variable.manage' ])
         <li class="nav-item">
-          <a {!! Str::contains(url()->current(), array('user_roles', 'users', 'organization', 'organization_configs', 'templates')) ? 'class="nav-link active" aria-expanded="true"' : 'class="nav-link collapsed" aria-expanded="false"' !!} href="#user-management" data-toggle="collapse" role="button" aria-controls="user-management">
+          <a {!! Str::contains(url()->current(), array('user_roles', 'users', 'organization', 'organization_configs', 'templates', 'custom_global_variable')) ? 'class="nav-link active" aria-expanded="true"' : 'class="nav-link collapsed" aria-expanded="false"' !!} href="#user-management" data-toggle="collapse" role="button" aria-controls="user-management">
             <i class="ni ni-single-02"></i>
             <span class="nav-link-text">Users Management</span>
           </a>
 
-          <div class="collapse{{ Str::contains(url()->current(), array('user_roles', 'users', 'organization', 'organization_configs', 'templates')) ? ' show' : '' }}" id="user-management" style="">
+          <div class="collapse{{ Str::contains(url()->current(), array('user_roles', 'users', 'organization', 'organization_configs', 'templates', 'custom_global_variable')) ? ' show' : '' }}" id="user-management" style="">
             <ul class="nav nav-sm flex-column">
               @can('organization.manage')
 
@@ -156,6 +156,15 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
                 <a href="{{route($folder['route_folder_name'].'.user_roles.index')}}" class="nav-link{{ Str::contains(url()->current(), array('user_roles')) ? ' active' : '' }}">
                   <span class="sidenav-mini-icon"> R </span>
                   <span class="sidenav-normal"> User Roles </span>
+                </a>
+              </li>
+              @endcan
+
+              @can('custom_global_variable.manage')
+              <li class="nav-item">
+                <a href="{{route($folder['route_folder_name'].'.custom_global_variable.index')}}" class="nav-link{{ Str::contains(url()->current(), array('user_roles')) ? ' active' : '' }}">
+                  <span class="sidenav-mini-icon"> CGV </span>
+                  <span class="sidenav-normal"> Custom Global Variable </span>
                 </a>
               </li>
               @endcan

@@ -22,7 +22,8 @@ use App\Http\Controllers\Admin\{
     ExpenseTypeController,
     ExpenseController,
     TenantController,
-    TenancyController
+    TenancyController,
+    CustomGlobalVariableController
 };
 
 use App\Http\Controllers\CronController;
@@ -113,7 +114,8 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
             'expense_type'=>'ExpenseTypeController',
             'expenses'=>'ExpenseController',
             'tenant'=>'TenantController',
-            'tenancy'=>'TenancyController'
+            'tenancy'=>'TenancyController',
+            'custom_global_variable' => 'CustomGlobalVariableController'
         ];
 
         foreach($routes_arr as $rak=>$rav){

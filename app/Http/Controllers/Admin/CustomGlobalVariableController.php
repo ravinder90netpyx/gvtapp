@@ -1,24 +1,23 @@
 <?php
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Tenant_Variant as DefaultModel;
+use App\Models\Custom_Global_Variable as DefaultModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
-use Illuminate\SUpport\Facades\Auth;
 use URL;
 use Carbon\Carbon;
-use Nnjeim\World\World;
-use Nnjeim\World\Models\Country;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
-class TenantController extends Controller{
+class CustomGlobalVariableController extends Controller{
     public $module = array(
-        'module_view' => 'tenant',
-        'module_route' => 'tenant',
-        'permission_group' => 'user_roles',
-        'main_heading' => 'Tenant',
+        'module_view' => 'custom_global_variable',
+        'module_route' => 'custom_global_variable',
+        'permission_group' => 'custom_global_variable',
+        'main_heading' => 'Custom Global Variable',
         'default_perpage' => 10
     );
 
@@ -50,7 +49,7 @@ class TenantController extends Controller{
         $perpage = $request->perpage ?? $module['default_perpage'];
         if(!$request->perpage && !empty($request->cookie('perpage'))) $perpage = $request->cookie('perpage');
         
-        $model_get = $model->where('isfamily','0');
+        $model_get = $model;
         $auth_user = Auth::user();
         $roles = $auth_user->roles()->pluck('id')->toArray();
         if(!in_array(1, $roles)){
@@ -80,68 +79,31 @@ class TenantController extends Controller{
         $title_shown = 'Add '.$module['main_heading'];
         $method = 'POST';
         $mode = 'insert';
-        $indiaStates = DB::connection('mysqlw')
-        ->table('city')->select('District')->where('CountryCode','IND')->distinct()
-        ->pluck('District');
 
-        return view($module['main_view'].'.cred2', compact('module', 'model', 'indiaStates', 'action', 'method', 'mode', 'folder', 'title_shown'));
+        return view($module['main_view'].'.cred', compact('module', 'model', 'action', 'method', 'mode', 'folder', 'title_shown'));
     }
 
     public function store(Request $request, DefaultModel $model){
         $module = $this->module;
         $auth_user = Auth::user();
         $roles = $auth_user->roles()->pluck('id')->toArray();
+        $org_id = in_array(1,$roles) ? $request->organization_id : $auth_user->organization_id;
         $request->validate([
             'organization_id' =>in_array(1,$roles)? 'required':'nullable',
-            'name' => 'required',
-            'age' => 'required|numeric',
-            'gender' => 'required|in:male,female,other',
-            'mobile_number' => 'required',
-            'photo' => 'required|file|mimes:jpg,jpeg,png|max:2048',
-            'document.*' => 'required|file|mimes:pdf,txt,doc,docx|max:2048',
-            'locality' => 'required',
-            'city' => 'required',
-            'state' => 'required',
-            'pincode' => 'required|numeric'
+            'name' => [
+                'required',
+                Rule::unique('custom_global_variable')->where(function ($query) use ($org_id) {
+                    return $query->where('organization_id', $org_id);
+                }),
+            ],
+            'value'=> 'required'
         ]);
 
-        $variant= [];
-        if(in_array(1,$roles)){
-            $variant['organization_id'] = $request->input('organization_id');
-        } else{
-            $variant['organization_id'] = $auth_user->organization_id;
+        if(!in_array(1, $roles)){
+            $request->merge(['organization_id'=> $org_id]);
         }
-        $variant['name'] = $request->input('name');
-        $variant['age'] = $request->input('age');
-        $variant['gender'] = $request->input('gender');
-        $variant['mobile_number'] = $request->input('mobile_number');
-        $variant['email'] = $request->input('email') ?? null;
-        $variant['locality'] = $request->input('locality');
-        $variant['city'] = $request->input('city');
-        $variant['state'] = $request->input('state');
-        $variant['pincode'] = $request->input('pincode');
 
-        if($request->hasFile("photo")){
-            $image = $request->file("photo");
-            $imageName= pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME).time().'.'.$request->file("photo")->getClientOriginalExtension();
-            $image->move(public_path('upload/tenant'), $imageName);
-            $variant['photo'] = $imageName;
-            $variant['photo_name'] = $image->getClientOriginalName();
-        }
-        if($request->hasFile("document")){
-            $imageDocName =[];
-            $image_name = [];
-            foreach($request->file('document') as $image){
-                // $image = $request->file("document");
-                $imageName= pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME).time().'.'.$request->file("document")->getClientOriginalExtension();
-                $image->move(public_path('upload/tenant'), $imageName);
-                $imageDocName[] = $imageName;
-                $image_name[] = $image->getClientOriginalName();
-            }
-            $variant['document'] = implode(',',$image_name);
-            $variant['document_name'] = implode(',',$imageDocName);
-        }
-        $model->create($variant);
+        $model->create($request->all());
 
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
     }
@@ -164,66 +126,19 @@ class TenantController extends Controller{
         $title_shown = 'Edit '.$module['main_heading'];
         $method = 'PUT';
         $mode = 'edit';
-        $indiaStates = DB::connection('mysqlw')
-        ->table('city')->select('District')->where('CountryCode','IND')->distinct()
-        ->pluck('District');
 
-        return view($module['main_view'].'.cred2')->with(compact('form_data', 'model', 'module', 'action', 'method', 'indiaStates', 'mode', 'folder', 'title_shown', 'id'));
+        return view($module['main_view'].'.cred')->with(compact('form_data', 'model', 'module', 'action', 'method', 'mode', 'folder', 'title_shown', 'id'));
     }
 
     public function update(Request $request, $id, DefaultModel $model){
         $module = $this->module;
         $request->validate([
             'name' => 'required',
-            'age' => 'required|numeric',
-            'gender' => 'required|in:male,female,other',
-            'mobile_number' => 'required',
-            'locality' => 'required',
-            'city' => 'required',
-            'state' => 'required',
-            'pincode' => 'required|numeric'
+            'value' => 'required'
         ]);
-        $variant=[];
-        $variant['name'] = $request->input('name');
-        $variant['age'] = $request->input('age');
-        $variant['gender'] = $request->input('gender');
-        $variant['mobile_number'] = $request->input('mobile_number');
-        $variant['email'] = $request->input('email');
-        $variant['locality'] = $request->input('locality');
-        $variant['city'] = $request->input('city');
-        $variant['state'] = $request->input('state');
-        $variant['pincode'] = $request->input('pincode');
+
         $modelfind = $model->find($id);
-        if($request->hasFile("photo")){
-            $image = $request->file("photo");
-            if ($modelfind->photo && file_exists(public_path('upload/tenant/' . $modelfind->photo))) {
-                unlink(public_path('upload/tenant/' . $modelfind->photo));
-            }
-            $imageName= pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME).time().'.'.$request->file("photo")->getClientOriginalExtension();
-            $image->move(public_path('upload/tenant'), $imageName);
-            $variant['photo'] = $imageName;
-            $variant['photo_name'] = $image->getClientOriginalName();
-        }
-        if($request->hasFile("document")){
-            $doc = explode(',',$modelfind->document);
-            foreach($doc as $d){
-                if ($d && file_exists(public_path('upload/tenant/' . $d))) {
-                    unlink(public_path('upload/tenant/' . $d));
-                }
-            }
-            $imageDocName =[];
-            $image_name = [];
-            foreach($request->file('document') as $image){
-                $imageName= pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME).time().'.'.$image->getClientOriginalExtension();
-                $image->move(public_path('upload/tenant'), $imageName);
-                $imageDocName[] = $imageName;
-                $image_name[] = $image->getClientOriginalName();
-            }
-            $variant['document'] = implode(',',$imageDocName);
-            $variant['document_name'] = implode(',',$image_name);
-        }
-        // dd($request->input());
-        $modelfind->update($variant);
+        $modelfind->update($request->all());
     
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' updated successfully');
     }

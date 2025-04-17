@@ -258,7 +258,7 @@ $(document).ready(function(){
     <div class="row">
         <div class="offset-xl-2 col-xl-8 offset-lg-1 col-lg-10 col-md-12">
             <div class="main-card mb-3 card">
-                <div class="card-header bg-primary d-flex justify-content-between align-items-center">
+                <div class="card-header fixed-header bg-primary d-flex justify-content-between align-items-center">
                     <div>{{ $title_shown }}</div>
                     <div>
                         <button type="submit" class="mt-1 btn btn-dark btn-sm">{!! __('admin.text_button_submit') !!}</button>
