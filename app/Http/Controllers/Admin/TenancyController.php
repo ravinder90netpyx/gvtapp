@@ -131,13 +131,13 @@ class TenancyController extends Controller{
             $master['rent_agreement'] = $imageName;
             $master['rent_agreement_name'] = $image->getClientOriginalName();
         }
-        if($request->hasFile('police_verification')){
-            $image = $request->file('police_verification');
-            $imageName= pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME).time().'.'.$request->police_verification->getClientOriginalExtension();
-            $image->move(public_path('upload/tenant'), $imageName);
-            $master['police_verification'] = $imageName;
-            $master['police_verification_name'] = $image->getClientOriginalName();
-        }
+        // if($request->hasFile('police_verification')){
+        //     $image = $request->file('police_verification');
+        //     $imageName= pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME).time().'.'.$request->police_verification->getClientOriginalExtension();
+        //     $image->move(public_path('upload/tenant'), $imageName);
+        //     $master['police_verification'] = $imageName;
+        //     $master['police_verification_name'] = $image->getClientOriginalName();
+        // }
         if($request->hasFile('undertaking')){
             $image = $request->file('undertaking');
             $imageName= pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME).time().'.'.$request->undertaking->getClientOriginalExtension();
