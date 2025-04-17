@@ -85,6 +85,7 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
         Route::post('tenancy/get_member', [TenancyController::class,'get_member'])->name('tenancy.get_member');
 
         Route::get('tenancy/{id}/make', [TenancyController::class, 'generate_file_'])->name('tenancy.generate_file_');
+        Route::get('tenancy/{id}/show', [TenancyController::class, 'show_pdf'])->name('tenancy.show_pdf');
         
         Route::get('journal_entry/{id}/view', [JournalEntryController::class, 'view_pdf'])->name('journal_entry.view_pdf');
         Route::get('journal_entry/{id}/show', [JournalEntryController::class, 'show_pdf'])->name('journal_entry.show_pdf');

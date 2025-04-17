@@ -12,6 +12,10 @@
     function regenerate_file(id){
         document.location.href = "/supanel/tenancy/"+id+"/make?redirect_index=1";
     }
+
+    function download_file(id){
+        window.open("/supanel/tenancy/"+id+"/show");
+    }
 </script>
 
 @endsection
@@ -99,6 +103,7 @@
                             <th style="width:120px">{{ __('admin.text_actions') }}</th>
                             <th>{{ __('Unit Number') }}</th>
                             <th>{{ __('See Pdf') }}</th>
+                            <th>{{ __('Generate Pdf') }}</th>
                             <th style="width:150px">{{ __('admin.text_date_created') }}</th>
                         </tr>
                     </thead>
@@ -153,8 +158,11 @@
                                     @endphp
 
                                     <td>{{ $member->unit_number }}</td>
-                                    <td><a href='' target="_blank" onclick="regenerate_file({{ $row_id }})" title="See File" rel="tab" class="px-1">
+                                    <td><a href='' onclick="download_file({{ $row_id }})" title="Download" rel="tab" class="px-1">
                                         View
+                                    </a></td>
+                                    <td><a href='' target="_blank" onclick="regenerate_file({{ $row_id }})" title="See File" rel="tab" class="px-1">
+                                        Generate
                                     </a></td>
                                     <td>{{ $row_time }}</td>
                                 </tr>

@@ -400,6 +400,7 @@ class TenancyController extends Controller{
     }
 
     public function generate_file_($id){
+        $module = $this->module;
         $model_var = \App\Models\Tenant_Variant::where([['status','>','0'], ['delstatus', '<','1'],['tenant_master_id','=',$id]])->get()->toArray();
         $model = \App\Models\Tenant_Master::find($id);
         $organization = \App\Models\Organization::find($model->organization_id);
@@ -454,13 +455,18 @@ class TenancyController extends Controller{
         $now=Carbon::now();
         $file_name = $id.'-'.$now->format('Y-m-d-H-i-s');
         $mpdf->showWatermarkImage = true;
-        // $mpdf->save(public_path("upload/pdf_files/{$file_name}.pdf"));
-        // $models=$journal_entry->find($je_id);
         $mpdf->Output(public_path("upload/tenant/{$file_name}.pdf"), \Mpdf\Output\Destination::FILE);
-        // dd($file_name);
         $model1 = \App\Models\Tenant_Master::find($id);
         $model1->update(['pdf_file'=> $file_name]);
-        $name = $file_name; 
+        // $name = $file_name;
+        return redirect()->route($module['main_route'].'.index')->with('success', 'File generated Successfully');
+        // return view('include.show_tenant',compact('name'));
+    }
+
+    public function show_pdf($id){
+
+        $model = \App\Models\Tenant_Master::find($id);
+        $name = $model->pdf_file;
         return view('include.show_tenant',compact('name'));
     }
 

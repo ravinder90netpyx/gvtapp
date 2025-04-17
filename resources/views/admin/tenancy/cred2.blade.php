@@ -273,7 +273,7 @@ $(document).ready(function(){
                     $auth_user = Illuminate\Support\Facades\Auth::user();
                     $roles = $auth_user->roles()->pluck('id')->toArray();
                     @endphp
-                    @if(in_array(1, $roles) && $mode!='edit')
+                        @if(in_array(1, $roles) && $mode!='edit')
                         <div class="col-md-6">
                             @php 
                             $current_field = 'organization_id';
@@ -327,9 +327,14 @@ $(document).ready(function(){
                             @php 
                             $current_field = 'member_id';
                             $row_data = [];
-                            $picked_member = \App\Models\Tenant_Master::where([['status','>','0'], ['delstatus','<','1'],['member_id','!=',null]])->pluck('member_id')->toArray();
 
-                            $data_select = \App\Models\Members::where([['delstatus','<','1'],['status','>','0']])->whereNotIn('id',$picked_member)->get();
+                            $picked_member = \App\Models\Tenant_Master::where([['status','>','0'], ['delstatus','<','1'],['member_id','!=',null]])->pluck('member_id')->toArray();
+                            if($mode=='insert'){
+                                $data_select = \App\Models\Members::where([['delstatus','<','1'],['status','>','0']])->whereNotIn('id',$picked_member)->get();
+                            }
+                            if($mode == 'edit'){
+                                $data_select = \App\Models\Members::where([['status','>','0'], ['delstatus','<','1']])->whereNotIn('id',$picked_member)->orwhere([['status','>','0'], ['delstatus','<','1'], ['id','=',$form_data->$current_field]])->get();
+                            }
                             foreach($data_select as $ds) $row_data[$ds->id] = $ds->unit_number;
                             @endphp
                             {!! Form::bsSelect($current_field, __('Unit Number'), $row_data, $form_data->$current_field ?? '', ['required', 'data-toggle'=>'select'], ['vertical'=>true]); !!}
