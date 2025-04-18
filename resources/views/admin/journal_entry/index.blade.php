@@ -337,6 +337,7 @@ $(function(){
       series_select('{{ $auth_user->organization_id}}');
       @if(!empty($serial_id))
         series_data('{{$serial_id}}');
+        $('#series_id').val();
       @endif
     @endif
     $('#charge').prop('disabled', true);
