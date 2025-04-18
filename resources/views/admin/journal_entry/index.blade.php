@@ -162,6 +162,7 @@ function series_data(ser_id){
     method: "POST",
     data: {'_token': '{!! csrf_token() !!}', 'ser_id' : ser_id},
     success: function(response){
+      $('#series_id').val(ser_id);
       $('#next_number').val(response.next_num);
       $('#next_number').closest('.form-group-multi-input').find('label').append(' (S. NO.- '+response.serial_no+')');
     },
@@ -336,8 +337,8 @@ $(function(){
       autocomplete_trigger('{{ $auth_user->organization_id}}');
       series_select('{{ $auth_user->organization_id}}');
       @if(!empty($serial_id))
+        
         series_data('{{$serial_id}}');
-        $('#series_id').val();
       @endif
     @endif
     $('#charge').prop('disabled', true);
@@ -351,11 +352,12 @@ $(function(){
     $('#entry_year').val("{{ $val_year }}");
     $('#cred_modal').modal('show');
     $('#cred_modal').modal({ backdrop:false });
+
     // $('#form_id').trigger('reset');
     // $('#member_mob').val('');
     $('#form_btn_submit').show();
     $('#exampleModalLabel').text("{{ $title_shown }}");
-    });
+  });
 
   $(document).on('click','#fine_wave_off',function(){
     val = $(this).prop('checked');
