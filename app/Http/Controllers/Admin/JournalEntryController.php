@@ -116,6 +116,7 @@ class JournalEntryController extends Controller{
         if(!in_array(1, $roles)){
             $organization_id = $auth_user->organization_id;
             $model_get = $model_get->where('organization_id', $organization_id);
+            $series = \App\Models\Series::where([['status','>','0'], ['delstatus','<','1'], ['organization_id', '=',$organization_id]])->latest()->first();
         }
 
         if($model->getDelStatusColumn()) $model_get = $model_get->where($model->getDelStatusColumn(), '<', '1');
@@ -141,12 +142,14 @@ class JournalEntryController extends Controller{
             });
         }
 
+        $serial_id = isset($series->id) ? $series->id:'';
+
         $data = $model_get->paginate($perpage)->onEachSide(2);
 
         $title_shown = 'Manage '.$module['main_heading'];
         $folder = $this->folder;
 
-        return view($module['main_view'].'.index', compact('data', 'action', 'method', 'act', 'model', 'mode', 'carbon', 'module', 'perpage', 'folder', 'title_shown', 'title_showns', 'query', 'financial_years', 'unit_no'))->with('i', ($request->input('page', 1) - 1) * $perpage);
+        return view($module['main_view'].'.index', compact('data', 'action', 'method', 'act', 'model', 'mode', 'carbon', 'serial_id', 'module', 'perpage', 'folder', 'title_shown', 'title_showns', 'query', 'financial_years', 'unit_no'))->with('i', ($request->input('page', 1) - 1) * $perpage);
     }
 
     public function create(DefaultModel $model, helpers $helpers){

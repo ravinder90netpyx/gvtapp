@@ -29,6 +29,7 @@ class Custom_Global_Variable extends Base_Model{
     protected $fillable = [
         'organization_id',
         'name',
+        'variable_name',
         'value'
     ];
 }

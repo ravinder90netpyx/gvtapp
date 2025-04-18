@@ -335,6 +335,9 @@ $(function(){
     @if(!in_array(1, $roles))
       autocomplete_trigger('{{ $auth_user->organization_id}}');
       series_select('{{ $auth_user->organization_id}}');
+      @if(!empty($serial_id))
+        series_data('{{$serial_id}}');
+      @endif
     @endif
     $('#charge').prop('disabled', true);
     @php

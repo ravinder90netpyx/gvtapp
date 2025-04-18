@@ -18,6 +18,7 @@ return new class extends Migration
 
             $table->unsignedBigInteger('organization_id');
             $table->string('name');
+            $table->string('variable_name')->nullable();
             $table->string('value');
 
             $table->enum('delstatus', ['0', '1'])->default('0');

@@ -44,6 +44,9 @@
                     @php $current_field = 'name'; @endphp
                     {!! Form::bsText($current_field, __('admin.text_name'), $form_data->$current_field ?? '', ['required']); !!}
 
+                    @php $current_field = 'variable_name'; @endphp
+                    {!! Form::bsText($current_field, __(' Variable Name '), $form_data->$current_field ?? '', ['required']); !!}
+
                     @php $current_field = 'value'; @endphp
                     {!! Form::bsText($current_field, __('Value'), $form_data->$current_field ?? '', ['required']); !!}
 
