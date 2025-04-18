@@ -420,17 +420,21 @@ select[invalid], input[invalid], textarea[invalid]{
     font-size: 12px;
 }
 
- .file-div img {
+.file-div img {
     width: 30px;
     display: inline-block;
     margin-right: 10px;
-  }
+}
 
-  .fixed-header {
+.fixed-header {
     position: sticky;
     top: 0;
     z-index: 222;
-  }
+}
+
+@media (max-width: 767px) {
+    .fixed-header {top: 30px;}
+}
 
 
 /*** media ****/
