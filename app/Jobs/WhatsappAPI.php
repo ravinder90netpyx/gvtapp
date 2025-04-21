@@ -98,7 +98,7 @@ class WhatsappAPI implements ShouldQueue
             // dd($res_arr->status);
             if($res_arr->status == 'submitted'){
                 $api_arr = [];
-                $api_arr['journal_entry_id'] = !empty($je_id) ? $je_id: '';
+                $api_arr['journal_entry_id'] = !empty($je_id) ? $je_id: null;
                 $api_arr['response'] = $response;
                 if(!empty($je_id)){
                     $je_model = \App\Models\Journal_Entry::find($je_id);
