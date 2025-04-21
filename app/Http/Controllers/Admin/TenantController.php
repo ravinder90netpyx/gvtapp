@@ -134,7 +134,7 @@ class TenantController extends Controller{
             $image_name = [];
             foreach($request->file('document') as $image){
                 // $image = $request->file("document");
-                $imageName= pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME).time().'.'.$request->file("document")->getClientOriginalExtension();
+                $imageName= pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME).time().'.'.$image->getClientOriginalExtension();
                 $image->move(public_path('upload/tenant'), $imageName);
                 $imageDocName[] = $imageName;
                 $image_name[] = $image->getClientOriginalName();
