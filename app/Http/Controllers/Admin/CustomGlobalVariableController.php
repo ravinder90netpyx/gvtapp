@@ -90,7 +90,8 @@ class CustomGlobalVariableController extends Controller{
         $org_id = in_array(1,$roles) ? $request->organization_id : $auth_user->organization_id;
         $request->validate([
             'organization_id' =>in_array(1,$roles)? 'required':'nullable',
-            'name' => [
+            'name' => 'required',
+            'variable_name' => [
                 'required',
                 Rule::unique('custom_global_variable')->where(function ($query) use ($org_id) {
                     return $query->where('organization_id', $org_id);
@@ -134,6 +135,12 @@ class CustomGlobalVariableController extends Controller{
         $module = $this->module;
         $request->validate([
             'name' => 'required',
+            'variable_name' => [
+                'required',
+                Rule::unique('custom_global_variable')->where(function ($query) use ($org_id) {
+                    return $query->where('organization_id', $org_id);
+                })->ignore($id),
+            ],
             'value' => 'required'
         ]);
 

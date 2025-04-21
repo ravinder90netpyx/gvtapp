@@ -9,6 +9,31 @@
 @endsection
 
 @section('scripts')
+<script>
+function send_pdf(id){
+  if(confirm("Do you really want to send the Message? Please confirm")){
+    // document.location.href = "/supanel/journal_entry/"+id+"/send";
+    $.ajax({
+      url: '{{ route("supanel.tenant.send_msg") }}',
+      method: "POST",
+      data: {'_token': '{!! csrf_token() !!}', 'id' : id},
+      success: function(response){
+        if(response != 'fail'){
+	        $('.header-body').append('<div class="alert alert-success alert-block"><button type="button" class="close" data-dismiss="alert">×</button><strong>Message Sent Successfully</strong></div>');
+        } else{
+          $('.header-body').append('<div class="alert alert-info alert-block"><button type="button" class="close" data-dismiss="alert">×</button> <strong>Message can\'t be send</strong></div>');
+        }
+        setTimeout(function() {
+          $(".alert").alert('close');
+        }, 3000);
+      },
+      error: function(error) {
+        console.error('Error fetching folder content:', error);
+      }
+    });
+  }
+}
+</script>
 @endsection
 
 @section('content')
@@ -129,6 +154,15 @@
                                         {{-- <a href="{{ route($module['main_route'].'.show', $row_id) }}" title="{{ __('admin.text_show') }}" rel="tab">
                                             <i class="{{ config('custom.icons.info') }}"></i>
                                         </a> --}}
+                                        @php
+                                            $org_id = $item['organization_id'];
+                                            $wht_model = \App\Models\Templates::where([['name','=','tenant_family'],['organization_id','=',$org_id]])->count();
+                                        @endphp
+                                        @if($wht_model>0)
+                                        <a href='#' onclick="send_pdf({{ $row_id }})" title="Send Reciept on Whatsapp" rel="tab" class="px-1">
+                                            <i class="fab fa-lg fa-whatsapp"></i>
+                                        </a>
+                                        @endif
 
                                         @can($module['permission_group'].'.edit')
                                         <a href="{{ route($module['main_route'].'.edit', $row_id) }}" title="{{ __('admin.text_edit') }}" rel="tab">

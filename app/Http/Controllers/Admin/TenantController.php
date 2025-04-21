@@ -284,4 +284,44 @@ class TenantController extends Controller{
             }
         }
     }
+
+    public function send_msg(Request $request){
+        $id = $request->input('id');
+        $model = \App\Models\Tenant_Variant::find($id);
+        if($model->isfamily == '0'){
+            $destination = $model->mobile_number;
+            $message ='';
+            $helpers = new \App\Helpers\helpers();
+            $org_id = $model->organization_id;
+            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','tenant_family'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            $global_var = new App\Models\CustomGlobalVariable();
+            $data = [
+                'name' =>$model->name,
+                'security' => $global_var->where([['variable_name','=','security'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
+                'pvtatime' => $global_var->where([['variable_name','=','pvtatime'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
+                'shiftingcharge' => $global_var->where([['variable_name','=','shiftingcharge'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
+            ];
+            
+            $templ_json = $helpers->make_temp_json($temp->id, $data);
+
+            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+        } else{
+            $destination = $model->mobile_number;
+            $message ='';
+            $helpers = new \App\Helpers\helpers();
+            $org_id = $model->organization_id;
+            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','tenant_family'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            $global_var = new App\Models\CustomGlobalVariable();
+            $data = [
+                'name' =>$model->name,
+                'security' => $global_var->where([['variable_name','=','security'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
+                'pvtatime' => $global_var->where([['variable_name','=','pvtatime'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
+                'shiftingcharge' => $global_var->where([['variable_name','=','shiftingcharge'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
+            ];
+            
+            $templ_json = $helpers->make_temp_json($temp->id, $data);
+
+            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+        }
+    }
 }

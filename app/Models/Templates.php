@@ -31,7 +31,8 @@ class Templates extends Base_Model{
         'reciept' => 'Reciept',
         'overdue' => 'Over-due',
         'maitenance_last_day' => 'Maitenance Last Day',
-        'fine' => 'Fine'
+        'fine' => 'Fine',
+        'tenant_family' =>'Tenant Family'
     ];
 
     protected $fillable = [

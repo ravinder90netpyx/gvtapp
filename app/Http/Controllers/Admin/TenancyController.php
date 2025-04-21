@@ -178,6 +178,7 @@ class TenancyController extends Controller{
         }
         if($request->input('type') == 'family'){
             foreach($request->input('row_data') as $index => $row_data){
+                $variant['organization_id'] = $master['organization_id'];
                 $variant['tenant_variant_id'] = $id_tenant;
                 $variant['name'] =  $row_data['name'];
                 $variant['age'] = $row_data['age'];
