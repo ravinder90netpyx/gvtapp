@@ -304,7 +304,6 @@ class TenantController extends Controller{
             ];
             
             $templ_json = $helpers->make_temp_json($temp->id, $data);
-            dd($templ_json);
 
             dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
         } else{
@@ -322,7 +321,6 @@ class TenantController extends Controller{
             ];
             
             $templ_json = $helpers->make_temp_json($temp->id, $data);
-            dd($templ_json);
 
             dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
             return '';
