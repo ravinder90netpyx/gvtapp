@@ -100,10 +100,12 @@ class WhatsappAPI implements ShouldQueue
                 $api_arr = [];
                 $api_arr['journal_entry_id'] = !empty($je_id) ? $je_id: '';
                 $api_arr['response'] = $response;
-                $je_model = \App\Models\Journal_Entry::find($je_id);
+                if(!empty($je_id)){
+                    $je_model = \App\Models\Journal_Entry::find($je_id);
                 $count = $je_model->count ?? 0;
                 $count++;
                 $upd = $je_model->update(['count' => $count]);
+                }
                 $model = new API_Response();
                 $model->create($api_arr);
             }
