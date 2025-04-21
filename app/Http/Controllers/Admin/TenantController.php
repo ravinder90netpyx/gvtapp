@@ -8,6 +8,7 @@ use Illuminate\Support\HtmlString;
 use Illuminate\SUpport\Facades\Auth;
 use URL;
 use Carbon\Carbon;
+use App\Jobs\WhatsappAPI;
 use Nnjeim\World\World;
 use Nnjeim\World\Models\Country;
 use Spatie\Permission\Models\Role;
@@ -294,7 +295,7 @@ class TenantController extends Controller{
             $helpers = new \App\Helpers\helpers();
             $org_id = $model->organization_id;
             $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','tenant_family'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
-            $global_var = new App\Models\CustomGlobalVariable();
+            $global_var = new \App\Models\Custom_Global_Variable();
             $data = [
                 'name' =>$model->name,
                 'security' => $global_var->where([['variable_name','=','security'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
@@ -311,7 +312,7 @@ class TenantController extends Controller{
             $helpers = new \App\Helpers\helpers();
             $org_id = $model->organization_id;
             $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','tenant_family'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
-            $global_var = new App\Models\CustomGlobalVariable();
+            $global_var = new \App\Models\Custom_Global_Variable();
             $data = [
                 'name' =>$model->name,
                 'security' => $global_var->where([['variable_name','=','security'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
@@ -322,6 +323,7 @@ class TenantController extends Controller{
             $templ_json = $helpers->make_temp_json($temp->id, $data);
 
             dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+            return '';
         }
     }
 }
