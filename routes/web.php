@@ -85,6 +85,8 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
 
         Route::post('tenant/send', [TenantController::class, 'send_msg'])->name('tenant.send_msg');
 
+        Route::post('tenancy/send_tenancy', [TenancyController::class, 'send_tenancy_msg'])->name('tenancy.send_tenancy_msg');
+
         Route::post('tenancy/get_member', [TenancyController::class,'get_member'])->name('tenancy.get_member');
 
         Route::get('tenancy/{id}/make', [TenancyController::class, 'generate_file_'])->name('tenancy.generate_file_');

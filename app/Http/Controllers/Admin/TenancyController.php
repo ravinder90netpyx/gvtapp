@@ -9,6 +9,7 @@ use URL;
 use PDF;
 use Illuminate\SUpport\Facades\Auth;
 use Carbon\Carbon;
+use App\Jobs\WhatsappAPI;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -481,5 +482,40 @@ class TenancyController extends Controller{
         $id = $request->input('member_id');
         $member = \App\Models\Members::where([['status','>','0'], ['delstatus','<','1'], ['id','=',$id]])->first();
         return $member->name;
+    }
+
+    public function send_tenancy_msg(Request $request){
+        // id will come in request
+        $id = $request->input('id');
+        $member = \App\Models\Members::find($id);
+        $tenant = \App\Models\Tenant_Variant::where([['status','>','0'], ['delstatus', '<', '1'], ['tenant_master_id', '=', $id]])->pluck('name')->toArray();
+        $destination = $member->mobile_number;
+        $message = '';
+        $names = implode(',',$tenant);
+
+        $model = \App\Models\Tenant_Master::find($id);
+        $file_name = $model->pdf_file;
+        $message = array(
+            'type' => 'document',
+            'document' => array(
+                'link' => url('/upload/tenant/'.$file_name.'.pdf'),
+                // 'link' => 'https://gvtapp.netpyx.org/supanel/journal_entry/921/show',
+
+                'filename' => 'Document'
+            )
+        );
+        $helpers = new \App\Helpers\helpers();
+        $org_id = $model->organization_id;
+        $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','tenancy'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+        $global_var = new \App\Models\Custom_Global_Variable();
+
+        $data = [
+            'name' =>$names,
+            'unit_number' => $member->unit_number
+        ];
+        
+        $templ_json = $helpers->make_temp_json($temp->id, $data);
+
+        dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
     }
 }

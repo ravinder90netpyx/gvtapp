@@ -306,6 +306,8 @@ class TenantController extends Controller{
             $templ_json = $helpers->make_temp_json($temp->id, $data);
 
             dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+            return '';
+            
         } else{
             $destination = $model->mobile_number;
             $message ='';

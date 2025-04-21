@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('templates', function (Blueprint $table) {
-            DB::statement("ALTER TABLE templates MODIFY COLUMN name ENUM('welcome', 'reminder', 'reciept', 'overdue', 'maitenance_last_day', 'fine_day', 'tenant_family')");
+            DB::statement("ALTER TABLE templates MODIFY COLUMN name ENUM('welcome', 'reminder', 'reciept', 'overdue', 'maitenance_last_day', 'fine_day', 'tenant_family', 'tenant_individual', 'tenancy')");
         });
     }
 
