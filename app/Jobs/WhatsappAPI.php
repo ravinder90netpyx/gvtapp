@@ -93,12 +93,12 @@ class WhatsappAPI implements ShouldQueue
         $response = curl_exec($curl);
         curl_close($curl);
         echo $response;
-        if(!empty($je_id)){
+
             $res_arr = json_decode($response);
             // dd($res_arr->status);
             if($res_arr->status == 'submitted'){
                 $api_arr = [];
-                $api_arr['journal_entry_id'] = $je_id;
+                $api_arr['journal_entry_id'] = !empty($je_id) $je_id: '';
                 $api_arr['response'] = $response;
                 $je_model = \App\Models\Journal_Entry::find($je_id);
                 $count = $je_model->count ?? 0;
@@ -107,6 +107,5 @@ class WhatsappAPI implements ShouldQueue
                 $model = new API_Response();
                 $model->create($api_arr);
             }
-        }
     }
 }
