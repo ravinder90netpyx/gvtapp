@@ -133,6 +133,9 @@ class CustomGlobalVariableController extends Controller{
 
     public function update(Request $request, $id, DefaultModel $model){
         $module = $this->module;
+        $auth_user = Auth::user();
+        $roles = $auth_user->roles()->pluck('id')->toArray();
+        $org_id = in_array(1,$roles) ? $request->organization_id : $auth_user->organization_id;
         $request->validate([
             'name' => 'required',
             'variable_name' => [
