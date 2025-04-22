@@ -26,13 +26,14 @@ class WhatsappAPI implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($destination,$message, $org_id, $template, $je_id =null)
+    public function __construct($destination,$message, $org_id, $template, $category, $je_id =null)
     {
         $this->destination = $destination;
         $this->message = $message;
         $this->org_id = $org_id;
         $this->template = $template;
         $this->je_id = $je_id;
+        $this->category = $category;
     }
 
     /**
@@ -55,6 +56,7 @@ class WhatsappAPI implements ShouldQueue
         $org_id = $this->org_id;
         $template = $this->template;
         $je_id = $this->je_id ?? null;
+        $category = $this->category ?? '';
 
         $model = new \App\Models\Organization_Settings();
         $group = 'whatsapp_settings';
@@ -100,6 +102,7 @@ class WhatsappAPI implements ShouldQueue
                 $api_arr = [];
                 $api_arr['journal_entry_id'] = !empty($je_id) ? $je_id: null;
                 $api_arr['response'] = $response;
+                $api_arr['category'] = $category ?? '';
                 if(!empty($je_id)){
                     $je_model = \App\Models\Journal_Entry::find($je_id);
                     $count = $je_model->count ?? 0;

@@ -159,7 +159,7 @@ function send_pdf(id){
                                             $wht_model = \App\Models\Templates::where([['name','=','tenant_family'],['organization_id','=',$org_id]])->count();
                                         @endphp
                                         @if($wht_model>0)
-                                        <a href='#' onclick="send_pdf({{ $row_id }})" title="Send Reciept on Whatsapp" rel="tab" class="px-1">
+                                        <a href='#' onclick="send_pdf({{ $row_id }})" title="Send Message on Whatsapp" rel="tab" class="px-1">
                                             <i class="fab fa-lg fa-whatsapp"></i>
                                         </a>
                                         @endif

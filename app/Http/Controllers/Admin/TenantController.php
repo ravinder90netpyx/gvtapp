@@ -288,6 +288,7 @@ class TenantController extends Controller{
 
     public function send_msg(Request $request){
         $id = $request->input('id');
+        $category = 'tenant';
         $model = \App\Models\Tenant_Variant::find($id);
         if($model->isfamily == '0'){
             $destination = $model->mobile_number;
@@ -305,7 +306,7 @@ class TenantController extends Controller{
             
             $templ_json = $helpers->make_temp_json($temp->id, $data);
 
-            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category) )->onConnection('sync');
             return '';
             
         } else{
@@ -324,7 +325,7 @@ class TenantController extends Controller{
             
             $templ_json = $helpers->make_temp_json($temp->id, $data);
 
-            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category) )->onConnection('sync');
             return '';
         }
     }

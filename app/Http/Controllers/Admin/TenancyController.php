@@ -211,13 +211,13 @@ class TenancyController extends Controller{
     }
 
     public function show($id, DefaultModel $model){
-        $module = $this->module;
-        $folder = $this->folder;
-        $form_data = $model->find($id);
-        $title_shown = 'Show '.$module['main_heading'];
-        $mode = 'show';
+        // $module = $this->module;
+        // $folder = $this->folder;
+        // $form_data = $model->find($id);
+        // $title_shown = 'Show '.$module['main_heading'];
+        // $mode = 'show';
         
-        return view($module['main_view'].'.show', compact('form_data', 'model', 'module', 'folder', 'title_shown', 'mode', 'id'));
+        // return view($module['main_view'].'.show', compact('form_data', 'model', 'module', 'folder', 'title_shown', 'mode', 'id'));
     }
 
     public function edit($id, DefaultModel $model){
@@ -503,7 +503,7 @@ class TenancyController extends Controller{
         $message = '';
         $names = implode(',',$tenant);
 
-        
+        $category = 'tenancy';
         $file_name = $model->pdf_file;
         $message = array(
             'type' => $api['type'],
@@ -526,6 +526,6 @@ class TenancyController extends Controller{
         $templ_json = $helpers->make_temp_json($temp->id, $data);
         $message = json_encode($message, true);
 
-        dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+        dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category) )->onConnection('sync');
     }
 }
