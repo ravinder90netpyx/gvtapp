@@ -496,13 +496,14 @@ class TenancyController extends Controller{
         // id will come in request
         $id = $request->input('id');
         $api = $this->whatsapp_api;
-        $member = \App\Models\Members::find($id);
+        $model = \App\Models\Tenant_Master::find($id);
+        $member = \App\Models\Members::find($model->member_id);
         $tenant = \App\Models\Tenant_Variant::where([['status','>','0'], ['delstatus', '<', '1'], ['tenant_master_id', '=', $id]])->pluck('name')->toArray();
         $destination = $member->mobile_number;
         $message = '';
         $names = implode(',',$tenant);
 
-        $model = \App\Models\Tenant_Master::find($id);
+        
         $file_name = $model->pdf_file;
         $message = array(
             'type' => $api['type'],
