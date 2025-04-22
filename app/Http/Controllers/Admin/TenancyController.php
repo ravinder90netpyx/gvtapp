@@ -517,7 +517,6 @@ class TenancyController extends Controller{
         $helpers = new \App\Helpers\helpers();
         $org_id = $model->organization_id;
         $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','tenancy'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
-        $global_var = new \App\Models\Custom_Global_Variable();
 
         $data = [
             'name' =>$names,
