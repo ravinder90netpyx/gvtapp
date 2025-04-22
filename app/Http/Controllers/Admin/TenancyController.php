@@ -22,6 +22,14 @@ class TenancyController extends Controller{
         'default_perpage' => 10
     );
 
+    public $whatsapp_api = array(
+        'whatsapp_api_url' => 'https://api.gupshup.io/wa/api/v1/template/msg',
+        'channel' => 'whatsapp',
+        'src_name' => 'GVTGH9',
+        'type' => 'document',
+        'template_id' => 'c376f4e4-2743-4eb9-8cdb-2648f7457d22',
+    );
+
     public function __construct(Request $request){
         $module = $this->module;
         $folder = $this->folder;
@@ -487,6 +495,7 @@ class TenancyController extends Controller{
     public function send_tenancy_msg(Request $request){
         // id will come in request
         $id = $request->input('id');
+        $api = $this->whatsapp_api;
         $member = \App\Models\Members::find($id);
         $tenant = \App\Models\Tenant_Variant::where([['status','>','0'], ['delstatus', '<', '1'], ['tenant_master_id', '=', $id]])->pluck('name')->toArray();
         $destination = $member->mobile_number;
@@ -496,8 +505,8 @@ class TenancyController extends Controller{
         $model = \App\Models\Tenant_Master::find($id);
         $file_name = $model->pdf_file;
         $message = array(
-            'type' => 'document',
-            'document' => array(
+            'type' => $api['document'],
+            $api['document'] => array(
                 'link' => url('/upload/tenant/'.$file_name.'.pdf'),
                 // 'link' => 'https://gvtapp.netpyx.org/supanel/journal_entry/921/show',
 
