@@ -524,6 +524,7 @@ class TenancyController extends Controller{
         ];
         
         $templ_json = $helpers->make_temp_json($temp->id, $data);
+        $message = json_encode($message, true);
 
         dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
     }
