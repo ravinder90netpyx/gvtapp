@@ -192,9 +192,15 @@
                                     @endphp
 
                                     <td>{{ $member->unit_number }}</td>
-                                    <td><a href='' onclick="download_file({{ $row_id }})" title="Download" rel="tab" class="px-1">
+                                    <td>
+                                        @if(!empty($item['pdf_file']))
+                                        <a href='' onclick="download_file({{ $row_id }})" title="Download" rel="tab" class="px-1">
                                         View
-                                    </a></td>
+                                        </a>
+                                        @else
+                                        Please Generate the File
+                                        @endif
+                                    </td>
                                     <td><a href='' target="_blank" onclick="regenerate_file({{ $row_id }})" title="See File" rel="tab" class="px-1">
                                         Generate
                                     </a></td>
