@@ -170,7 +170,7 @@
                                             $wht_model = \App\Models\Templates::where([['name','=','tenancy'],['organization_id','=',$org_id]])->count();
                                         @endphp
                                         @if($wht_model>0)
-                                        <a href='#' onclick="send_pdf({{ $row_id }})" title="Send Document on Whatsapp" rel="tab" class="px-1">
+                                        <a href='' onclick="send_pdf({{ $row_id }})" title="Send Document on Whatsapp" rel="tab" class="px-1">
                                             <i class="fab fa-lg fa-whatsapp"></i>
                                         </a>
                                         @endif
