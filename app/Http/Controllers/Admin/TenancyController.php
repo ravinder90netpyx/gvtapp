@@ -505,8 +505,8 @@ class TenancyController extends Controller{
         $model = \App\Models\Tenant_Master::find($id);
         $file_name = $model->pdf_file;
         $message = array(
-            'type' => $api['document'],
-            $api['document'] => array(
+            'type' => $api['type'],
+            $api['type'] => array(
                 'link' => url('/upload/tenant/'.$file_name.'.pdf'),
                 // 'link' => 'https://gvtapp.netpyx.org/supanel/journal_entry/921/show',
 
