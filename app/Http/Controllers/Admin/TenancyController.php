@@ -170,7 +170,7 @@ class TenancyController extends Controller{
         $master_data = $model->create($master);
         $variant = [];
         $variant['tenant_master_id'] = $master_data->id;
-        $this->generate_file($variant['tenant_master_id']);
+        $this->generate_file_($variant['tenant_master_id']);
         
         foreach($request->input('tenant_member') as $tm){
             $ten_vari =[];
@@ -313,7 +313,7 @@ class TenancyController extends Controller{
             $master['acceptance_name'] = $image->getClientOriginalName();
         }
         $master_data = $modelfind->update($master);
-        $this->generate_file($id);
+        $this->generate_file_($id);
         $variant = [];
         $variant['tenant_master_id'] = $id;
         foreach($request->input('tenant_member') as $tm){
@@ -478,7 +478,7 @@ class TenancyController extends Controller{
         $model1->update(['pdf_file'=> $file_name]);
         // $name = $file_name;
         // return view('include.make_tenant_doc',compact('data','profile_data','family_data'));
-        return redirect()->route($module['main_route'].'.index')->with('success', 'File generated Successfully');
+        $this->generate_file_($id);
     }
 
     public function show_pdf($id){
