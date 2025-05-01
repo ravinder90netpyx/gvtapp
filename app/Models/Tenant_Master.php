@@ -39,7 +39,7 @@ class Tenant_Master extends Base_Model{
         'undertaking_name',
         'acceptance',
         'aceeptance_name',
-        'pdf_file'
-        
+        'pdf_file',
+        'counter'
     ];
 }

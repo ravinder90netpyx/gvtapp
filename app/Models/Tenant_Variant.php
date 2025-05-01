@@ -44,7 +44,8 @@ class Tenant_Variant extends Base_Model{
         'pincode',
         'isfamily',
         'police_verification',
-        'police_verification_name'
-
+        'police_verification_name',
+        'tenant_variant_id',
+        'counter'
     ];
 }

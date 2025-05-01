@@ -36,6 +36,7 @@ return new class extends Migration
             $table->unsignedBigInteger('pincode')->nullable();
             $table->enum('isfamily', ['0', '1'])->default('0');
             $table->unsignedBigInteger('tenant_variant_id')->nullable();
+            $table->unsignedBigInteger('counter')->default(0)->nullable();
 
             $table->enum('status', ['0', '1'])->default('1');
             $table->enum('delstatus', ['0', '1'])->default('0');

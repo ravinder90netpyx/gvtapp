@@ -170,6 +170,7 @@ class TenancyController extends Controller{
         $master_data = $model->create($master);
         $variant = [];
         $variant['tenant_master_id'] = $master_data->id;
+        $this->generate_file($variant['tenant_master_id']);
         
         foreach($request->input('tenant_member') as $tm){
             $ten_vari =[];
@@ -312,6 +313,7 @@ class TenancyController extends Controller{
             $master['acceptance_name'] = $image->getClientOriginalName();
         }
         $master_data = $modelfind->update($master);
+        $this->generate_file($id);
         $variant = [];
         $variant['tenant_master_id'] = $id;
         foreach($request->input('tenant_member') as $tm){
@@ -437,8 +439,8 @@ class TenancyController extends Controller{
                 $pddata['age'] = $mv['age'];
                 $pddata['address'] = $mv['locality'].', '.$mv['city'].', '.$mv['state'].'.';
                 $pddata['photo'] = $mv['photo'];
+                $pddata['police_verification'] = !empty($mv['police_verification']) ? 'Submitted':'Pending';
                 $profile_data[] = $pddata;
-                if(empty($mv['police_verification'])) $pvc=1;
             } else{
                 $famdata['name'] = $mv['name'];
                 $famdata['age'] = $mv['age'];
@@ -448,10 +450,10 @@ class TenancyController extends Controller{
         }
         $data['profile_data'] = $profile_data;
         $data['family_data'] = $family_data;
-        $data['rent_agreement'] = !empty($model->rent_agreement) ? 'Ok':'N/A';
-        $data['undertaking'] = !empty($model->undertaking) ? 'Ok':'N/A';
-        $data['police_verification'] = ($pvc==0) ? 'Ok':'N/A';
-        $data['acceptance'] = !empty($model->acceptance) ? 'Ok':'N/A';
+        $data['rent_agreement'] = !empty($model->rent_agreement) ? 'Submitted':'Pending';
+        $data['undertaking'] = !empty($model->undertaking) ? 'Submitted':'Pending';
+        // $data['police_verification'] = ($pvc==0) ? 'Submitted':'Pending';
+        $data['acceptance'] = !empty($model->acceptance) ? 'Submitted':'Pending';
 
         $pdf = PDF::loadView('include.make_tenant_doc', $data);
 
@@ -475,8 +477,8 @@ class TenancyController extends Controller{
         $model1 = \App\Models\Tenant_Master::find($id);
         $model1->update(['pdf_file'=> $file_name]);
         // $name = $file_name;
+        // return view('include.make_tenant_doc',compact('data','profile_data','family_data'));
         return redirect()->route($module['main_route'].'.index')->with('success', 'File generated Successfully');
-        // return view('include.show_tenant',compact('name'));
     }
 
     public function show_pdf($id){
@@ -527,5 +529,7 @@ class TenancyController extends Controller{
         $message = json_encode($message, true);
 
         dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category) )->onConnection('sync');
+        $model->counter++;
+        $model->save();
     }
 }

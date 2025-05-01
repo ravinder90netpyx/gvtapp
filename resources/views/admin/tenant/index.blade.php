@@ -118,6 +118,7 @@ function send_pdf(id){
                             <th style="width:40px">{{ __('admin.text_idcheck') }}</th>
                             <th style="width:120px">{{ __('admin.text_actions') }}</th>
                             <th>{{ __('admin.text_name') }}</th>
+                            <th>{{ 'Message Send' }}</th>
                             <th style="width:150px">{{ __('admin.text_date_created') }}</th>
                         </tr>
                     </thead>
@@ -178,6 +179,7 @@ function send_pdf(id){
                                     </td>       
 
                                     <td>{{ $item['name'] }}</td>
+                                    <td>{{ $item['counter'] }}</td>
                                     <td>{{ $row_time }}</td>
                                 </tr>
                             @endforeach

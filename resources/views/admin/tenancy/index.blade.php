@@ -128,6 +128,7 @@
                             <th>{{ __('Unit Number') }}</th>
                             <th>{{ __('See Pdf') }}</th>
                             <th>{{ __('Generate Pdf') }}</th>
+                            <th>{{ 'Message Send' }}</th>
                             <th style="width:150px">{{ __('admin.text_date_created') }}</th>
                         </tr>
                     </thead>
@@ -204,6 +205,7 @@
                                     <td><a href='' target="_blank" onclick="regenerate_file({{ $row_id }})" title="See File" rel="tab" class="px-1">
                                         Generate
                                     </a></td>
+                                    <td>{{ $item['counter'] }}</td>
                                     <td>{{ $row_time }}</td>
                                 </tr>
                             @endforeach

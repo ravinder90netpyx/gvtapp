@@ -290,43 +290,25 @@ class TenantController extends Controller{
         $id = $request->input('id');
         $category = 'tenant';
         $model = \App\Models\Tenant_Variant::find($id);
-        if($model->isfamily == '0'){
-            $destination = $model->mobile_number;
-            $message ='';
-            $helpers = new \App\Helpers\helpers();
-            $org_id = $model->organization_id;
-            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','tenant_family'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
-            $global_var = new \App\Models\Custom_Global_Variable();
-            $data = [
-                'name' =>$model->name,
-                'security' => $global_var->where([['variable_name','=','security'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
-                'pvtatime' => $global_var->where([['variable_name','=','pvtatime'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
-                'shiftingcharge' => $global_var->where([['variable_name','=','shiftingcharge'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
-            ];
             
-            $templ_json = $helpers->make_temp_json($temp->id, $data);
+        $destination = $model->mobile_number;
+        $message ='';
+        $helpers = new \App\Helpers\helpers();
+        $org_id = $model->organization_id;
+        $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','tenant_family'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+        $global_var = new \App\Models\Custom_Global_Variable();
+        $data = [
+            'name' =>$model->name,
+            'security' => $global_var->where([['variable_name','=','security'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
+            'pvtatime' => $global_var->where([['variable_name','=','pvtatime'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
+            'shiftingcharge' => $global_var->where([['variable_name','=','shiftingcharge'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
+        ];
+        
+        $templ_json = $helpers->make_temp_json($temp->id, $data);
 
-            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category) )->onConnection('sync');
-            return '';
-            
-        } else{
-            $destination = $model->mobile_number;
-            $message ='';
-            $helpers = new \App\Helpers\helpers();
-            $org_id = $model->organization_id;
-            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','tenant_family'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
-            $global_var = new \App\Models\Custom_Global_Variable();
-            $data = [
-                'name' =>$model->name,
-                'security' => $global_var->where([['variable_name','=','security'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
-                'pvtatime' => $global_var->where([['variable_name','=','pvtatime'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
-                'shiftingcharge' => $global_var->where([['variable_name','=','shiftingcharge'], ['status', '>','0'], ['delstatus', '<', '1'], ['organization_id','=',$org_id]])->first()?->value ?? '',
-            ];
-            
-            $templ_json = $helpers->make_temp_json($temp->id, $data);
-
-            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category) )->onConnection('sync');
-            return '';
-        }
+        dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category) )->onConnection('sync');
+        $model->counter++;
+        $model->save();
+        return '';
     }
 }

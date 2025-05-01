@@ -34,6 +34,7 @@ return new class extends Migration
             $table->string('acceptance_name')->nullable();
 
             $table->string('pdf_file')->nullable();
+            $table->unsignedBigInteger('counter')->default(0)->nullable();
 
             $table->enum('status', ['0', '1'])->default('1');
             $table->enum('delstatus', ['0', '1'])->default('0');
