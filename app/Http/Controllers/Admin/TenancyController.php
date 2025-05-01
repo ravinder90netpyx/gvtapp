@@ -478,11 +478,10 @@ class TenancyController extends Controller{
         $model1->update(['pdf_file'=> $file_name]);
         // $name = $file_name;
         // return view('include.make_tenant_doc',compact('data','profile_data','family_data'));
-        $this->generate_file_($id);
+        return $this->show_pdf($id);
     }
 
     public function show_pdf($id){
-
         $model = \App\Models\Tenant_Master::find($id);
         $name = $model->pdf_file;
         return view('include.show_tenant',compact('name'));
