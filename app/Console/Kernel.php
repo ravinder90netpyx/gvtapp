@@ -99,7 +99,7 @@ class Kernel extends ConsoleKernel{
             $data1['name'] = "Reminder cron";
             $data1['date'] = $now;
             $model1 = $model12->create($data1);
-        })/*->everyMinute();/*->everyThreeHours()->days([1, 2, 3]);/*/->cron('55 18 1,8,12,18,26,30 * *');
+        })/*->everyMinute();/*->everyThreeHours()->days([1, 2, 3]);/*/->cron('58 18 1,8,12,18,26,30 * *');
         
             
         }
