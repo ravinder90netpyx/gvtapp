@@ -21,7 +21,7 @@ class Kernel extends ConsoleKernel{
     protected function schedule(Schedule $schedule){
         // $schedule->command('inspire')->hourly();
         $schedule->call(function (){
-
+            
             $now = Carbon::now();
             $member_model = \App\Models\Members::where([['status','>','0'], ['delstatus','<','1']])->get();
 
@@ -84,22 +84,23 @@ class Kernel extends ConsoleKernel{
                        $mobile_msg_arr =[];
                     }
                     if(in_array('reminder',$mobile_msg_arr)){
-                        dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+                        dispatch( new WhatsappAPI('+917479735912',$message, $org_id,$templ_json,'cron') )->onConnection('sync');
                     }
 
                     if(in_array('reminder',$sublet_msg_arr)){
                         $destination = $val->sublet_number;
                         if(!empty($destination)){
-                            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json) )->onConnection('sync');
+                            dispatch( new WhatsappAPI('+917479735912',$message, $org_id,$templ_json,'cron') )->onConnection('sync');
                         }
                     }
                 }
             }      
+            die('run');
             $model12 = new \App\Models\Test_Cron();
             $data1['name'] = "Reminder cron";
             $data1['date'] = $now;
             $model1 = $model12->create($data1);
-        })/*->everyMinute();/*->everyThreeHours()->days([1, 2, 3]);/*/->cron('30 19 1,8,12,18,26,30 * *');
+        })->cron('51 11 1,2,8,12,18,26,30 * *');
         
             
         }
