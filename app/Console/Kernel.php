@@ -84,23 +84,22 @@ class Kernel extends ConsoleKernel{
                        $mobile_msg_arr =[];
                     }
                     if(in_array('reminder',$mobile_msg_arr)){
-                        dispatch( new WhatsappAPI('+917479735912',$message, $org_id,$templ_json,'cron') )->onConnection('sync');
+                        dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json,'cron') )->onConnection('sync');
                     }
 
                     if(in_array('reminder',$sublet_msg_arr)){
                         $destination = $val->sublet_number;
                         if(!empty($destination)){
-                            dispatch( new WhatsappAPI('+917479735912',$message, $org_id,$templ_json,'cron') )->onConnection('sync');
+                            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json,'cron') )->onConnection('sync');
                         }
                     }
                 }
             }      
-            die('run');
             $model12 = new \App\Models\Test_Cron();
             $data1['name'] = "Reminder cron";
             $data1['date'] = $now;
             $model1 = $model12->create($data1);
-        })->cron('51 11 1,2,8,12,18,26,30 * *');
+        })->cron('00 12 1,2,8,12,18,26,30 * *');
         
             
         }
