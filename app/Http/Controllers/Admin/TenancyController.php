@@ -170,7 +170,7 @@ class TenancyController extends Controller{
         $master_data = $model->create($master);
         $variant = [];
         $variant['tenant_master_id'] = $master_data->id;
-        $this->generate_file_($variant['tenant_master_id']);
+        
         
         foreach($request->input('tenant_member') as $tm){
             $ten_vari =[];
@@ -207,6 +207,7 @@ class TenancyController extends Controller{
                 $variant_data = \App\Models\Tenant_Variant::create($variant);
             }
         }
+        $this->generate_file_($variant['tenant_master_id']);
 
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
     }
@@ -313,7 +314,7 @@ class TenancyController extends Controller{
             $master['acceptance_name'] = $image->getClientOriginalName();
         }
         $master_data = $modelfind->update($master);
-        $this->generate_file_($id);
+        $vari_model = \App\Models\Tenant_Variant::where([['status','>','0'], ['delstatus','<','1'], ['tenant_master_id', '=', $id]])->update(['tenant_master_id'=>null]);
         $variant = [];
         $variant['tenant_master_id'] = $id;
         foreach($request->input('tenant_member') as $tm){
@@ -330,7 +331,7 @@ class TenancyController extends Controller{
             
             $id_tenant = $tm;
         }
-        $var_model = \App\Models\Tenant_Variant::where([['status','>','0'], ['delstatus','<','1'], ['isfamily','=','1'], ['tenant_master_id', '=',$id]])->update(['tenant_master_id','=',null]);
+        $var_model = \App\Models\Tenant_Variant::where([['status','>','0'], ['delstatus','<','1'], ['isfamily','=','1'], ['tenant_master_id', '=',$id]])->update(['tenant_master_id' => null]);
         if($request->input('type') == 'family'){
             foreach($request->input('row_data') as $index => $row_data){
                 if($index && $variant_model = \App\Models\Tenant_Variant::find($index)){
@@ -354,8 +355,9 @@ class TenancyController extends Controller{
                 }
             }
         }
-        $modelfind = $model->find($id);
-        $modelfind->update($request->all());
+        $this->generate_file_($id);
+        // $modelfind = $model->find($id);
+        // $modelfind->update($request->all());
     
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' updated successfully');
     }

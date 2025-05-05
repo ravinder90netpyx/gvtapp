@@ -59,7 +59,7 @@ Form::macro('variantData2', function($dataArray,$mode)
     return "<div class='row py-1 row_data[$rowIndex]'>"
     .Form::hidden('police_verification['.$rowIndex.'][tenant_member]', $dataArray['id'] , ['class' => 'form-control']).
     Form::rawLabel($dataArray['name'], $dataArray['name'], ['class' => 'form-control-label col-md-3 col-form-label']).
-    "<div class='col-md-9'>".Form::file('police_verification['.$rowIndex.'][police_verification]' , ['class' => 'form-control name', 'placeholder'=>'Police Verification Copy', 'required'])."<div class=''><a target='_blank' href='". asset('upload/tenant/'.$dataArray['police_verification'])."'><i class='text-danger far fa-lg fa-file-pdf'> </i><span> View ".$dataArray['police_verification_name']."</span> </a>
+    "<div class='col-md-9'>".Form::file('police_verification['.$rowIndex.'][police_verification]' , ['class' => 'form-control name', 'placeholder'=>'Police Verification Copy', $req_field])."<div class=''><a target='_blank' href='". asset('upload/tenant/'.$dataArray['police_verification'])."'><i class='text-danger far fa-lg fa-file-pdf'> </i><span> View ".$dataArray['police_verification_name']."</span> </a>
     </div></div>
     </div>";
 });
@@ -201,20 +201,23 @@ $(document).ready(function(){
         // alert(type);
         @if($mode!='edit')
         $('select[name="tenant_member[]"]').val([]).trigger('change');
-        @else{
+        @else
             if(counter>0){
                 $('select[name="tenant_member[]"]').val([]).trigger('change');
             }
-        }
         @endif
-        counter++;
+        alert(counter);
         if(type == 'family'){
             $('select[name="tenant_member[]"]').prop('multiple', false);
             $('.photo').find('label').html("Family Group Photo<span class="+req+"></span>");
             $('.addon').show();
             $('.addon').find('input').attr('required', true);
             rowCount=0;
+            @if($mode != 'edit' )
             add_row();
+            @else
+            if(counter>0) add_row();
+            @endif
         } else if(type=="individual"){
             $('select[name="tenant_member[]"]').prop('multiple', true);
             $('.photo').find('label').html("Photo<span class="+req+"></span>");
@@ -228,6 +231,7 @@ $(document).ready(function(){
             $('.addon').find('input').removeAttr('required');
             $('.temp1').text('');
         }
+        counter++;
     });
     $('#type').trigger('change');
     $('select[name="tenant_member[]"]').on('change', function(){
