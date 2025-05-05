@@ -22,6 +22,7 @@ class ChargeType extends Base_Model{
     protected $fillable = [
         'name',
         'alias_name',
+        'type',
         'price'
     ];
 }

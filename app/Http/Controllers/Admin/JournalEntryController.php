@@ -314,7 +314,7 @@ class JournalEntryController extends Controller{
         $charge = \App\Models\Charges::find($member->charges_id)->rate;
         $charge_type = \App\Models\ChargeType::find($request_data['charge_type_id']);
 
-        if($charge_type->name == 'Fine'){
+        if($charge_type->type == 'fine'){
 
             $entry_charge_arr =[];
             $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
@@ -360,7 +360,7 @@ class JournalEntryController extends Controller{
 
             $monthwise_model->where([['entrywise_fine_id', '=',null],['member_id','=',$fetch_data->member_id],['status','>','0'],['delstatus','<','1'],['fine_waveoff','=','0']])->update(['entrywise_fine_id' => $create_data->id, 'fine_waveoff' => '1']);
 
-        } elseif($charge_type->name == 'Maintenance'){
+        } elseif($charge_type->type == 'maintenance'){
             $paid = $request_data['paid_money'];
             // $month_arr = $helpers->get_financial_month_year($request->input('from_month'), $request->input('to_month'));
             $paid_m = empty($paid) ? $charge*count($month_arr) : $paid;
@@ -585,7 +585,7 @@ class JournalEntryController extends Controller{
         $member = \App\Models\Members::find($request_data['member_id']);
         $charge = \App\Models\Charges::find($member->charges_id)->rate;
         $charge_type = \App\Models\ChargeType::find($request_data['charge_type_id']);
-        if($charge_type->name == 'Fine'){
+        if($charge_type->type == 'fine'){
             $entrywise_model = Entrywise_Fine::where([['member_id','=',$request_data['member_id']],['status','>','0'],['delstatus','<','0']])->orderBy('id','DESC')->first();
             if($entrywise_model->journal_entry_id == $id){
                 // $request_data['partial'] = 0;
@@ -628,7 +628,7 @@ class JournalEntryController extends Controller{
             else{
                 return redirect()->route($module['main_route'].'.index')->with('info', 'Only update last fine of a particular member');
             }
-        } else if($charge_type->name == 'Maintenance'){
+        } else if($charge_type->type == 'maintenance'){
             $from_month = $request->input('from_month');
             $to_month = $request->input('to_month');
             $report_model = new Report();

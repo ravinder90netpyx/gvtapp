@@ -99,6 +99,7 @@
                             <th style="width:120px">{{ __('admin.text_actions') }}</th>
                             <th>{{ __('admin.text_name') }}</th>
                             <th>{{ __('Alias Name') }}</th>
+                            <th>{{ __('Type') }}</th>
                             <th style="width:150px">{{ __('admin.text_date_created') }}</th>
                         </tr>
                     </thead>
@@ -147,6 +148,7 @@
 
                                     <td class="name-{{$item['id']}}">{{ $item['name'] }}</td>
                                     <td class="name-{{$item['id']}}-alias">{{ $item['alias_name'] }}</td>
+                                    <td class="name-{{$item['id']}}-type">{{ $item['type'] }}</td>
                                     <td>{{ $row_time }}</td>
                                 </tr>
                             @endforeach
@@ -189,6 +191,15 @@
                             {!! Form::bsInput('text', 'alias_name', __('Alias Name'), $form_data->alias_name ?? '', [ 'required', 'autocomplete'=>'off','class' => 'form-control alias_name' ],  ['vertical'=>true]); !!}
                         </div>
 
+                        <div class="col-md-12">
+                            @php 
+                            $current_field = 'type';
+                            $row_data = ['fine'=>'Fine', 'maintenance'=>'Maintenance'];
+                            
+                            @endphp
+                            {!! Form::bsSelect($current_field, __('Type'), $row_data, $form_data->$current_field ?? '', ['required', 'class'=>'form-control type'], ['vertical'=>true]); !!}
+                        </div>
+
                     </div>
                 </div>
                 <input name="_method" type="hidden" class="form-method" value="Post">
@@ -213,8 +224,11 @@
         if(attr_id){
             var name=$('.name-'+attr_id).text();
             var alias=$('.name-'+attr_id+'-alias').text();
+            var type= $('.name-'+attr_id+'-type').text();
+  
             $('.charge_type_name').val(name);
             $('.alias_name').val(alias);
+            $('.type').val(type);
         }
         
         
