@@ -206,7 +206,6 @@ $(document).ready(function(){
                 $('select[name="tenant_member[]"]').val([]).trigger('change');
             }
         @endif
-        alert(counter);
         if(type == 'family'){
             $('select[name="tenant_member[]"]').prop('multiple', false);
             $('.photo').find('label').html("Family Group Photo<span class="+req+"></span>");
