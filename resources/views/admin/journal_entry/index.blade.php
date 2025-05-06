@@ -840,7 +840,7 @@ $(function(){
               <td>{{ $item['series_number'] }}</td>
               <td>{{ $item['entry_date'] }}</td>
               <td>{{ $type->name ?? '' }}</td>
-              <td>&#8377;{{ $amount }}</td>
+              <td>&#8377;{{ $item['charge'] }}</td>
               <td>{{ $item['count'] ?? '0' }}</td>
               {{-- <td> {{ $row_time }} </td> --}}
             </tr>
