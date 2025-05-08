@@ -4,7 +4,7 @@ public/upload/*/*
 /public/build
 /public/hot
 /public/storage
-/storage/*.key
+/storage
 /vendor
 .env
 .env.backup
@@ -21,3 +21,4 @@ yarn-error.log
 /.htaccess
 /public/upload/pdf_files/*
 !/public/upload/pdf_files/.gitkeep
+/.liveback
