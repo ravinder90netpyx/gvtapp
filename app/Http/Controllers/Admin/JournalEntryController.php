@@ -724,10 +724,10 @@ class JournalEntryController extends Controller{
             }
         } else{
             $entry_charge_arr =[];
-            $name = $modelfind->orderBy('entry_date','DESC')->first();
+            // $name = $modelfind->orderBy('entry_date','DESC')->first();
             $request_data['partial'] ='0';
             $date = $request_data['entry_date'];
-            $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
+            // $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
             // if(strtotime($date) > strtotime($pre_date)){
             
             $request_data['charge'] = $request_data['paid_money'];
