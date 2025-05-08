@@ -846,8 +846,10 @@ $(function(){
                 @php
                   $entrywise_model = \App\Models\Entrywise_Fine::where([['member_id','=',$item['member_id']],['status','>','0'],['delstatus','<','1']])->orderBy('id','DESC')->first();
                 @endphp
-
-                @if(empty($entrywise_model) || $entrywise_model->journal_entry_id == $row_id || $item['charge_type_id'] == '7' )
+                @php 
+                  $charge_type = \App\Models\ChargeType::where([['status','>','0'],['delstatus', '<','1'],['id', '=',$item['charge_type_id']]])->first();
+                @endphp
+                @if(empty($entrywise_model) || $entrywise_model->journal_entry_id == $row_id || $charge_type->type != 'fine' )
                 @can($module['permission_group'].'.edit')
                 <a href="{{ route($module['main_route'].'.edit', $row_id) }}" data-id="{{ $row_id }}" class="edit_but" title="{{ __('admin.text_edit') }}" rel="tab" class="px-1">
                   <i class=" text-primary fa-lg fas fa-edit"></i>
