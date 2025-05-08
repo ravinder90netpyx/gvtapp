@@ -24,6 +24,7 @@
 
     <div class="entry-section" style="text-align: center; padding:10px;">
         <h2 class="text-center">{{ $org_name }}</h2>
+        <p style="text-align: right;">- {!! $address !!}</p>
             <p>Payment Receipt</p>
             <p style="text-align: left;">Thank You for Paying {{ $charge_type->alias_name }}. Here is the payment receipt.</p>
         <div class="table-responsive" style="text-align:center;">
@@ -61,7 +62,7 @@
                         <td>Paid Amount</td>
                         <td>&#8377;{{ $charge }}</td>
                     </tr>
-                    @if(!empty($from_month))
+                    @if($charge_type_type =='maintenance')
                     <tr>@php
                         $single = 0;
                         if($from_month == $to_month) $single =1;
@@ -69,7 +70,7 @@
                         <td>Month(s) Cleared</td>
                         <td>{{ date("M Y", strtotime($from_month)) }} @if($single == 0) - {{ date("M Y", strtotime($to_month)) }} @endif</td>
                     </tr>
-                    @else
+                    @elseif($charge_type_type == 'fine')
                     <tr>
                         <td>Day(s) of Fine</td>
                         <td>{{ $fine_days }}</td>
@@ -82,7 +83,7 @@
         <hr>
         <p style="font-size: 15px;"><i>{!! $line1 !!}</i></p>
         <hr>
-        <p style="text-align: left;">{!! $address !!}</p>
+        
     </div>
  
     {{-- <div class="row">

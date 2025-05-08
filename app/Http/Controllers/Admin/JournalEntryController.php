@@ -171,7 +171,7 @@ class JournalEntryController extends Controller{
         $charge_name = '';
         if(!empty($request->input('charge_type_id'))){
             $charge_mod = \App\Models\ChargeType::find($request->input('charge_type_id'));
-            $charge_name = $charge_mod->name;
+            $charge_name = $charge_mod->type;
         }
         $roles = $auth_user->roles()->pluck('name','id')->toArray();
         $rules= [
@@ -194,7 +194,7 @@ class JournalEntryController extends Controller{
             'charge_type_id' => 'required',
             'from_month' => 
             [
-                empty($request->input('custom_month')) && $charge_name == 'Maintenance' ? 'required':'nullable',
+                empty($request->input('custom_month')) && $charge_name == 'maintenance' ? 'required':'nullable',
                 function($attribute, $value, $fail){
                     $request = Request();
                     $helpers = new helpers();
@@ -229,7 +229,7 @@ class JournalEntryController extends Controller{
             ],
             'to_month' =>
             [
-                empty($request->input('custom_month')) && $charge_name == 'Maintenance' ? 'required':'nullable',
+                empty($request->input('custom_month')) && $charge_name == 'maintenance' ? 'required':'nullable',
                 function($attribute, $value, $fail){
                     $hlp = new helpers;
                     $request = Request();
@@ -252,7 +252,7 @@ class JournalEntryController extends Controller{
 
             'custom_month' =>
             [
-                empty($request->input('from_month')) && $charge_name == 'Maintenance' ? 'required':'nullable',
+                empty($request->input('from_month')) && $charge_name == 'maintenance' ? 'required':'nullable',
                 function($attribute, $value, $fail){
                     $val_arr = [];
                     $val_arr = explode(',',$value);
@@ -300,7 +300,7 @@ class JournalEntryController extends Controller{
         } else{
             $month_arr = explode(',', $request->input('custom_month'));
         }
-        
+
         $check = \App\Models\Members::where('id',$request->input('member_id'))->count();
         
         $series_number = \App\Models\Series::find($request->input('series_id'));
@@ -325,7 +325,7 @@ class JournalEntryController extends Controller{
             $series_num =$series_number->name.$series_number->number_separator.str_pad($series_number->next_number,$series_number->min_length,'0', STR_PAD_LEFT);
             $next_number = $series_number->next_number;
             $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
-            $request_data['charge'] = $request_data['paid_money'];
+            $request_data['charge'] = $request_data['fine_amt'];
             $request_data['name'] = $member['name'];
             $request_data['series_next_number'] = $next_number;
             $request_data['series_number'] = $series_num;
@@ -428,6 +428,21 @@ class JournalEntryController extends Controller{
                 }
                 $report_data =[];
             }
+        } else{
+            $entry_charge_arr =[];
+            $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
+            $request_data['partial'] ='0';
+            $date = $request_data['entry_date'];
+            $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
+            // if(strtotime($date) > strtotime($pre_date)){
+            $series_num =$series_number->name.$series_number->number_separator.str_pad($series_number->next_number,$series_number->min_length,'0', STR_PAD_LEFT);
+            $next_number = $series_number->next_number;
+            $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
+            $request_data['charge'] = $request_data['paid_money'];
+            $request_data['name'] = $member['name'];
+            $request_data['series_next_number'] = $next_number;
+            $request_data['series_number'] = $series_num;
+            $fetch_data = $model->create($request_data);
         }
 
         $this->generate_pdf_file($fetch_data->id);
@@ -491,13 +506,13 @@ class JournalEntryController extends Controller{
         $charge_name = '';
         if(!empty($request->input('charge_type_id'))){
             $charge_mod = \App\Models\ChargeType::find($request->input('charge_type_id'));
-            $charge_name = $charge_mod->name;
+            $charge_name = $charge_mod->type;
         }
         $request->validate([
             'entry_date' => 'required|date_format:Y-m-d H:i:s',
             'from_month' => 
             [
-                empty($request->input('custom_month')) && $charge_name == 'Maintenance' ? 'required':'nullable',
+                empty($request->input('custom_month')) && $charge_name == 'maintenance' ? 'required':'nullable',
                 function($attribute, $value, $fail) use($request, $id) {
                     $request = Request();
                     $helpers = new helpers();
@@ -531,7 +546,7 @@ class JournalEntryController extends Controller{
             ],
             'to_month' => 
             [
-                empty($request->input('custom_month')) && $charge_name == 'Maintenance' ? 'required':'nullable',
+                empty($request->input('custom_month')) && $charge_name == 'maintenance' ? 'required':'nullable',
                 function($attribute, $value, $fail) use($id) {
                     $hlp = new helpers;
                     $request = Request();
@@ -552,7 +567,7 @@ class JournalEntryController extends Controller{
             ],
             'custom_month' => 
             [
-                empty($request->input('from_month')) && $charge_name == 'Maintenance' ? 'required':'nullable',
+                empty($request->input('from_month')) && $charge_name == 'maintenance' ? 'required':'nullable',
                 function($attribute, $value, $fail){
                     $val_arr = [];
                     $val_arr = explode(',',$value);
@@ -591,8 +606,7 @@ class JournalEntryController extends Controller{
                 // $request_data['partial'] = 0;
                 $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
                 $date = $request_data['entry_date'];
-                $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
-                $request_data['charge'] = $request_data['paid_money'];
+                $request_data['charge'] = $request_data['fine_amt'];
                 $request_data['name'] = $member['name'];
                 $fetch_data = $modelfind->update($request_data);
 
@@ -708,6 +722,19 @@ class JournalEntryController extends Controller{
                 }
                 $report_data =[];
             }
+        } else{
+            $entry_charge_arr =[];
+            $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
+            $request_data['partial'] ='0';
+            $date = $request_data['entry_date'];
+            $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
+            // if(strtotime($date) > strtotime($pre_date)){
+            
+            $request_data['charge'] = $request_data['paid_money'];
+            $request_data['name'] = $member['name'];
+            // $request_data['series_next_number'] = $next_number;
+            // $request_data['series_number'] = $series_num;
+            $fetch_data = $model->update($request_data);
         }
 
         $this->generate_pdf_file($id);
@@ -797,8 +824,10 @@ class JournalEntryController extends Controller{
             $file_name = $je_id.'-'.$now->format('Y-m-d-H-i-s');
         }
         $charge_type_id = $journal_entry->charge_type_id;
+        $charge = \App\Models\ChargeType::where([['status','>','0'],['delstatus','<','1'],['id','=',$charge_type_id]])->first();
         $rec_name = $journal_entry->name;
         $data = [
+            'charge_type_type'=>$charge->type,
             'org_name' => $name,
             'note' => $setting_model->getVal('pdf', 'pdf_note'),
             'line1' => $setting_model->getVal('pdf', 'line1'),
@@ -815,7 +844,8 @@ class JournalEntryController extends Controller{
             'year' => $journal_entry->entry_year,
             'charge_type_id' => $journal_entry->charge_type_id
         ];
-        if($charge_type_id == '8'){
+        // dd($data);
+        if($charge->type == 'fine'){
             $entrywise_model = \App\Models\Entrywise_Fine::where('journal_entry_id','=',$je_id)->first();
             $data['from_month'] ='';
             $data['to_month'] ='';
@@ -823,6 +853,14 @@ class JournalEntryController extends Controller{
 
             $data['fine_days'] = $this->calculate_fine_days($entrywise_model->id);
             $this->calculate_fine_days($entrywise_model->id);
+        } else if($charge->type == 'maintenance'){
+            $data['from_month'] =$journal_entry->from_month;
+            $data['to_month'] =$journal_entry->to_month;
+            $data['fine_days'] = '';
+        } else if($charge->type == 'others'){
+            $data['from_month'] = '';
+            $data['to_month'] = '';
+            $data['fine_days'] = '';
         }
         $pdf = PDF::loadView('include.make_pdf', $data);
 
@@ -1250,6 +1288,12 @@ class JournalEntryController extends Controller{
             $data_arr[] =$temp_arr;
         }
         return $data_arr;
+    }
+
+    function get_charge(Request $request){
+        $id = $request->input('id');
+        $charge = \App\Models\ChargeType::where([['status','>','0'],['delstatus', '<', '1'],['id','=',$id]])->first();
+        return $charge->type;
     }
 
 //     public function sendPdfToWhatsapp($destination,$message, $org_id, $template){

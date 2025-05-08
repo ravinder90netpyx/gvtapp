@@ -98,6 +98,7 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
         Route::post('journal_entry/send', [JournalEntryController::class, 'send_msg'])->name('journal_entry.send_msg');
         Route::post('journal_entry/fine_get', [JournalEntryController::class, 'fine_ajax'])->name('journal_entry.fine_ajax');
         Route::post('journal_entry/get_table', [JournalEntryController::class, 'get_table'])->name('journal_entry.get_table');
+        Route::post('journal_entry/get_charge', [JournalEntryController::class, 'get_charge'])->name('journal_entry.get_charge');
         Route::get('members/{id}/reminder', [MembersController::class, 'send_reminder'])->name('members.send_reminder');
         Route::post('expense/ajax_name', [ExpenseController::class, 'ajax_name'])->name('expense.ajax_name');
 

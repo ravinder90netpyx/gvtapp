@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('charge_type', function (Blueprint $table) {
-            $table->enum('type',['fine','maintenance'])->nullable();
+            $table->enum('type',['fine','maintenance','others'])->nullable();
         });
     }
 

@@ -194,7 +194,7 @@
                         <div class="col-md-12">
                             @php 
                             $current_field = 'type';
-                            $row_data = ['fine'=>'Fine', 'maintenance'=>'Maintenance'];
+                            $row_data = ['fine'=>'Fine', 'maintenance'=>'Maintenance', 'others'=>'Other Charge'];
                             
                             @endphp
                             {!! Form::bsSelect($current_field, __('Type'), $row_data, $form_data->$current_field ?? '', ['required', 'class'=>'form-control type'], ['vertical'=>true]); !!}

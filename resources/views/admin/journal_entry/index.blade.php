@@ -115,6 +115,7 @@ function ajax_edit(id){
       datetimepicker_month('to_month');
       custom_datetimepicker_month('custom_month');
       reciept_datetimepicker();
+      $('#charge_type_id').trigger('change');
     },
     error: function(error) {
       console.error('Error fetching folder content:', error);
@@ -294,6 +295,20 @@ function send_pdf(id){
   }
 }
 
+function get_charge_type(id, callback){
+  $.ajax({
+    url: '{{ route("supanel.journal_entry.get_charge") }}',
+    method: "POST",
+    data: {'_token': '{!! csrf_token() !!}', 'id' : id},
+    success: function(response){
+      callback(response);
+    },
+    error: function(error) {
+      console.error('Error fetching folder content:', error);
+    }
+  });
+}
+
 function reciept_datetimepicker(){
   $('#reciept_date').datetimepicker({
     useCurrent : false,
@@ -415,7 +430,6 @@ $(function(){
     $('#cred_modal').modal('show');
     $('#cred_modal').modal({ backdrop:false });
     ajax_edit(id);
-
     $('#form_btn_submit').show();
     $('#form_btn_save_submit').show();
   });
@@ -534,35 +548,51 @@ $(function(){
     if($('#member_mob').val()!=''){
     	fine_ajax($('#member_mob').val());
     }
+    if($(this).val() !=''){
+      get_charge_type($(this).val(), function(type){
+        types = type;
+        if(types=='fine'){
+          $('#charge').prop('disabled',true);
+          $('.from_month').hide();
+          $('.to_month').hide();
+          $('.custom_toggle').hide();
+          $('.charge').hide();
+          if($('#member_mob').val() != ''){
+            get_table($('#member_mob').val());
+          }
+          $('.charge .input-group-text').show();
+          $('#from_month').prop('required',false);
+          $('#to_month').prop('required',false);
+          $('#from_month').prop('required',false);
 
+          $('.fine_amount').show();
+        } else if(types== 'maintenance'){
+          $('#charge').prop('disabled',true);
+          $('.charge .input-group-text').show();
+          $('.from_month').show();
+          $('.to_month').show();
+          $('.custom_toggle').show();
+          if($('#member_mob').val() != ''){
+            $('.charge').show();
+          }
 
-    if($(this).val()=='8'){
-    	$('.from_month').hide();
-      $('.to_month').hide();
-      $('.custom_toggle').hide();
-      if($('#member_mob').val() != ''){
-      	$('.charge').hide();
-        get_table($('#member_mob').val());
-      }
+          $('#from_month').prop('required',true);
+          $('#to_month').prop('required',true);
+          $('#from_month').prop('required',true);
 
-      $('#from_month').prop('required',false);
-      $('#to_month').prop('required',false);
-      $('#from_month').prop('required',false);
-
-      $('.fine_amount').show();
-    } else if($(this).val() == '7'){
-    	$('.from_month').show();
-      $('.to_month').show();
-      $('.custom_toggle').show();
-      if($('#member_mob').val() != ''){
-      	$('.charge').show();
-      }
-
-      $('#from_month').prop('required',true);
-      $('#to_month').prop('required',true);
-      $('#from_month').prop('required',true);
-
-      $('.fine_amount').hide();
+          $('.fine_amount').hide();
+        } else if(types=='others'){
+          $('#charge').prop('disabled',false);
+          $('#from_month').prop('required',false);
+          $('#to_month').prop('required',false);
+          $('.from_month').hide();
+          $('.to_month').hide();
+          $('.custom_toggle').hide();
+          $('.charge').show();
+          $('.fine_amount').hide();
+          $('.charge .input-group-text').hide();
+        }
+      });
     }
   });
 
@@ -618,9 +648,15 @@ $(function(){
     e.preventDefault();
     var send =0;
     if(form_je.checkValidity()=== true){
+      // alert('edit');
     	form_submit(send,id);
     } else{
     	form_je.classList.add('was-validated');
+      [...form_je.elements].forEach(function(field) {
+            if (!field.checkValidity()) {
+                console.warn(`Field "${field.name || field.id}" error: ${field.validationMessage}`);
+            }
+        });
     }
   });
 
@@ -632,6 +668,7 @@ $(function(){
       // form_je.reportValidity();
       if(form_je.checkValidity()=== true){
   	    form_submit(send,id);
+        alert('edit');
     	} else{
     		form_je.classList.add('was-validated');
     	}

@@ -90,7 +90,7 @@ class ChargeTypeController extends Controller
         $request->validate([
             'name' => 'required|unique:charge_type,name',
             'alias_name' => 'required',
-            'type'=> 'nullable|in:fine,maintenance'
+            'type'=> 'nullable|in:fine,maintenance,others'
         ]);
 
         $model->create($request->all());
@@ -117,7 +117,7 @@ class ChargeTypeController extends Controller
         $request->validate([
             'name' => 'required|unique:'.$model->getTable().',name,'.$id.','.$model->getKeyName(),
             'alias_name' => 'required',
-            'type'=> 'nullable|in:fine,maintenance'
+            'type'=> 'nullable|in:fine,maintenance,others'
         ]);
 
         $modelfind = $model->find($id);
