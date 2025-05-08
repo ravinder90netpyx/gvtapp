@@ -24,7 +24,7 @@
 
     <div class="entry-section" style="text-align: center; padding:10px;">
         <h2 class="text-center">{{ $org_name }}</h2>
-        <p style="text-align: right;">- {!! $address !!}</p>
+        <p class="text-center">{!! $address !!}</p>
             <p>Payment Receipt</p>
             <p style="text-align: left;">Thank You for Paying {{ $charge_type->alias_name }}. Here is the payment receipt.</p>
         <div class="table-responsive" style="text-align:center;">
