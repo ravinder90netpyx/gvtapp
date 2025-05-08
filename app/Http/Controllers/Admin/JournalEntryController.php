@@ -724,7 +724,7 @@ class JournalEntryController extends Controller{
             }
         } else{
             $entry_charge_arr =[];
-            $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
+            $name = $modelfind->orderBy('entry_date','DESC')->first();
             $request_data['partial'] ='0';
             $date = $request_data['entry_date'];
             $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
@@ -734,7 +734,7 @@ class JournalEntryController extends Controller{
             $request_data['name'] = $member['name'];
             // $request_data['series_next_number'] = $next_number;
             // $request_data['series_number'] = $series_num;
-            $fetch_data = $model->update($request_data);
+            $fetch_data = $modelfind->update($request_data);
         }
 
         $this->generate_pdf_file($id);
