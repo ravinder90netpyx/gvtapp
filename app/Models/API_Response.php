@@ -29,6 +29,7 @@ class API_Response extends Base_Model{
     protected $fillable = [
         'journal_entry_id',
         'response',
-        'category'
+        'category',
+        'member_id'
     ];
 }

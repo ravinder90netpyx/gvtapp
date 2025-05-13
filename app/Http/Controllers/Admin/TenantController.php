@@ -293,6 +293,7 @@ class TenantController extends Controller{
             
         $destination = $model->mobile_number;
         $message ='';
+        $mem_id = null;
         $helpers = new \App\Helpers\helpers();
         $org_id = $model->organization_id;
         $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','tenant_family'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
@@ -305,8 +306,8 @@ class TenantController extends Controller{
         ];
         
         $templ_json = $helpers->make_temp_json($temp->id, $data);
-
-        dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category) )->onConnection('sync');
+        // dd($category);
+        dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category,$mem_id) )->onConnection('sync');
         $model->counter++;
         $model->save();
         return '';

@@ -291,12 +291,12 @@ class MembersController extends Controller{
             $mobile_msg_arr =!empty($member->mobile_message) && $member->mobile_message != 'null' ? json_decode($member->mobile_message): [];
             $sublet_msg_arr =!empty($member->sublet_message) && $member->sublet_message != 'null' ? json_decode($member->sublet_message): [];
             if(in_array('reminder',$mobile_msg_arr)){
-                dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category) )->onConnection('sync');
+                dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category,$mem_id) )->onConnection('sync');
             }
             if(in_array('reminder',$sublet_msg_arr)){
                 $dest_mob_no = $member->sublet_number;
                 if(!empty($dest_mob_no)){
-                    dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category) )->onConnection('sync');
+                    dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category,$mem_id) )->onConnection('sync');
                 }
             }
             return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
@@ -347,12 +347,12 @@ class MembersController extends Controller{
             $sublet_msg_arr =!empty($member->sublet_message) && $member->sublet_message != 'null' ? json_decode($member->sublet_message): [];
 
             if(in_array('reminder',$mobile_msg_arr)){
-                dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category) )->onConnection('sync');
+                dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category, $mem_id) )->onConnection('sync');
             }
             if(in_array('reminder',$sublet_msg_arr)){
                 $dest_mob_no = $member->sublet_number;
                 if(!empty($dest_mob_no)){
-                    dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category) )->onConnection('sync');
+                    dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category, $mem_id) )->onConnection('sync');
                 }
             }
         }
