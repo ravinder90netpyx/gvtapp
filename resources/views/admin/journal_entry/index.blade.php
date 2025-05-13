@@ -653,10 +653,10 @@ $(function(){
     } else{
     	form_je.classList.add('was-validated');
       [...form_je.elements].forEach(function(field) {
-            if (!field.checkValidity()) {
-                console.warn(`Field "${field.name || field.id}" error: ${field.validationMessage}`);
-            }
-        });
+        if (!field.checkValidity()) {
+          console.warn(`Field "${field.name || field.id}" error: ${field.validationMessage}`);
+        }
+      });
     }
   });
 
@@ -668,7 +668,7 @@ $(function(){
       // form_je.reportValidity();
       if(form_je.checkValidity()=== true){
   	    form_submit(send,id);
-        alert('edit');
+        // alert('edit');
     	} else{
     		form_je.classList.add('was-validated');
     	}

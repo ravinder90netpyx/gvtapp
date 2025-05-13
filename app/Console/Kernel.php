@@ -41,6 +41,7 @@ class Kernel extends ConsoleKernel{
                 $org_model = new \App\Models\Organization_Settings();
                 $org_id = $val->organization_id;
                 $charge = \App\Models\Charges::find($val->charges_id);
+                $mem_id = $val->id;
                 $data = [
                     'name'=> $val->name,
                     'mobile_number' => $val->mobile_number,
@@ -84,13 +85,13 @@ class Kernel extends ConsoleKernel{
                        $mobile_msg_arr =[];
                     }
                     if(in_array('reminder',$mobile_msg_arr)){
-                        dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json,'cron') )->onConnection('sync');
+                        dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json,'cron',$mem_id) )->onConnection('sync');
                     }
 
                     if(in_array('reminder',$sublet_msg_arr)){
                         $destination = $val->sublet_number;
                         if(!empty($destination)){
-                            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json,'cron') )->onConnection('sync');
+                            dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json,'cron', $mem_id) )->onConnection('sync');
                         }
                     }
                 }

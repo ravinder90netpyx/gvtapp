@@ -18,11 +18,13 @@ return new class extends Migration
             $table->unsignedBigInteger('journal_entry_id')->nullable();
             $table->string('response')->nullable();
             $table->string('category')->nullable();
+            $table->unsignedBigInteger('member_id')->nullable();
 
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
             $table->foreign('journal_entry_id')->references('id')->on('journal_entry')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign('member_id')->references('id')->on('members')->onupdate('cascade')->onDelete('cascade');
         });
     }
 

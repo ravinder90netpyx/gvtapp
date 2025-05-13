@@ -497,6 +497,7 @@ class TenancyController extends Controller{
 
     public function send_tenancy_msg(Request $request){
         // id will come in request
+        $mem_id = null;
         $id = $request->input('id');
         $api = $this->whatsapp_api;
         $model = \App\Models\Tenant_Master::find($id);
@@ -529,7 +530,7 @@ class TenancyController extends Controller{
         $templ_json = $helpers->make_temp_json($temp->id, $data);
         $message = json_encode($message, true);
 
-        dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category) )->onConnection('sync');
+        dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category, $mem_id) )->onConnection('sync');
         $model->counter++;
         $model->save();
     }

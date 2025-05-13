@@ -20,20 +20,23 @@ class WhatsappAPI implements ShouldQueue
     protected $message;
     protected $org_id;
     protected $template;
+    protected $category;
+    protected $mem_id;
     protected $je_id;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($destination,$message, $org_id, $template, $category, $je_id =null)
+    public function __construct($destination,$message, $org_id, $template, $category, $mem_id=null, $je_id =null)
     {
         $this->destination = $destination;
         $this->message = $message;
         $this->org_id = $org_id;
         $this->template = $template;
-        $this->je_id = $je_id;
         $this->category = $category;
+        $this->mem_id = $mem_id;
+        $this->je_id = $je_id;
     }
 
     /**
@@ -55,8 +58,9 @@ class WhatsappAPI implements ShouldQueue
         $message = $this->message;
         $org_id = $this->org_id;
         $template = $this->template;
-        $je_id = $this->je_id ?? null;
         $category = $this->category ?? '';
+        $mem_id = $this->mem_id ?? null;
+        $je_id = $this->je_id ?? null;
 
         $model = new \App\Models\Organization_Settings();
         $group = 'whatsapp_settings';
@@ -103,6 +107,7 @@ class WhatsappAPI implements ShouldQueue
                 $api_arr['journal_entry_id'] = !empty($je_id) ? $je_id: null;
                 $api_arr['response'] = $response;
                 $api_arr['category'] = !empty($category) ? $category: null;
+                $api_arr['member_id'] = !empty($mem_id) ? $mem_id: null;
                 if(!empty($je_id)){
                     $je_model = \App\Models\Journal_Entry::find($je_id);
                     $count = $je_model->count ?? 0;
