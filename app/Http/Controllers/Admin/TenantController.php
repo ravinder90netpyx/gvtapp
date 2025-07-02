@@ -81,7 +81,7 @@ class TenantController extends Controller{
         $title_shown = 'Add '.$module['main_heading'];
         $method = 'POST';
         $mode = 'insert';
-        $indiaStates = DB::connection('mysqlw')
+        $indiaStates = DB::connection('mysql')
         ->table('city')->select('District')->where('CountryCode','IND')->distinct()
         ->pluck('District');
 
@@ -165,7 +165,7 @@ class TenantController extends Controller{
         $title_shown = 'Edit '.$module['main_heading'];
         $method = 'PUT';
         $mode = 'edit';
-        $indiaStates = DB::connection('mysqlw')
+        $indiaStates = DB::connection('mysql')
         ->table('city')->select('District')->where('CountryCode','IND')->distinct()
         ->pluck('District');
 

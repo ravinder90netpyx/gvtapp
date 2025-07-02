@@ -1189,6 +1189,7 @@ class JournalEntryController extends Controller{
         if(!empty($entrywise_model)){
             $data['fine_days'] = $this->calculate_fine_days($entrywise_model->id);
             $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','fine'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+            $templ_json = $helpers->make_temp_json($temp->id, $data);
             $destination = $member->mobile_number;
             $message = json_encode($message,true);
 
