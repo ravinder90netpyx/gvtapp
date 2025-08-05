@@ -197,6 +197,60 @@ class ReportController extends Controller{
         return $response;
     }
 
+    public function getComprehensiveReport(Request $request, helpers $helpers, JournalEntryModel $journalEntryModel, ReportModel $model){
+        $carbon = new Carbon();
+        $module = $this->module;
+        $perpage = $request->perpage ?? $module['default_perpage'];
+        if(!$request->perpage && !empty($request->cookie('perpage'))) $perpage = $request->cookie('perpage');
+        $model_get = $journalEntryModel;
+        $auth_user = Auth::user();
+        $roles = $auth_user->roles()->pluck('id')->toArray();
+        if(!in_array(1,$roles)){
+            $organization_id = $auth_user->organization_id;
+        }
+        if($model->getDelStatusColumn()) $model_get = $model_get->where($model->getDelStatusColumn(), '<', '1');
+        if($model->getSortOrderColumn()) $model_get = $model_get->orderBy($model->getSortOrderColumn(), 'ASC');
+        else $model_get = $model_get->latest();
+
+        $query = $request->get('query') ?? '';
+        if(!empty($query)) $model_get = $model_get->where('name', 'LIKE', '%'.$query.'%');
+
+        $data = $model_get->paginate($perpage)->onEachSide(2);
+
+        $format = "Y-m";
+        $month_arr = [];
+        $end_month = Carbon::now()->format('Y-m');
+        $start_month = Carbon::now()->subMonth()->format('Y-m');
+        // $data = $model_get->paginate($perpage)->onEachSide(2);
+        $month_arr = $helpers->get_financial_month_year($start_month, $end_month, $format);
+        $form_data = $journalEntryModel->where('from_month',$start_month)->get()->toArray();
+
+        // $month_arr = $helpers->get_financial_month_year($start_month, $end_month, $format);
+
+        $title_shown = 'Comprehensive '.$module['main_heading'].'s';
+        $folder = $this->folder;
+
+        return view($module['main_view'].'.index_comprehensive', compact('data', 'model','month_arr' ,'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);
+    }
+
+    public function ajax_comprehensive(Request $request, helpers $helpers, JournalEntryModel $journalEntryModel, ReportModel $model){
+        $carbon = new Carbon();
+        $module = $this->module;
+        $from_date = $request->formData['from_date'] ?? $carbon->now()->subMonth()->format('Y-m');
+        $to_date = $request->formData['to_date'] ?? $carbon->now()->format('Y-m');
+        $memberIds = $request->formData['memberIds'] ?? [];
+        $members = $model->whereIn('id',$memberIds)->get();
+        $month_arr = [];
+        $format = 'Y-m';
+        $month_arr = $helpers->get_financial_month_year($from_date, $to_date, $format);
+        $form_data = $journalEntryModel->where('from_month',$from_date)->get()->toArray();
+        $title_shown = 'Manage Pending '.$module['main_heading'].'s';
+        // $report_mod = $helpers->get_financial_month_year($from_date,$to_date,$format);
+        $html_data = view($module['main_view'].'.ajax_comprehensive_report', compact(['members','memberIds','module','month_arr','carbon','helpers']))->render();
+        $response = response()->json(['html'=>$html_data, 'title_shown'=>$title_shown, ]);
+        return $response;
+    }
+
     public function getPersonalReport(Request $request, helpers $helpers,JournalEntryModel $journalEntryModel,ReportModel $model){
         $carbon = new Carbon();
         $module = $this->module;

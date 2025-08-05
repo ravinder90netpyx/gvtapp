@@ -23,7 +23,11 @@ use App\Http\Controllers\Admin\{
     ExpenseController,
     TenantController,
     TenancyController,
-    CustomGlobalVariableController
+    CustomGlobalVariableController,
+    DemandController,
+    EventController,
+    AttendesController,
+    EventTransactionController,
 };
 
 use App\Http\Controllers\CronController;
@@ -78,6 +82,8 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
         Route::get('expense_report/', [ReportController::class, 'getExpenseReport'])->name('expense_report');
         Route::post('report/ajax_data', [ReportController::class, 'ajaxExpense'])->name('report.ajax_data');
         Route::post('report/ajax_personal', [ReportController::class, 'ajaxPersonal'])->name('report.ajax_personal');
+        Route::get('comprehensive_report/', [ReportController::class, 'getComprehensiveReport'])->name('comprehensive_report');
+        Route::post('report/ajax_comprehensive', [ReportController::class, 'ajax_comprehensive'])->name('report.ajax_comprehensive');
         Route::get('organization_configs/', [OrganizationConfigController::class, 'index'])->name('organization_configs.index');
         Route::post('organization_configs/', [OrganizationConfigController::class, 'store'])->name('organization_configs.store');
         Route::get('general_configs/', [GeneralConfigController::class, 'index'])->name('general_configs.index');
@@ -99,8 +105,19 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
         Route::post('journal_entry/fine_get', [JournalEntryController::class, 'fine_ajax'])->name('journal_entry.fine_ajax');
         Route::post('journal_entry/get_table', [JournalEntryController::class, 'get_table'])->name('journal_entry.get_table');
         Route::post('journal_entry/get_charge', [JournalEntryController::class, 'get_charge'])->name('journal_entry.get_charge');
+        Route::post('journal_entry/check_demand', [JournalEntryController::class, 'check_demand'])->name('journal_entry.check_demand');
+        Route::post('journal_entry/demand_submit', [JournalEntryController::class, 'demand_submit'])->name('journal_entry.demand_submit');
         Route::get('members/{id}/reminder', [MembersController::class, 'send_reminder'])->name('members.send_reminder');
         Route::post('expense/ajax_name', [ExpenseController::class, 'ajax_name'])->name('expense.ajax_name');
+        Route::get('demand/{id}/make', [DemandController::class, 'generate_pdf'])->name('demand.generate_pdf');
+        Route::get('demand/{id}/show', [DemandController::class, 'show_pdf'])->name('demand.show_pdf');
+        Route::post('demand/send', [DemandController::class, 'send_msg'])->name('demand.send');
+        Route::get('demand/{id}/reminder', [DemandController::class, 'send_reminder'])->name('demand.send_reminder');
+
+        Route::post('event_transaction/get_attendes', [EventTransactionController::class, 'get_attendes'])->name('event_transaction.get_attendes');
+        Route::get('event_transaction/{id}/make', [EventTransactionController::class, 'generate_pdf'])->name('event_transaction.generate_pdf');
+        Route::get('event_transaction/{id}/show', [EventTransactionController::class, 'show_pdf'])->name('event_transaction.show_pdf');
+        Route::post('event_transaction/send', [EventTransactionController::class, 'send_msg'])->name('event_transaction.send_msg');
 
         Route::post('dashboard', [DashboardController::class, 'ajax_year'])->name('dashboard.ajax_year');
 
@@ -120,7 +137,11 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
             'expenses'=>'ExpenseController',
             'tenant'=>'TenantController',
             'tenancy'=>'TenancyController',
-            'custom_global_variable' => 'CustomGlobalVariableController'
+            'custom_global_variable' => 'CustomGlobalVariableController',
+            'demand' => 'DemandController',
+            'event' => 'EventController',
+            'attendes' => 'AttendesController',
+            'event_transaction' => 'EventTransactionController',
         ];
 
         foreach($routes_arr as $rak=>$rav){
@@ -136,6 +157,8 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
 Route::get('redis', [CronController::class, 'redisTest'])->name('redis.test');
 Route::get('optimize', [CronController::class, 'optimize'])->name('optimize.index');
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::redirect('/','/supanel');
+
+// Route::get('/', function () {
+//    return view('welcome');
+// });

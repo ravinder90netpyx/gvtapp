@@ -409,6 +409,7 @@ class JournalEntryController extends Controller{
                         $report_data['money_pending'] = $charge - $paid_m;
                         $paid_m = 0;
                     }
+                    dump($report_data);
                     $upd_rep = $report_model->create($report_data);
                 } else{
                     $money = $report_models->money_pending;
@@ -443,6 +444,42 @@ class JournalEntryController extends Controller{
             $request_data['series_next_number'] = $next_number;
             $request_data['series_number'] = $series_num;
             $fetch_data = $model->create($request_data);
+        }
+
+        foreach($request->input('demand_charge') as $rc){
+            $jd_relation =[];
+            $jd_relation['demand_charge_id'] = $rc['id'];
+            // demand charge
+            $dem = \App\Models\Demand_Charge::find($rc['id']);
+            $jd_relation['demand_id'] = $dem->demand_id;
+            $jd_relation['organization_id'] = $request_data['organization_id'];
+            $jd_relation['member_id'] = $request_data['member_id'];
+            $jd_relation['journal_entry_id'] = $fetch_data->id;
+            $jd_relation['partial'] = $dem->partial;
+            $jd_relation['charge_type_id'] = $dem->charge_type_id;
+            $dem_charge = $rc['charge'] ?? $dem->pending_amount;
+            $jd_relation['amount'] = $dem_charge;
+
+            $status = ($dem->pending_amount > $dem_charge) ? 'partially_paid':'paid';
+            $jd_relation['demand_status'] = $status;
+            \App\Models\Journal_Demand_Relation::create($jd_relation);
+            $paid_money = $dem->paid_amount+$dem_charge;
+            $pending_money = $dem->pending_amount-$dem_charge;
+            $dem->update(['charge_status'=>$status,  'paid_amount'=>$paid_money, 'pending_amount'=>$pending_money]);
+
+            // demand
+            $demand_charge = \App\Models\Demand_Charge::where('demand_id',$dem->demand_id)->get()->toArray();
+            $status_dc = '';
+            foreach($demand_charge as $dc){
+                if(empty($status_dc) || $status_dc=='paid'){
+                    $status_dc = $dc['charge_status'];
+                } else{
+                    $status_dc = 'partially_paid';
+                }
+            }
+            $demand = \App\Models\Demand::find($dem->demand_id);
+            
+            $demand->update(['charge_status'=>$status_dc]);
         }
 
         $this->generate_pdf_file($fetch_data->id);
@@ -825,6 +862,17 @@ class JournalEntryController extends Controller{
         }
         $charge_type_id = $journal_entry->charge_type_id;
         $charge = \App\Models\ChargeType::where([['status','>','0'],['delstatus','<','1'],['id','=',$charge_type_id]])->first();
+        $demand = null;
+        $demand_charge = \App\Models\Journal_Demand_Relation::where('journal_entry_id','=',$je_id)->get()->toArray();
+        if(!empty($demand_charge)){
+            $dem_reciept = [];
+            foreach($demand_charge as $dc){
+                $demand = \App\Models\Demand::find($dc['demand_id']);
+                $dem_reciept_num[] = $demand->demand_reciept_number;
+            }
+        }
+        $dem_reciept_num = !empty($dem_reciept_num) ? implode(', ',$dem_reciept_num) : '';
+        // $demand_pending_money = $demand->pending_money ?? 0;
         $rec_name = $journal_entry->name;
         $data = [
             'charge_type_type'=>$charge->type,
@@ -842,7 +890,9 @@ class JournalEntryController extends Controller{
             'date' => $journal_entry->entry_date,
             'reciept_date' => $journal_entry->reciept_date,
             'year' => $journal_entry->entry_year,
-            'charge_type_id' => $journal_entry->charge_type_id
+            'charge_type_id' => $journal_entry->charge_type_id,
+            'demand_reciept_number' => $dem_reciept_num,
+            // 'demand_pending_money' => $demand_pending_money,
         ];
         // dd($data);
         if($charge->type == 'fine'){
@@ -865,7 +915,7 @@ class JournalEntryController extends Controller{
         $pdf = PDF::loadView('include.make_pdf', $data);
 
         $mpdf = $pdf->getMpdf();
-         $width = 10; // Adjust the width of the watermark image
+        $width = 10; // Adjust the width of the watermark image
         $height = 10; // Adjust the height of the watermark image
 
         // Get the dimensions of the page
@@ -1079,7 +1129,7 @@ class JournalEntryController extends Controller{
         $module = $this->module;
         $input=$request->input('org_id');
         $models =new \App\Models\Series();
-        $data = $models->select('id', 'name')->where('organization_id',$input)->orderBy('id','DESC')->get()->toArray();
+        $data = $models->select('id', 'name')->where([['organization_id','=',$input], ['status','>','0'], ['delstatus','<','1'], ['type','=', 'journal_entry']])->orderBy('id','DESC')->get()->toArray();
         $row_data =[];
         foreach($data as $ds){
             $row_data[$ds['id']] = $ds['name'];
@@ -1297,6 +1347,52 @@ class JournalEntryController extends Controller{
         $id = $request->input('id');
         $charge = \App\Models\ChargeType::where([['status','>','0'],['delstatus', '<', '1'],['id','=',$id]])->first();
         return $charge->type;
+    }
+
+    function check_demand(Request $request){
+        $id = $request->input('id');
+        $charge = $request->input('charge_type');
+        $demand_charge = \App\Models\Demand_Charge::where([['charge_type_id','=',$charge],['pending_amount','>',0],['member_id','=',$id]])->get()->toArray();
+        // dump($demand_charge);
+        $return_arr=[];
+        $demand_arr= [];
+        $partial = 0;
+        foreach($demand_charge as $dm){
+            $temp_arr =[];
+            $demand = \App\Models\Demand::find($dm['demand_id']);
+            $member= \App\Models\Members::find($dm['member_id']);
+            $temp_arr['id'] = $dm['id'];
+            $temp_arr['name'] = $dm['member_name'];
+            $temp_arr['partial'] = $dm['partial'];
+
+            $temp_arr['unit_number'] = $member->unit_number;
+            $temp_arr['reciept_number'] = $demand->demand_reciept_number;
+            $temp_arr['charge'] = $dm['pending_amount'];
+            $temp_arr['due_date'] = $demand->due_date;
+            $demand_arr[] = $temp_arr;
+        }
+        if(!empty($demand_arr)){
+            $return_arr['check'] = 'yes';
+            $return_arr['array'] =  $demand_arr;
+            $return_arr['partial'] = $partial;
+        } else{
+            $return_arr['check'] = 'no';
+            $return_arr['array'] = [];
+            $return_arr['partial'] = $partial;
+        }
+        return $return_arr;
+    }
+
+    function demand_submit(Request $request){
+        $demand_val = $request->input('demand_value');
+        $amount =0;
+        // dump($demand_val);
+        foreach($demand_val as $dv){
+            $demand = \App\Models\Demand_Charge::find($dv['id']);
+            $charge = $dv['charge'] ?? $demand->pending_amount;
+            $amount = $amount+$charge;
+        }
+        return $amount;
     }
 
 //     public function sendPdfToWhatsapp($destination,$message, $org_id, $template){
