@@ -116,6 +116,30 @@ class UserRoleSeeder extends Seeder
             [ 'name' => 'custom_global_variable.delete' ],
             [ 'name' => 'custom_global_variable.status' ],
 
+            [ 'name' => 'demand.manage' ],
+            [ 'name' => 'demand.add' ],
+            [ 'name' => 'demand.edit' ],
+            [ 'name' => 'demand.delete' ],
+            [ 'name' => 'demand.status' ],
+
+            [ 'name' => 'event.manage' ],
+            [ 'name' => 'event.add' ],
+            [ 'name' => 'event.edit' ],
+            [ 'name' => 'event.delete' ],
+            [ 'name' => 'event.status' ],
+
+            ['name' => 'attendes.manage'],
+            ['name' => 'attendes.add'],
+            ['name' => 'attendes.edit'],
+            ['name' => 'attendes.delete'],
+            ['name' => 'attendes.status'],
+
+            ['name' => 'event_transaction.manage'],
+            ['name' => 'event_transaction.add'],
+            ['name' => 'event_transaction.edit'],
+            ['name' => 'event_transaction.delete'],
+            ['name' => 'event_transaction.status'],
+
         ];
 
         $default_data = [ 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now() ];
