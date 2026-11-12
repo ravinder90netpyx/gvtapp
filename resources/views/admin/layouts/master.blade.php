@@ -42,6 +42,21 @@ $authentic_username = ucwords($authentic_user->first_name.' '.$authentic_user->l
 
 <style>
 .alert{z-index:99;top:60px;right:18px;min-width:30%;position:fixed;animation:slide .5s forwards}@keyframes slide{100%{top:30px}}@media screen and (max-width:668px){.alert{left:10px;right:10px}}.error{width:100%;color:red;margin-top:5px}
+
+#clock {
+  font-weight: bold;
+}
+
+.top_timer_wrap {
+  float: none;
+  font-size: 15px;
+  font-weight: normal;
+  left: 35%;
+  margin: 12px auto 0;
+  position: absolute;
+  text-align: center;
+  width: 270px;
+}
 </style>
 </head>
 <body @yield('bodyAttr')>
@@ -61,6 +76,10 @@ $authentic_username = ucwords($authentic_user->first_name.' '.$authentic_user->l
           @can('general_settings.manage_config')<a href="{{route($folder['route_folder_name'].'.config.index')}}" rel="tab" class="text-success font-weight-normal">{{ $authentic_username }}</a>@endcan
           @cannot('general_settings.manage_config')<span class="text-dark font-weight-normal">{{ $authentic_username }}</span>@endcannot
         </h4>
+        <div class= "top_timer_wrap">
+        <span> Current Time: </span>
+        <label id="clock" class="text-center"></label>
+        </div>
         <ul class="navbar-nav align-items-center ml-auto">
           <li class="nav-item dropdown">
             <a class="nav-link pr-0" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -150,6 +169,38 @@ $authentic_username = ucwords($authentic_user->first_name.' '.$authentic_user->l
 <script src="{{ asset('dashboard/js/custom.js') }}"></script>
 
 <script>
+@php
+  $now = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+@endphp
+let serverTime = new Date("{{ $now }}");
+function clock(){
+	var d = new Date(serverTime);
+	months = new Array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec');
+
+	month_array = new Array('January', 'Febuary', 'March', 'April', 'May', 'June', 'July', 'Augest', 'September', 'October', 'November', 'December');
+
+	currentYear = d.getFullYear();
+	month = d.getMonth();
+	var currentMonth = months[month];
+	var currentMonth1 = month_array[month];
+	var currentDate = d.getDate();
+	currentDate = currentDate < 10 ? '0'+currentDate : currentDate;
+
+	var hours = d.getHours();
+	var minutes = d.getMinutes();
+	var seconds = d.getSeconds();
+
+  var ampm = hours >= 12 ? 'PM' : 'AM';
+	hours = hours % 12;
+	hours = hours ? hours : 12; // the hour ’0' should be ’12'
+	minutes = minutes < 10 ? '0'+minutes : minutes;
+	seconds = seconds < 10 ? '0'+seconds : seconds;
+	var strTime = hours + ':' + minutes+ ':' + seconds + ' ' + ampm;
+	document.getElementById("clock").innerHTML= strTime ;
+
+  serverTime.setSeconds(serverTime.getSeconds() + 1);
+}
+
 function sticky_header(){
   scrollTop = $(document).scrollTop();
 
@@ -174,6 +225,9 @@ $(document).ready(function(){
     allowClear: true,
     closeOnSelect: false
   });
+
+  clock();
+  setInterval(clock, 1000);
 
   sticky_header();
   $(window).scroll(function(){

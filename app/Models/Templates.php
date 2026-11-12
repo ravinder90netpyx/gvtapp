@@ -34,7 +34,11 @@ class Templates extends Base_Model{
         'fine' => 'Fine',
         'tenant_family' =>'Tenant Family',
         'tenant_individual' => 'Tenant Individual',
-        'tenancy' => 'Tenancy'
+        'tenancy' => 'Tenancy',
+        'demand' => 'Demand',
+        'demand_reminder' => 'Demand Reminder',
+        'event_reciept' => 'Event Reciept',
+        'other_charge_reciept' => 'Other Charge Reciept'
     ];
 
     protected $fillable = [

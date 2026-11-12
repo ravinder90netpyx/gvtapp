@@ -157,6 +157,12 @@ $(function(){
                         </div>
                     </div>
 
+                    @php $current_field = 'location'; @endphp
+                    {!! Form::bsInput('text', $current_field, __('Location'), $form_data->$current_field ?? '', [ 'required', 'autocomplete'=>'off' ],  []); !!}
+
+                    @php $current_field = 'sub_location'; @endphp
+                    {!! Form::bsInput('text', $current_field, __('Sub Location'), $form_data->$current_field ?? '', [ 'autocomplete'=>'off' ],  []); !!}
+
                     @php $current_field = 'description'; @endphp
                     {!! Form::bsTextArea($current_field, __('Remarks'), $form_data->$current_field ?? '', ['']); !!}
 

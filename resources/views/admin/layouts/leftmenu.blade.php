@@ -189,7 +189,7 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
             <span class="nav-link-text"> Masters </span>
           </a>
 
-          <div class="collapse{{ Str::contains(url()->current(), array('charges', 'members', 'series', 'chargetype', 'group', 'expense_type', 'tenant', 'tenancy', 'event', 'attendes')) ? ' show' : '' }}" id="leftMenu2" style="">
+          <div class="collapse{{ Str::contains(url()->current(), array('charges', 'members', 'series', 'chargetype', 'group', 'expense_type', 'tenant', 'tenancy', 'events', 'attendes')) ? ' show' : '' }}" id="leftMenu2" style="">
             <ul class="nav nav-sm flex-column">
 
               @can('series.manage')
@@ -266,9 +266,9 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
 
               @can('event.manage')
               <li class="nav-item">
-                <a href="{{ route($folder['route_folder_name'].'.event.index') }}" class="nav-link{{ Str::contains(url()->current(),array('event')) ? ' active':'' }}">
+                <a href="{{ route($folder['route_folder_name'].'.events.index') }}" class="nav-link{{ Str::contains(url()->current(),array('events')) ? ' active':'' }}">
                   <span class="sidenav-mini-icon"> Ev </span>
-                  <span class="sidenav-normal"> Manage Event </span>
+                  <span class="sidenav-normal"> Manage Events </span>
                 </a>
               </li>
               @endcan
@@ -322,7 +322,6 @@ $roles = $auth_user->roles()->pluck('id')->toArray();
                   </a>
                 </li>
                 @endcan
-
                 @can('event_transaction.manage')
                 <li class="nav-item">
                   <a href="{{ route($folder['route_folder_name'].'.event_transaction.index') }}" class="nav-link{{ Str::contains(url()->current(),array('event_transaction')) ?' active':'' }}">

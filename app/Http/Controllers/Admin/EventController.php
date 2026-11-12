@@ -14,7 +14,7 @@ use Spatie\Permission\Models\Permission;
 class EventController extends Controller{
     public $module = array(
         'module_view' => 'event',
-        'module_route' => 'event',
+        'module_route' => 'events',
         'permission_group' => 'event',
         'main_heading' => 'Event',
         'default_perpage' => 10
@@ -86,6 +86,7 @@ class EventController extends Controller{
             // 'series_id' => 'required',
             'description' => 'nullable',
             'date' => 'required',
+            'location',
             'collection_slab.*.attendes_id' => 'required',
             'collection_slab.*.amount' => 'required'
         ]);
@@ -130,6 +131,7 @@ class EventController extends Controller{
             'name' => 'required',
             'description' => 'nullable',
             'date' => 'required',
+            'location'=>'required',
             'collection_slab.*.attendes_id' => 'required',
             'collection_slab.*.amount' => 'required'
         ]);

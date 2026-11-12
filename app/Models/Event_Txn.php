@@ -38,9 +38,11 @@ class Event_Txn extends Base_Model{
         'amount',
         'mode',
         'payment_date',
+        'reciept_date',
         'payment_status',
         'file_name',
         'remark',
-        'count'
+        'count',
+        'status'
     ];
 }

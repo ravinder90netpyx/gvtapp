@@ -34,23 +34,45 @@
             var series_name = $('#name').val();
             var number_separator = $('#number_separator').val();
             var str_start_number = $('#start_number').val();
+            // var str_financial_year_seperator = $('#financial_year_seperator').val();
+            // var str_financial_year = $('#financial_year').val();
             var str_min_length = $('#min_length').val();
 
             // var min_length = Math.max(parseInt(str_min_length), str_start_number.length);
             
         var changed_num = String(str_start_number).padStart(str_min_length, '0');
 
-            var result = series_name + number_separator + changed_num;
+            var result = series_name +  number_separator + changed_num;
 
             return result;
         }
 
         // Update the result when any of the relevant fields change
-        $('#name, #number_separator, #start_number, #min_length').on('change', function() {
+        $('#name, #number_separator, #start_number, #min_length, #financial_year_seperator, #financial_year').on('change', function() {
             var series = generateSeries();
             $('#generated_series').text("First Number : " + series);
         });
+        
+        $('#tag').on('change', function(){
+            val = $(this).prop('checked');
+            $('#financial_year').val('');
+            if(val){
+                $('.financial_year').show();
+                $('#financial_year').closest('div').find('label').html('Financial Year<span class="req"></span>');
+                $('#financial_year').prop('required',true);
+            } else{
+                $('.financial_year').hide();
+                $('#financial_year').prop('required', false);
+            }
+        });
 
+        @if($mode == 'edit')
+        if($('#tag').prop('checked')){
+            $('.financial_year').show();
+            $('#financial_year').closest('div').find('label').html('Financial Year<span class="req"></span>');
+            $('#financial_year').prop('required',true);
+        }
+        @endif
         // Initialize the result when the document is ready
         var initialSeries = generateSeries();
         $('#generated_series').text("First Number : " + initialSeries);
@@ -94,14 +116,11 @@
                             {!! Form::bsInput('number',$current_field, __('Start Number'), $form_data->$current_field ?? 1, ['required', $disablefield, 'min' => 1], ['vertical'=>true]); !!}
                         </div>
 
-
                         <div class="col-md-4">
                             @php $current_field = 'min_length'; @endphp
                             {!! Form::bsInput('number',$current_field, __('Minimum Length'), $form_data->$current_field ?? 1, ['required', $disablefield, 'min' => 1, 'max' => 20], ['vertical'=>true]); !!}
                         </div>             
                         
-                       
-
                         <div class="col-md-4">
                             @php 
                             $current_field = 'type';
@@ -125,7 +144,30 @@
                         </div>
                            @endif
                            @php } @endphp
-                       </div>
+                        <div class="col-md-4">
+                            @php $current_field = 'tag'; @endphp
+                            {!! Form::bsToggle($current_field, 'Tag it With Financial Year', '1', ( $form_data->$current_field ?? false ), ['required'], ['vertical'=>true]); !!}
+                        </div>
+
+                        {{-- <div class="col-md-4 financial_year_seperator">
+                            @php 
+                            $current_field = 'financial_year_seperator';
+                            $row_data = $model->getSeparatorList();
+                            @endphp
+                            {!! Form::bsSelect($current_field, __('Financial Year Separator'), $row_data, $form_data->$current_field ?? '', ['required', 'data-toggle'=>'select'], ['vertical'=>true]); !!}
+                        </div> --}}
+
+                        <div class="col-md-4 financial_year" style="display:none;">
+                            @php $current_field = 'financial_year';
+                            $row_data=[''=>' --Select Year-- '];
+                            foreach(array_reverse($financial_year) as $fy){
+                                $row_data[$fy] = $fy;
+                            }
+                            @endphp
+                            {!! Form::bsSelect($current_field, __('Financial Year'), $row_data, $form_data->$current_field ?? '', [''], ['vertical'=>true, 'remove_blank_field'=>true]); !!}
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>

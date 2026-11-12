@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\{
     EventController,
     AttendesController,
     EventTransactionController,
+    CommonController,
 };
 
 use App\Http\Controllers\CronController;
@@ -119,6 +120,13 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
         Route::get('event_transaction/{id}/show', [EventTransactionController::class, 'show_pdf'])->name('event_transaction.show_pdf');
         Route::post('event_transaction/send', [EventTransactionController::class, 'send_msg'])->name('event_transaction.send_msg');
 
+        // Common Controller
+        Route::get('common/ajax_member/', [CommonController::class, 'ajax_member'])->name('common.ajax_member');
+        Route::get('common/ajax_with_non_member/', [CommonController::class, 'ajax_memberwith_non_member'])->name('common.ajax_with_non_member');
+        Route::post('common/series_select',[CommonController::class, 'series_select'])->name('common.series_select');
+        Route::post('common/series_data', [CommonController::class, 'series_data'])->name('common.series_data');
+
+
         Route::post('dashboard', [DashboardController::class, 'ajax_year'])->name('dashboard.ajax_year');
 
         $routes_arr = [
@@ -139,7 +147,7 @@ Route::name('supanel.')->prefix('supanel')->group(function () {
             'tenancy'=>'TenancyController',
             'custom_global_variable' => 'CustomGlobalVariableController',
             'demand' => 'DemandController',
-            'event' => 'EventController',
+            'events' => 'EventController',
             'attendes' => 'AttendesController',
             'event_transaction' => 'EventTransactionController',
         ];

@@ -113,7 +113,7 @@
                                 $dt_str = $carbon->createFromFormat('Y-m-d H:i:s', $item[$model::CREATED_AT]);
                                 $row_time = $dt_str->format(config('custom.datetime_format'));
                                
-                                $str = $item['name'] . $item['number_separator'];
+                                $str = $item['name'].$item['number_separator'];
                                 $result =  $str.str_pad($item['start_number'], $item['min_length'], "0", STR_PAD_LEFT);
                                 @endphp
                                 <tr>

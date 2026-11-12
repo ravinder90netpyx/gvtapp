@@ -34,6 +34,7 @@ class Event_attendes_Relation extends Base_Model{
         'event_txn_id',
         'name',
         'amount',
-        'number'
+        'number',
+        'status'
     ];
 }

@@ -98,7 +98,7 @@ class WhatsappAPI implements ShouldQueue
         ));
         $response = curl_exec($curl);
         curl_close($curl);
-        echo $response;
+        // echo $response;
 
             $res_arr = json_decode($response);
             // dd($res_arr->status);

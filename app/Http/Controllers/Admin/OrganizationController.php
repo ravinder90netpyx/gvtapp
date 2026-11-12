@@ -83,7 +83,10 @@ class OrganizationController extends Controller{
             'name' => 'required',
             'gst_number' => 'required|unique:'.$module['table_name'].',gst_number',
             'description' => 'required',
-            'address' => 'required'
+            'address' => 'required',
+            'mobile_number'=>'required',
+            'addon_mobile_number'=> 'required',
+            'email'=> 'required'
         ]);
 
         $model->create($request->all());
@@ -109,7 +112,10 @@ class OrganizationController extends Controller{
             'name' => 'required',
             'gst_number' => 'required|unique:'.$module['table_name'].',gst_number,'.$id.','.$module['table_column_index'],
             'description' => 'required',
-            'address' => 'required'
+            'address' => 'required',
+            'mobile_number' => 'required',
+            'addon_mobile_number'=>'required',
+            'email' => 'required'
         ]);
 
         $modelfind = $model->find($id);

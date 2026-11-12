@@ -22,7 +22,9 @@ return new class extends Migration
             $table->unsignedBigInteger('amount');
             $table->text('description')->nullable();
             $table->text('collection_slab')->nullable();
-            $table->date('date')->nullable();
+            $table->timestamp('date')->nullable();
+            $table->text('location')->nullable();
+            $table->text('sub_location')->nullable();
 
             $table->enum('delstatus', ['0', '1'])->default('0');
             $table->enum('status', ['0', '1'])->default('1');

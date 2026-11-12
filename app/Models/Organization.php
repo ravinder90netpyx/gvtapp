@@ -24,6 +24,7 @@ class Organization extends Base_Model{
         'description',
         'gst_number',
         'users_allowed',
-        'address'
+        'address',
+        'start_date'
     ];
 }

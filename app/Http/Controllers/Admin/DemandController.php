@@ -144,6 +144,8 @@ class DemandController extends Controller{
             \App\Models\Demand_Charge::create($demand_charge);
         }
 
+        $this->generate_pdf($demand->id);
+
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
     }
 
@@ -223,6 +225,7 @@ class DemandController extends Controller{
                 \App\Models\Demand_Charge::create($demand_charge);
             }
         }
+        $this->generate_pdf($demand->id);
     
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' updated successfully');
     }
@@ -377,6 +380,7 @@ class DemandController extends Controller{
         $dest_mob_no = $member->mobile_number;
         $file_name = $model->file_name;
         $mem_id = $model->member_id;
+        // $dest_mob_no = '+917479735912';
 
         $message = array(
             'type' => $api['type'],
@@ -425,7 +429,7 @@ class DemandController extends Controller{
         $charge = \App\Models\ChargeType::find($member->charges_id);
         $now = Carbon::now();
         // $month = $je_model->to_month;
-        $dest_mob_no = '+917479735912';
+        // $dest_mob_no = '+917479735912';
         $day = $now->day;
 
         // if($day>12){

@@ -23,18 +23,23 @@ class Series extends Base_Model{
     ];
 
     public const ModuleType = [
-        'journal_entry' => 'Journal Entry'
+        'journal_entry' => 'Journal Entry',
+        'demand' => 'Demand',
+        'event' => 'Event'
     ];
 
 
     protected $fillable = [
         'organization_id',
         'name',
+        'financial_year',
+        'financial_year_seperator',
         'start_number',
         'next_number',
         'min_length',
         'number_separator',
         'type',
+        'tag'
     ];
 
     public function getSeparatorList(){

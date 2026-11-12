@@ -104,7 +104,7 @@
                             $doc_name = explode(',',$form_data->document_name); @endphp
                             @foreach($doc as $ind=>$d)
                                 <div class="file-div">
-                                    <a target="_blank" href="{{ asset('upload/tenant/'.$d) }}"><i class="text-danger far fa-lg fa-file-pdf"> </i><span> View {{ $doc_name[$ind] }}</span> </a>
+                                    <a target="_blank" href="{{ asset('upload/tenant/'.$doc_name[$ind]) }}"><i class="text-danger far fa-lg fa-file-pdf"> </i><span> View {{ $d }}</span> </a>
                                 </div>
                             @endforeach
                             @endif

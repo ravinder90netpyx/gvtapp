@@ -16,6 +16,16 @@
 
 @php } @endphp
 
+<div class="col-md-6">
+    @php $current_field = 'entry_year';
+        $row_data=[];
+        foreach(array_reverse($financial_years) as $fy){
+            $row_data[$fy] = $fy;
+        }
+    @endphp
+    {!! Form::bsSelect($current_field, __('Year'), $row_data, $form_data->$current_field ?? '', ['required', $disable], ['vertical'=>true, 'remove_blank_field'=>true]); !!}
+</div>
+
 <div class="col-md-6" id = "series_div_id">
     @php
         $row_data=[];
@@ -33,16 +43,6 @@
         }
     @endphp
     {!! Form::bsSelect($current_field, __('Series'), $row_data, $form_data->$current_field ?? '', ['required', 'disabled'], ['vertical'=>true]); !!} --}}
-</div>
-
-<div class="col-md-6">
-    @php $current_field = 'entry_year';
-        $row_data=[];
-        foreach(array_reverse($financial_years) as $fy){
-            $row_data[$fy] = $fy;
-        }
-    @endphp
-    {!! Form::bsSelect($current_field, __('Year'), $row_data, $form_data->$current_field ?? '', ['required', $disable], ['vertical'=>true, 'remove_blank_field'=>true]); !!}
 </div>
 
 <div class="col-md-6">

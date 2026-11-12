@@ -9,6 +9,31 @@
 @endsection
 
 @section('scripts')
+<script>
+function datetimepicker_date(id){
+    date = new Date('2020-01-01');
+    $('#'+id).datepicker({
+        format: "yyyy-mm-dd",
+        startView: 0,
+        minViewMode: 0,
+        startDate : date,
+        // container: '#cred_modal',
+        autoclose: true
+    });
+}
+$(function(){
+    datetimepicker_date('start_date');
+    $('#same_date').on('click', function(){
+        val = $(this).prop('checked');
+        if(val){
+            let today = new Date().toISOString().split('T')[0];
+            $('#start_date').val(today);
+        } else{
+            $('#start_date').val('')
+        }
+    });
+});
+</script>
 @endsection
 
 @section('content')
@@ -36,6 +61,15 @@
 
                     @php $current_field = 'address'; @endphp
                     {!! Form::bsTextArea($current_field, __('Address'), $form_data->$current_field ?? '', ['required']); !!}
+
+                    @php
+                    $current_field = 'start_date';
+                    $val= !empty($form_data->$current_field) ? date('Y-m-d', strtotime($form_data->$current_field)) : '';
+                    $add_perm = [];
+                    $apm = ['addon_check'=>'same_date', 'addon_check_title' => 'Same as Todays Date'];
+                    $add_perm = array_merge($add_perm, $apm);
+                    @endphp
+                    {!! Form::bsInput('text', $current_field, __('Start Date'), $val ?? '', ['required', 'autocomplete'=>'off'], $add_perm); !!}
 
                     @php 
                     $current_field = 'users_allowed';

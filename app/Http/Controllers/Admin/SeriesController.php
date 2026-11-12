@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\helpers;
 
 class SeriesController extends Controller{
     public $module = array(
@@ -75,15 +76,25 @@ class SeriesController extends Controller{
         return view($module['main_view'].'.index', compact('data', 'model', 'carbon', 'module', 'perpage', 'folder', 'title_shown', 'query'))->with('i', ($request->input('page', 1) - 1) * $perpage);
     }
 
-    public function create(DefaultModel $model){
+    public function create(DefaultModel $model, helpers $helpers){
         $module = $this->module;
         $folder = $this->folder;
         $action = URL::route($module['main_route'].'.store');
         $title_shown = 'Add '.$module['main_heading'];
         $method = 'POST';
         $mode = 'insert';
+        $start_date = null;
+        $auth_user = Auth::user();
+        $roles = $auth_user->roles()->pluck('id')->toArray();
+        if(!in_array(1,$roles)){
+            $organization_id = $auth_user->organization_id;
+            $organization = \App\Models\Organization::find($organization_id);
+            $start_date = $organization->start_date ?? null;
+        }
+        $financial_year = $helpers->get_financial_years($start_date, null);
 
-        return view($module['main_view'].'.cred', compact('module', 'model', 'action', 'method', 'mode', 'folder', 'title_shown'));
+
+        return view($module['main_view'].'.cred', compact('module', 'model', 'financial_year', 'action', 'method', 'mode', 'folder', 'title_shown'));
     }
 
     public function store(Request $request, DefaultModel $model){
@@ -96,6 +107,8 @@ class SeriesController extends Controller{
         $request->validate([
             'name' => 'required|unique:'.$model->getTable().',name,NULL,NULL,organization_id,'.$org_id,
             'start_number' => 'required|integer|min:1',
+            // 'financial_year' => 'required',
+            // 'financial_year_seperator' => 'required',
             'min_length' => 'required|integer|min:1|max:20',
             'number_separator' => 'required|in:'.implode(",", array_keys($model->getSeparatorList())),
             'type' =>'required|in:'.implode(",", array_keys($model->getModuleTypeList()))
@@ -117,7 +130,7 @@ class SeriesController extends Controller{
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' created successfully.');
     }
 
-    public function edit($id, DefaultModel $model){
+    public function edit($id, DefaultModel $model, helpers $helpers){
         $module = $this->module;
         $folder = $this->folder;
         $form_data = $model->find($id);
@@ -130,10 +143,17 @@ class SeriesController extends Controller{
         $modelfind = $model->find($id);
         $auth_user = Auth::user();
         // dd($auth_user);
+        $start_date = null;
         $roles = $auth_user->roles()->pluck('id')->toArray();
+        if(!in_array(1,$roles)){
+            $organization_id = $auth_user->organization_id;
+            $organization = \App\Models\Organization::find($organization_id);
+            $start_date = $organization->start_date ?? null;
+        }
+        $financial_year = $helpers->get_financial_years($start_date, null);
         if(!in_array('1', $roles) && $auth_user->organization_id!=$modelfind->organization_id) return redirect()->route($module['main_route'].'.index');
 
-        return view($module['main_view'].'.cred')->with(compact('form_data', 'model', 'module', 'action', 'method', 'mode', 'folder', 'title_shown', 'id'));
+        return view($module['main_view'].'.cred')->with(compact('form_data', 'model', 'module', 'action', 'method', 'mode', 'folder', 'financial_year', 'title_shown', 'id'));
     }
 
     public function update(Request $request, $id, DefaultModel $model){
@@ -146,6 +166,8 @@ class SeriesController extends Controller{
             'name' => 'required|unique:'.$model->getTable().',name,'.$id.','.$model->getKeyName().',organization_id,'.$org_id,
             'start_number' => 'nullable',
             'min_length' => 'nullable',
+            // 'financial_year' => 'required',
+            // 'financial_year_seperator' => 'required',
             'number_separator' => 'required|in:'.implode(",", array_keys($model->getSeparatorList())),
             'type' => 'nullable|in:'.implode(",", array_keys($model->getModuleTypeList()))
         ]);

@@ -29,7 +29,36 @@ $current_url = Request::url();
 <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-ui@1.10.5/keycode.js"></script> -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap-autocomplete@2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script type="text/javascript">
+
+function demand_submit(){
+  var selectedValues = [];
+  $('input[name="row_check[]"]:checked').each(function() {
+    var dem_id = $(this).val();
+    var dem_charge = $(this).closest('tr').find('.adjust_charge').val();
+    selectedValues.push({
+      id: dem_id,
+      charge: dem_charge
+    });
+  });
+  if(selectedValues.length>0){
+    $.ajax({
+      url: '{{ route("supanel.journal_entry.demand_submit") }}',
+      method: "POST",
+      data:{'_token':'{!! csrf_token() !!}', 'demand_value':selectedValues},
+      success: function(response){
+        $('#charge').val(response);
+        if(response>0){
+          $('#charge').closest('.input-group').find('.input-group-append').hide();
+        }
+      },
+      error: function(error){
+        console.error(error);
+      }
+    });
+  }
+}
 
 function form_submit(send , id = null){
   var series_id= $('#series_id').val();
@@ -48,6 +77,16 @@ function form_submit(send , id = null){
   var charge_type_id = $('#charge_type_id').val();
   var reciept_date = $('#reciept_date').val();
   var fine_amt = $('#fine_amt').val();
+  var demand = [];
+  $('input[name="row_check[]"]:checked').each(function() {
+    var id = $(this).val();
+    var charge = $(this).closest('tr').find('.adjust_charge').val();
+    demand.push({
+      id: id,
+      charge: charge
+    });
+  });
+
 
   // form_data = {
   //     'series_id' : series_id,
@@ -67,7 +106,7 @@ function form_submit(send , id = null){
   $.ajax({
     url: action,
     method: method,
-    data: {'_token': '{!! csrf_token() !!}', 'series_id' : series_id, 'entry_date' : entry_date, 'entry_year' : entry_year, 'member_id' : member_id, 'organization_id' : organization_id, 'paid_money' : paid, 'from_month' : from_month, 'to_month': to_month, 'payment_mode':payment_mode, 'send' : send, 'remarks' : remarks, 'custom_month':custom_month, 'charge_type_id': charge_type_id, 'reciept_date':reciept_date, 'fine_amt':fine_amt},
+    data: {'_token': '{!! csrf_token() !!}', 'series_id' : series_id, 'entry_date' : entry_date, 'entry_year' : entry_year, 'member_id' : member_id, 'organization_id' : organization_id, 'paid_money' : paid, 'from_month' : from_month, 'to_month': to_month, 'payment_mode':payment_mode, 'send' : send, 'remarks' : remarks, 'custom_month':custom_month, 'charge_type_id': charge_type_id, 'reciept_date':reciept_date, 'fine_amt':fine_amt, 'demand_charge':demand},
     success: function(response){
       $('#cred_modal').modal('hide');
       location.reload();
@@ -143,10 +182,12 @@ function ajax_show(id){
 }
 
 function series_select(org_id){
+  year = $('#entry_year').val() ?? '';
+  // alert(year);
   $.ajax({
     url: '{{ route("supanel.journal_entry.series_select") }}',
     method: "POST",
-    data: {'_token': '{!! csrf_token() !!}', 'org_id' : org_id},
+    data: {'_token': '{!! csrf_token() !!}', 'org_id' : org_id, 'financial_year' : year},
     success: function(response){
       $('#series_div_id').html(response.html);
       $('#series_id').prop('disabled',false);
@@ -229,6 +270,44 @@ function make_table(data){
   });
   table_data +='</tbody></table>';
   $('#table_div').html(table_data);
+}
+
+function make_demand_table(data){
+  var table_data = '<table class="table table-striped table-hover table-bordered table-sm mb-2 main-listing-table"><thead><tr><th>#</th> <th>Member Name</th> <th>Unit Number</th> <th>Serial Number</th> <th>Charge</th> <th> Adjust Payment </th> <th>Due Date</th></tr></thead><tbody>';
+  data.forEach(dt =>{
+    var partial = dt.partial;
+    table_data += '<tr><td><div class="custom-checkbox custom-control"><input class="custom-control-input data-checkboxes id_checkbox" type="checkbox" name="row_check[]" id="dem_'+dt.id+'" value="'+dt.id+'"><label class="custom-control-label" for="dem_'+dt.id+'"></label></div></td>';
+    table_data+= '<td>'+dt.name ?? ''+'</td>';
+    table_data += '<td>'+dt.unit_number ?? ''+'</td>';
+    table_data += '<td>'+dt.reciept_number+'</td>';
+    table_data += '<td class="dem_charge">'+dt.charge+'</td>';
+    if(partial=='1'){
+      table_data += '<td><div class="input-group"> <input class="form-control adjust_charge" name="adjust_charge[]" disabled type="number" value="" id=""> <div class="input-group-append"> <div class="input-group-text p-0 pl-3"> <div class="custom-checkbox custom-control"> <input id="" name="adjust" type="hidden" value=""> <input id="adjust'+dt.id+'" class="custom-control-input adjust" name="adjust" disabled type="checkbox" value="1"> <label class="custom-control-label" for="adjust'+dt.id+'" title="Fully Paid"></label> </div></div></div></div></td>';
+    } else{
+      table_data += '<td> N/A </td>';
+    }
+    table_data += '<td>'+dt.due_date+'</td></tr>';
+  });
+  table_data +='</tbody></table>';
+  $('#demand_table_div').html(table_data);
+}
+
+function check_demand(member_id, charge_type){
+  $.ajax({
+    url:'{{ route("supanel.journal_entry.check_demand") }}',
+    method: "POST",
+    data: {'_token': '{!! csrf_token() !!}', 'id':member_id, 'charge_type':charge_type},
+    success: function(response){
+      console.log(response.check);
+      if(response.check == 'yes'){
+        if(confirm("This Unit Number has pending Demand, do you want to fill it?")){
+          make_demand_table(response.array);
+          $('#demand_modal').show();
+          $('#demand_modal').modal({ backdrop:false });
+        }
+      }
+    }
+  });
 }
 
 function fine_ajax(member_id){
@@ -334,6 +413,8 @@ $(function(){
   $("#add_but").on('click',function(e){
     e.preventDefault();
     id = null;
+    $('#cred_modal').modal('show');
+    $('#cred_modal').modal({ backdrop:false });
 
     form = document.getElementById('form_id');
     $('#member_mob').val('');
@@ -348,14 +429,6 @@ $(function(){
       $('#member_mob').prop('disabled', true);
       $('#fine_amt').prop('disabled', true);
     @endif
-    @if(!in_array(1, $roles))
-      autocomplete_trigger('{{ $auth_user->organization_id}}');
-      series_select('{{ $auth_user->organization_id}}');
-      @if(!empty($serial_id))
-        
-        series_data('{{$serial_id}}');
-      @endif
-    @endif
     $('#charge').prop('disabled', true);
     @php
       $form_data=[];
@@ -365,9 +438,15 @@ $(function(){
     @endphp
     $('#entry_date').val("{{ $now }}");
     $('#entry_year').val("{{ $val_year }}");
-    $('#cred_modal').modal('show');
-    $('#cred_modal').modal({ backdrop:false });
 
+    @if(!in_array(1, $roles))
+      autocomplete_trigger('{{ $auth_user->organization_id}}');
+      series_select('{{ $auth_user->organization_id}}');
+      @if(!empty($serial_id))
+          
+        series_data('{{$serial_id}}');
+      @endif
+    @endif
     // $('#form_id').trigger('reset');
     // $('#member_mob').val('');
     $('#form_btn_submit').show();
@@ -456,6 +535,7 @@ $(function(){
     if(val !== undefined && val !== null && val !== 0 && val !== ''){
     	$('#series_id').prop('disabled', false);
       $('#member_mob').prop('disabled', false);
+      $('#entry_year').prop('disabled', false);
       autocomplete_trigger(val);
       series_select(val);
     } else{
@@ -465,6 +545,7 @@ $(function(){
       $('#next_number').closest('.form-group-multi-input').find('label').html('Series<span class="req"></span>');
       $('#series_id').prop('disabled', true);
       $('#member_mob').prop('disabled', true);
+      $('#entry_year').prop('disabled', true);
       if ($('#member_mob').hasClass("select2-hidden-accessible")) {
       	$('#member_mob').select2('destroy');
       }
@@ -539,15 +620,23 @@ $(function(){
       	$('.charge').hide();
       }
     }
+    var charge_type = $('#charge_type_id').val();
+    if(charge_type != ""){
+      var mem = $(this).val();
+      check_demand(mem, charge_type);
+    }
   });
 
   $(document).on('change','#charge_type_id', function(){
-  	var org_val = $('organization_id').val();
+  	var org_val = $('#organization_id').val();
     $('#fine_amt').val('');
     $('#table_div').html('');
     if($('#member_mob').val()!=''){
     	fine_ajax($('#member_mob').val());
+      charge_type = $('#charge_type_id').val();
+      check_demand($('#member_mob').val(), charge_type);
     }
+  
     if($(this).val() !=''){
       get_charge_type($(this).val(), function(type){
         types = type;
@@ -605,6 +694,52 @@ $(function(){
     }
   });
 
+  $(document).on('click', '.adjust', function(){
+    var val = $(this).prop('checked');
+    if(val){
+      $('input[name="adjust_charge"]').prop('disabled',true);
+      var dem_charge = $(this).closest('tr').find('.dem_charge').html();
+      $(this).closest('tr').find('.adjust_charge').val(dem_charge);
+    } else{
+      $('input[name="adjust_charge"]').prop('disabled',false);
+      $(this).closest('tr').find('.adjust_charge').val(0);
+    }
+    $(this).closest('tr').find('.adjust_charge').trigger('input');
+  });
+
+  $(document).on('click','.id_checkbox',function(){
+    val = $(this).prop('checked');
+    if(val){
+      $(this).closest('tr').find('.adjust_charge').prop('disabled', false);
+      $(this).closest('tr').find('.adjust').prop('disabled', false);
+      $(this).closest('tr').find('.adjust_charge').trigger('input');
+    } else{
+      $(this).closest('tr').find('.adjust_charge').val(0);
+      $(this).closest('tr').find('.adjust').prop('checked',false);
+      $(this).closest('tr').find('.adjust_charge').prop('disabled', true);
+      $(this).closest('tr').find('.adjust').prop('disabled', true);
+      $('.id_checkbox').prop('disabled', false);
+    }
+  });
+
+  $(document).on('input', '.adjust_charge', function(){
+    var val=$(this).val();
+    // alert(val);
+    $('.id_checkbox').prop('disabled', true);
+    // $('.adjust').prop('disabled', true); 
+    $(this).closest('tr').find('.adjust').prop('disabled', false);
+    // $('.adjust_charge').prop('disabled', true);
+    $(this).prop('disabled', false);
+    $(this).closest('tr').find('.id_checkbox').prop('disabled', false);
+    var chr = $(this).closest('tr').find('.dem_charge').html();
+    if(chr==val){
+      $('.id_checkbox').prop('disabled',false);
+
+      // $('.adjust_charge').prop('disabled', false);
+    }
+
+  });
+
   $(document).on('click', '#unpaid', function(){
   	var val = $(this).prop('checked');
     if(val){
@@ -616,7 +751,14 @@ $(function(){
   });
 
   $('#entry_year').on('change',function(){
+
     var val = $(this).val();
+    @if(!in_array(1, $roles))
+      series_select('{{ $auth_user->organization_id}}');
+    @else
+      org_id =$('#organization_id').val();
+      series_select(org_id);
+    @endif
     var arr= val.split('-');
     var yr = arr[0];
     var time= yr+"-04-01 00:00:00";
@@ -676,6 +818,17 @@ $(function(){
     	e.preventDefault();
     }
   });
+
+  $('#demand_click').on('click', function(e){
+    e.preventDefault();
+    demand_submit();
+  });
+
+  $(document).on('hidden.bs.modal', '.modal', function () {
+  if ($('.modal:visible').length) {
+    $('body').addClass('modal-open');
+  }
+});
 });
 </script>
 @endsection
@@ -805,7 +958,7 @@ $(function(){
                   <input class="custom-control-input data-checkboxes" type="checkbox" name="row_check[]" id="row_check_{{ $row_id }}" value="{{ $row_id }}">
                   <label class="custom-control-label" for="row_check_{{ $row_id }}"></label>
                 </div>
-              </td> 
+              </td>
 
               <td class="link-icons">
                 @can($module['permission_group'].'.status')
@@ -850,12 +1003,13 @@ $(function(){
                   $charge_type = \App\Models\ChargeType::where([['status','>','0'],['delstatus', '<','1'],['id', '=',$item['charge_type_id']]])->first();
                 @endphp
                 @if(empty($entrywise_model) || $entrywise_model->journal_entry_id == $row_id || $charge_type->type != 'fine' )
+                @if(empty($item['demand_charge_id']))
                 @can($module['permission_group'].'.edit')
                 <a href="{{ route($module['main_route'].'.edit', $row_id) }}" data-id="{{ $row_id }}" class="edit_but" title="{{ __('admin.text_edit') }}" rel="tab" class="px-1">
                   <i class=" text-primary fa-lg fas fa-edit"></i>
                 </a>
                 @endcan
-
+                @endif
                 @endif
 
                 @can($module['permission_group'].'.delete')
@@ -903,29 +1057,51 @@ $(function(){
   </div>
 </form>
 <div class="modal fade" id="cred_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-focus="false" role="dialog">
-    <div class="modal-dialog modal-lg">
-        {!! Form::open(['id'=>'form_id', 'method'=>$method, 'class'=>'needs-validation', 'novalidate']) !!}
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">{{ $title_showns }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" style="overflow:hidden;">
-                    <div class="row" id="changable_div">
-                        @include($module['main_view'].'.form_include',['bsmodal'=>true, 'module'=>$module, 'form_data'=>null])
-                    </div>
-                    <div class="row" id = "table_div">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
-                    <button type="submit" id="form_btn_submit" value="submit" class="btn btn-primary">Save</button>
-                    <button type="submit" id="form_btn_save_submit" value = "save_submit" class="btn btn-primary">Save & Send</button>
-                </div>
-            </div>
-        {!! Form::close() !!}
-    </div>
+  <div class="modal-dialog modal-lg">
+    {!! Form::open(['id'=>'form_id', 'method'=>$method, 'class'=>'needs-validation', 'novalidate']) !!}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">{{ $title_showns }}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" style="overflow:hidden;">
+          <div class="row" id="changable_div">
+            @include($module['main_view'].'.form_include',['bsmodal'=>true, 'module'=>$module, 'form_data'=>null])
+          </div>
+          <div class="row" id = "table_div">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
+          <button type="submit" id="form_btn_submit" value="submit" class="btn btn-primary">Save</button>
+          <button type="submit" id="form_btn_save_submit" value = "save_submit" class="btn btn-primary">Save & Send</button>
+        </div>
+      </div>
+    {!! Form::close() !!}
+  </div>
+</div>
+
+<div class="modal fade" id="demand_modal" tabindex="-1" aria-labelledby="demandModalLabel" aria-hidden="true" data-focus="false" role="dialog">
+  <div class="modal-dialog modal-lg">
+    {!! Form::open(['id'=>'form_id', 'method'=>$method, 'class'=>'needs-validation', 'novalidate']) !!}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="demandModalLabel">Demand(s)</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" style="overflow:hidden;">
+          <div class="row" id = "demand_table_div">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="demand_click" data-dismiss="modal">Done</button>
+        </div>
+      </div>
+    {!! Form::close() !!}
+  </div>
 </div>
 @endsection

@@ -32,6 +32,8 @@ class Event extends Base_Model{
         'description',
         'collection_slab',
         'date',
-        'amount'
+        'amount',
+        'location',
+        'sub_location'
     ];
 }

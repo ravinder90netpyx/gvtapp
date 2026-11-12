@@ -125,12 +125,13 @@ class EventTransactionController extends Controller{
         foreach($request->input('attendes') as $ind=>$att){
             $attende['organization_id'] = $additional_data['organization_id'];
             $attende['event_id'] = $request->input('event_id');
-            $attende['attendes_id'] = $ind;
+            $attende['attendes_id'] = $att['attendes_id'];
+            $attend = \App\Models\Attendes::find($att['attendes_id']);
             $attende['member_id'] = $additional_data['member_id'] ?? $request->input('member_id');
             $attende['event_txn_id'] = $fetch_data->id;
             $attende['amount'] = $att['amount'];
             $attende['number'] = $att['number'];
-            $attende['name'] = $att['name'];
+            $attende['name'] = $attend->name;
             \App\Models\Event_Attendes_Relation::create($attende);
         }
         $this->generate_pdf($fetch_data->id);
@@ -172,6 +173,7 @@ class EventTransactionController extends Controller{
 
     public function update(Request $request, $id, DefaultModel $model){
         $module = $this->module;
+        // dd($request->all());
         $request->validate([
             'payment_date' => 'required',
             'mode' => 'required|in:cash,online,personal_online',
@@ -196,14 +198,36 @@ class EventTransactionController extends Controller{
         $attende = [];
         $modelfind = $model->find($id);
         $fetch_data = $modelfind->update($request->all());
+        $evnt_rel = \App\Models\Event_Attendes_Relation::where([['event_txn_id','=',$id]])->update(['status'=>'0']);
         foreach($request->input('attendes') as $ind=>$att){
-            $event_attendes_relation = \App\Models\Event_Attendes_Relation::find($att['id']);
-            $attende['attendes_id'] = $ind;
-            $attende['member_id'] = $additional_data['member_id'] ?? $request->input('member_id');
-            $attende['amount'] = $att['amount'];
-            $attende['number'] = $att['number'];
-            $attende['name'] = $att['name'];
-            $event_attendes_relation->update($attende);
+            $event_attendes_relation = \App\Models\Event_Attendes_Relation::where([['delstatus','<','1'],['attendes_id', $att['attendes_id']], ['event_txn_id','=',$id]])->first();
+            if(!empty($event_attendes_relation)){
+                $attende['attendes_id'] = $att['attendes_id'];
+                $attend = \App\Models\Attendes::find($att['attendes_id']);
+                $attende['member_id'] = $additional_data['member_id'] ?? $request->input('member_id');
+                $attende['amount'] = $att['amount'];
+                $attende['number'] = $att['number'];
+                $attende['name'] = $attend->name;
+                $attende['status'] = '1';
+                $event_attendes_relation->update($attende);    
+            } else{
+                $attende['organization_id'] = $modelfind->organization_id;
+                $attende['event_id'] = $modelfind->event_id;
+                $attende['attendes_id'] = $att['attendes_id'];
+                $attend = \App\Models\Attendes::find($att['attendes_id']);
+                $attende['member_id'] = $additional_data['member_id'] ?? $request->input('member_id');
+                $attende['event_txn_id'] = $id;
+                $attende['amount'] = $att['amount'];
+                $attende['number'] = $att['number'];
+                $attende['name'] = $attend->name;
+                \App\Models\Event_Attendes_Relation::create($attende);
+            }
+            // $attende['attendes_id'] = $att['attendes_id'];
+            // $attende['member_id'] = $additional_data['member_id'] ?? $request->input('member_id');
+            // $attende['amount'] = $att['amount'];
+            // $attende['number'] = $att['number'];
+            // $attende['name'] = $att['name'];
+            // $event_attendes_relation->update($attende);
         }
         $this->generate_pdf($id);
         return redirect()->route($module['main_route'].'.index')->with('success', $module['main_heading'].' updated successfully');
@@ -268,19 +292,37 @@ class EventTransactionController extends Controller{
 
     public function get_attendes(Request $request){
         $id = $request->input('id');
+        $no = $request->input('no');
+        $sel_id = $request->input('sel_id') ?? 0;
         $event = \App\Models\Event::find($id);
         $attendes = json_decode($event->collection_slab);
         $data =[];
+        $count=0;
+        // $temp['select'] = '<div class="col-sm"><select class="custom-select" required name="attendes['.$count.'][gender]"<option value="" selected="selected"> --Select Attendes-- </option>';<option value="male"> Adult </option><option value="female"> Child </option><option value="other"> Free </option></select></div>';
         // dump($attendes);
+        $select = '<div class="col-sm"><select class="custom-select attendes_id" required data-toggle="select" name="attendes['.$no.'][attendes_id]"><option value=""> --Select Attendes-- </option> ';
         foreach($attendes as $at){
-            $temp=[];
-            $temp['id'] = $at->attendes_id;
             $atten = \App\Models\Attendes::find($at->attendes_id);
-            $temp['name'] = $atten->name;
-            $temp['amount'] = $at->amount;
-            $data[]=$temp;
+            $select = $select.'<option value="'.$at->attendes_id.'" data-amount="'.$at->amount.'">'.$atten->name.'</option>';
+            // }
         }
-        return $data;
+        $select = $select.'</select></div>';
+        return $select;
+    }
+
+    public function series_select(Request $request) {
+        $module = $this->module;
+        $input=$request->input('org_id');
+        $models =new \App\Models\Series();
+        $data = $models->select('id', 'name')->where([['organization_id','=',$input], ['status','>','0'], ['delstatus','<','1'], ['type','=', 'journal_entry']])->orderBy('id','DESC')->get()->toArray();
+        $row_data =[];
+        foreach($data as $ds){
+            $row_data[$ds['id']] = $ds['name'];
+        }
+        $html_data = view($module['main_view'].'.series_select', compact(['row_data']))->render();
+
+        $response = response()->json(['html'=>$html_data]);
+        return $response;
     }
 
     public function generate_pdf($id){
@@ -394,7 +436,7 @@ class EventTransactionController extends Controller{
         // $a = 'charge';
         $data = [
             'event_name' => $event->name,
-            'amount'=> $event->amount,
+            'amount'=> $model->amount,
             'date'=> $date,
             'organization_name'=> $organisation->name,
             'time' => $time
@@ -402,6 +444,9 @@ class EventTransactionController extends Controller{
         $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','event_reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
         $templ_json = $helpers->make_temp_json($temp->id, $data);
         $message = json_encode($message, true);
+        dump($message);
+        dump($templ_json);
+        dd('end');
 
         dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category, $mem_id) )->onConnection('sync');
 

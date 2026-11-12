@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->string('mobile_number')->nullable();
             $table->enum('outsider', ['0','1'])->default('0');
+            $table->timestamp('reciept_date')->nullable();
             $table->enum('mode',['cash','online','personal_online']);
             $table->timestamp('payment_date')->nullable();
             $table->enum('payment_status',['paid','unpaid'])->default('unpaid');
