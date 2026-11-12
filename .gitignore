@@ -8,6 +8,7 @@ public/upload/*/*
 /vendor
 .env
 .env.backup
+.env.development
 .env.production
 .phpunit.result.cache
 Homestead.json

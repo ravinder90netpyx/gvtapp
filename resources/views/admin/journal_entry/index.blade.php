@@ -86,7 +86,7 @@ function form_submit(send , id = null){
       charge: charge
     });
   });
-
+  var next_number = $('#next_number').val();
 
   // form_data = {
   //     'series_id' : series_id,
@@ -106,7 +106,7 @@ function form_submit(send , id = null){
   $.ajax({
     url: action,
     method: method,
-    data: {'_token': '{!! csrf_token() !!}', 'series_id' : series_id, 'entry_date' : entry_date, 'entry_year' : entry_year, 'member_id' : member_id, 'organization_id' : organization_id, 'paid_money' : paid, 'from_month' : from_month, 'to_month': to_month, 'payment_mode':payment_mode, 'send' : send, 'remarks' : remarks, 'custom_month':custom_month, 'charge_type_id': charge_type_id, 'reciept_date':reciept_date, 'fine_amt':fine_amt, 'demand_charge':demand},
+    data: {'_token': '{!! csrf_token() !!}', 'series_id' : series_id, 'entry_date' : entry_date, 'entry_year' : entry_year, 'member_id' : member_id, 'organization_id' : organization_id, 'paid_money' : paid, 'from_month' : from_month, 'to_month': to_month, 'payment_mode':payment_mode, 'send' : send, 'remarks' : remarks, 'custom_month':custom_month, 'charge_type_id': charge_type_id, 'reciept_date':reciept_date, 'fine_amt':fine_amt, 'demand_charge':demand,'next_number':next_number},
     success: function(response){
       $('#cred_modal').modal('hide');
       location.reload();
