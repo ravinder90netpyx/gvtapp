@@ -220,10 +220,10 @@ class JournalEntryController extends Controller{
                     //     $fail('The money for further month is already paid kindly select the next month to pay the money');
                     // }
                     if($value>$act_from_mon){
-                        $fail('The money of previous month is not paid please select previous month to pay');
+                        //$fail('The money of previous month is not paid please select previous month to pay');
                     }
                     if($to_month < $value){
-                        $fail('From Month should not be ahead of To Month');
+                        //$fail('From Month should not be ahead of To Month');
                     }
                 }
             ],
@@ -244,7 +244,7 @@ class JournalEntryController extends Controller{
                     if(!empty($report_model2->money_pending)) $count =$count-1;
                     if(!empty($request->paid_money)){
                         if($count !=ceil(($request->paid_money-$pending_money)/$charge)){
-                            $fail('Amount Paid and selected month are not proportional kindly adjust the value or month');
+                            //$fail('Amount Paid and selected month are not proportional kindly adjust the value or month');
                         }
                     }
                 }
@@ -271,7 +271,7 @@ class JournalEntryController extends Controller{
                     if(!empty($report_model2->money_pending)) $count =$count-1;
                     if(!empty($request->paid_money)){
                         if($count !=ceil(($request->paid_money-$pending_money)/$charge)){
-                            $fail('Amount Paid and selected month are not proportional kindly adjust the value or month');
+                            //$fail('Amount Paid and selected month are not proportional kindly adjust the value or month');
                         }
                     }
                 }
@@ -314,21 +314,26 @@ class JournalEntryController extends Controller{
         $charge = \App\Models\Charges::find($member->charges_id)->rate;
         $charge_type = \App\Models\ChargeType::find($request_data['charge_type_id']);
 
-        if($charge_type->type == 'fine'){
+        $series_num =$series_number->name.$series_number->number_separator.str_pad($series_number->next_number,$series_number->min_length,'0', STR_PAD_LEFT);
+        $next_number = $series_number->next_number;
+        if($request->input('next_number') == $next_number){
+            $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
+        }else{
+            $next_number = $request->input('next_number');
+        }
 
+        if($charge_type->type == 'fine'){
             $entry_charge_arr =[];
             $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
             $request_data['partial'] ='0';
             $date = $request_data['entry_date'];
             $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
             // if(strtotime($date) > strtotime($pre_date)){
-            $series_num =$series_number->name.$series_number->number_separator.str_pad($series_number->next_number,$series_number->min_length,'0', STR_PAD_LEFT);
-            $next_number = $series_number->next_number;
-            $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
+
             $request_data['charge'] = $request_data['fine_amt'];
             $request_data['name'] = $member['name'];
             $request_data['series_next_number'] = $next_number;
-            $request_data['series_number'] = $series_num;
+            $request_data['series_number'] = $series_num;            
             $fetch_data = $model->create($request_data);
 
             // Entry wise fine...
@@ -381,9 +386,7 @@ class JournalEntryController extends Controller{
             $date = $request_data['entry_date'];
             $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
             // if(strtotime($date) > strtotime($pre_date)){
-            $series_num =$series_number->name.$series_number->number_separator.str_pad($series_number->next_number,$series_number->min_length,'0', STR_PAD_LEFT);
-            $next_number = $series_number->next_number;
-            $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
+            
             $request_data['charge'] = $request_data['paid_money'];
             $request_data['name'] = $member['name'];
             $request_data['series_next_number'] = $next_number;
@@ -435,9 +438,7 @@ class JournalEntryController extends Controller{
             $date = $request_data['entry_date'];
             $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
             // if(strtotime($date) > strtotime($pre_date)){
-            $series_num =$series_number->name.$series_number->number_separator.str_pad($series_number->next_number,$series_number->min_length,'0', STR_PAD_LEFT);
-            $next_number = $series_number->next_number;
-            $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
+            
             $request_data['charge'] = $request_data['paid_money'];
             $request_data['name'] = $member['name'];
             $request_data['series_next_number'] = $next_number;
