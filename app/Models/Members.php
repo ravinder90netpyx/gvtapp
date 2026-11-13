@@ -11,7 +11,7 @@ class Members extends Base_Model{
     protected $nameColumn = 'name';
     protected $codeColumn = 'mobile_number';
     protected $statusColumn = 'status';
-    #protected $delstatusColumn = 'delstatus';
+    protected $delstatusColumn = 'delstatus';
     #protected $sortOrderColumn = 'sort_order';
     public $timestamps = true;
     const CREATED_AT = 'created_at';
