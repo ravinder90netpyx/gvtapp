@@ -202,15 +202,9 @@ function clock(){
 }
 
 function sticky_header(){
-  scrollTop = $(document).scrollTop();
-
-  var $cardlisting_offset = $(".card-listing .card-header").get(0).scrollHeight + 80;
-  //console.log($cardlisting_offset);
-  if(scrollTop>$cardlisting_offset){
-    $(".card-listing .card-header").addClass('sticky_top');
-  } else{
-    $(".card-listing .card-header").removeClass('sticky_top');
-  }
+  var header = $(".card-listing .card-header").get(0);
+  if(!header) return;
+  header.classList.remove('sticky_top');
 }
 
 $(document).ready(function(){
