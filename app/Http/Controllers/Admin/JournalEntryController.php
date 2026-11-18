@@ -301,16 +301,16 @@ class JournalEntryController extends Controller{
             $month_arr = explode(',', $request->input('custom_month'));
         }
 
-        $check = \App\Models\Members::where('id',$request->input('member_id'))->count();
         
-        $series_number = \App\Models\Series::find($request->input('series_id'));
         
         $request->validate($rules);
         $request_data = $request->input();
         $report_data = [];
         if(empty($request_data['organization_id'])) $request_data['organization_id'] = $auth_user->organization_id;
 
-        $member = \App\Models\Members::find($request_data['member_id']);
+        $check = \App\Models\Members::where('id',$request->input('member_id'))->count();        
+        $series_number = \App\Models\Series::find($request->input('series_id'));
+		$member = \App\Models\Members::find($request_data['member_id']);
         $charge = \App\Models\Charges::find($member->charges_id)->rate;
         $charge_type = \App\Models\ChargeType::find($request_data['charge_type_id']);
 
@@ -320,6 +320,7 @@ class JournalEntryController extends Controller{
             $upd = \App\Models\Series::where('id','=',$series_number->id)->update(['next_number'=>$series_number->next_number+1]);
         }else{
             $next_number = $request->input('next_number');
+			$series_num = $series_number->name.$series_number->number_separator.$next_number;
         }
 
         if($charge_type->type == 'fine'){
@@ -337,24 +338,32 @@ class JournalEntryController extends Controller{
             $fetch_data = $model->create($request_data);
 
             // Entry wise fine...
-
             $monthwise_fine_model = new Monthwise_Fine();
+            $monthwise_model = $monthwise_fine_model->where([
+				['member_id','=',$fetch_data->member_id],
+				['delstatus','<','1'],['status','>','0']
+			])->orderBy('month','DESC')->first();
 
-            $monthwise_model = $monthwise_fine_model->where([['member_id','=',$fetch_data->member_id],['delstatus','<','1'],['status','>','0']])->orderBy('month','DESC')->first();
             $month = '2024-07';
             if(!empty($monthwise_model->month) && $month<$monthwise_model->month){
                 $month = $monthwise_model->month;
             }
+
             $mon_arr = $helpers->get_financial_month_year('2024-07',$month,'Y-m');
             $total_fine =0;
             foreach($mon_arr as $ma){
-                $monthwise_mod = $monthwise_fine_model->where([['member_id','=',$fetch_data->member_id],['delstatus','<','1'],['status','>','0'],['month','=',$ma]])->first();
+                $monthwise_mod = $monthwise_fine_model->where([
+					['member_id','=',$fetch_data->member_id],
+					['delstatus','<','1'],['status','>','0'],
+					['month','=',$ma]
+				])->first();
                 if(empty($monthwise_mod)){
                     $total_fine += $this->late_fee_calculator($request_data['entry_date'],$ma,$fetch_data->member_id);
                 } else{
                     $total_fine += $monthwise_mod->fine_amount;
                 }
             }
+
             $entrywise_model = new Entrywise_Fine();
             $entrywise_arr =[];
             $entrywise_arr['journal_entry_id'] = $fetch_data->id;
@@ -363,9 +372,15 @@ class JournalEntryController extends Controller{
             $entrywise_arr['total_fine'] = $total_fine;
             $create_data = $entrywise_model->create($entrywise_arr);
 
-            $monthwise_model->where([['entrywise_fine_id', '=',null],['member_id','=',$fetch_data->member_id],['status','>','0'],['delstatus','<','1'],['fine_waveoff','=','0']])->update(['entrywise_fine_id' => $create_data->id, 'fine_waveoff' => '1']);
+            $monthwise_model->where([
+				['entrywise_fine_id', '=',null],
+				['member_id','=',$fetch_data->member_id],
+				['status','>','0'],['delstatus','<','1'],
+				['fine_waveoff','=','0']
+			])
+			->update(['entrywise_fine_id' => $create_data->id, 'fine_waveoff' => '1']);
 
-        } elseif($charge_type->type == 'maintenance'){
+        } elseif ($charge_type->type == 'maintenance') {
             $paid = $request_data['paid_money'];
             // $month_arr = $helpers->get_financial_month_year($request->input('from_month'), $request->input('to_month'));
             $paid_m = empty($paid) ? $charge*count($month_arr) : $paid;
@@ -381,8 +396,9 @@ class JournalEntryController extends Controller{
                 if(!empty($report_model_last_mon)) $dedt_amt = $report_model_last_mon->money_paid;
                 $request_data['paid_money'] = count($month_arr)*$charge - $dedt_amt;
             }
-
-            $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
+            $name = $model->where('organization_id',$request_data['organization_id'])
+			->orderBy('entry_date','DESC')
+			->first();
             $date = $request_data['entry_date'];
             $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
             // if(strtotime($date) > strtotime($pre_date)){
@@ -396,7 +412,11 @@ class JournalEntryController extends Controller{
 
             foreach($month_arr as $mt){
                 $this->late_fee_calculator($request_data['entry_date'],$mt,$fetch_data->member_id);
-                $report_models = $report_model->where([['month', '=',$mt], ['member_id','=',$request_data['member_id']], ['delstatus','<','1'],['status','>','0']])->first();
+                $report_models = $report_model->where([
+					['month', '=',$mt],
+					['member_id','=',$request_data['member_id']],
+					['delstatus','<','1'],['status','>','0']
+				])->first();
                 // $tempe_arr[] = $report_models->id;
                 $report_data['journal_entry_id'] = $fetch_data->id;
                 if(empty($report_models)){
@@ -433,7 +453,9 @@ class JournalEntryController extends Controller{
             }
         } else{
             $entry_charge_arr =[];
-            $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
+            $name = $model->where('organization_id',$request_data['organization_id'])
+			->orderBy('entry_date','DESC')
+			->first();
             $request_data['partial'] ='0';
             $date = $request_data['entry_date'];
             $pre_date = !empty($name)? $name->entry_date : '0000-00-00 00:00:00';
@@ -777,36 +799,33 @@ class JournalEntryController extends Controller{
 		$module = $this->module;
 		$token = $request->session()->token();
 		$post = $request->post();
+		if	(!empty($post['btn_apply']))	{
+			if	($token==$post['_token'])	{
+				if (empty($post['combined_action']))	{
+					return redirect()->route($module['main_route'].'.index')->with('error', 'Please select one action to perform.');
+				} else if (is_null($request->post('row_check')))	{
+					return redirect()->route($module['main_route'].'.index')->with('error', 'Please select atleast one checkbox to perform action.');
+				} else {
+					$msg_type = $post['combined_action']=='delete' ? 'info' : 'success';
+					foreach ($request->post('row_check') as $check_id) {
+						switch($post['combined_action']){
+							case 'activate':
+								$model->postActivate($check_id);
+							break;
 
-		if(!empty($post['btn_apply'])){
-	  if($token==$post['_token']){
-	    if(empty($post['combined_action'])){
-	      return redirect()->route($module['main_route'].'.index')->with('error', 'Please select one action to perform.');
-	    } else if(is_null($request->post('row_check'))){
-	      return redirect()->route($module['main_route'].'.index')->with('error', 'Please select atleast one checkbox to perform action.');
-	    } else{
-	      $msg_type = $post['combined_action']=='delete' ? 'info' : 'success';
+							case 'deactivate':
+								$model->postDeactivate($check_id);
+							break;
 
-	      foreach($request->post('row_check') as $check_id){
-	        switch($post['combined_action']){
-	          case 'activate':
-	            $model->postActivate($check_id);
-	          break;
-
-	          case 'deactivate':
-	            $model->postDeactivate($check_id);
-	          break;
-
-	          case 'delete':
-	            $model->postDelete($check_id);
-	          break;
-	        }
-	      }
-
-	      return redirect()->route($module['main_route'].'.index')->with($msg_type, $module['main_heading']."s ".ucfirst(strtolower($post['combined_action'])).( (substr($post['combined_action'], -1)=='e') ? 'd' : 'ed' )." Successfully.");
-	    }
-	  }
-	}
+							case 'delete':
+								$model->postDelete($check_id);
+							break;
+						}
+					}
+					return redirect()->route($module['main_route'].'.index')->with($msg_type, $module['main_heading']."s ".ucfirst(strtolower($post['combined_action'])).( (substr($post['combined_action'], -1)=='e') ? 'd' : 'ed' )." Successfully.");
+				}
+			}
+		}
 	}
 
 	public function generate_pdf_file($je_id){
@@ -822,8 +841,7 @@ class JournalEntryController extends Controller{
 		if($journal_entry->file_name && file_exists(public_path('upload/pdf_files/'.$journal_entry->file_name.'.pdf'))) {
 			unlink(public_path('upload/pdf_files/' . $journal_entry->file_name.'.pdf'));
 			$file_name = $journal_entry->file_name;
-		}
-		else{
+		} else {
 			$now=Carbon::now();
 			$file_name = $je_id.'-'.$now->format('Y-m-d-H-i-s');
 		}
@@ -831,13 +849,14 @@ class JournalEntryController extends Controller{
 		$charge = \App\Models\ChargeType::where([['status','>','0'],['delstatus','<','1'],['id','=',$charge_type_id]])->first();
 		$demand = null;
 		$demand_charge = \App\Models\Journal_Demand_Relation::where('journal_entry_id','=',$je_id)->get()->toArray();
-	if(!empty($demand_charge)){
+		if(!empty($demand_charge)){
 			$dem_reciept = [];
 			foreach($demand_charge as $dc){
 				$demand = \App\Models\Demand::find($dc['demand_id']);
 				$dem_reciept_num[] = $demand->demand_reciept_number;
 			}
 		}
+
 		$dem_reciept_num = !empty($dem_reciept_num) ? implode(', ',$dem_reciept_num) : '';
 		// $demand_pending_money = $demand->pending_money ?? 0;
 		$rec_name = $journal_entry->name;
@@ -861,104 +880,102 @@ class JournalEntryController extends Controller{
 			'demand_reciept_number' => $dem_reciept_num,
 			// 'demand_pending_money' => $demand_pending_money,
 		];
+
 		// dd($data);
-		if($charge->type == 'fine'){
+		if ($charge->type == 'fine') {
 			$entrywise_model = \App\Models\Entrywise_Fine::where('journal_entry_id','=',$je_id)->first();
 			$data['from_month'] ='';
 			$data['to_month'] ='';
 			$data['charge'] = $entrywise_model->fine_paid;
-
 			$data['fine_days'] = $this->calculate_fine_days($entrywise_model->id);
 			$this->calculate_fine_days($entrywise_model->id);
-		} else if($charge->type == 'maintenance'){
+		} else if ($charge->type == 'maintenance') {
 			$data['from_month'] =$journal_entry->from_month;
 			$data['to_month'] =$journal_entry->to_month;
 			$data['fine_days'] = '';
-		} else if($charge->type == 'others'){
+		} else if ($charge->type == 'others') {
 			$data['from_month'] = '';
 			$data['to_month'] = '';
 			$data['fine_days'] = '';
 		}
-	$pdf = PDF::loadView('include.make_pdf', $data);
+		$pdf = PDF::loadView('include.make_pdf', $data);
+		$mpdf = $pdf->getMpdf();
+		$width = 10; // Adjust the width of the watermark image
+		$height = 10; // Adjust the height of the watermark image
 
-	$mpdf = $pdf->getMpdf();
-	$width = 10; // Adjust the width of the watermark image
-	$height = 10; // Adjust the height of the watermark image
+		// Get the dimensions of the page
+		$pageWidth = $mpdf->w;
+		$pageHeight = $mpdf->h;
 
-	// Get the dimensions of the page
-	$pageWidth = $mpdf->w;
-	$pageHeight = $mpdf->h;
+		// Calculate the position to center the image
+		$x = ($pageWidth - $width) / 8;
+		$y = ($pageHeight - $height) / 8;
 
-	// Calculate the position to center the image
-	$x = ($pageWidth - $width) / 8;
-	$y = ($pageHeight - $height) / 8;
-
-	$mpdf->SetWatermarkImage(public_path('dashboard/img/Logo-GVT.png'), 0.1, '', array($x, $y), true);
-	    
-	$mpdf->showWatermarkImage = true;
-	// $mpdf->save(public_path("upload/pdf_files/{$file_name}.pdf"));
-	// $models=$journal_entry->find($je_id);
-	$mpdf->Output(public_path("upload/pdf_files/{$file_name}.pdf"), \Mpdf\Output\Destination::FILE);
-	$journal_model->where('id', '=', $je_id)->update(['file_name'=> $file_name]);
+		$mpdf->SetWatermarkImage(public_path('dashboard/img/Logo-GVT.png'), 0.1, '', array($x, $y), true);
+			
+		$mpdf->showWatermarkImage = true;
+		// $mpdf->save(public_path("upload/pdf_files/{$file_name}.pdf"));
+		// $models=$journal_entry->find($je_id);
+		$mpdf->Output(public_path("upload/pdf_files/{$file_name}.pdf"), \Mpdf\Output\Destination::FILE);
+		$journal_model->where('id', '=', $je_id)->update(['file_name'=> $file_name]);
 		if(!empty($request->input('redirect'))){
-	  return redirect()->route($module['main_route'].'.show_pdf', $je_id);
-	}
-	if(!empty($request->input('redirect_index'))){
-	  return redirect()->route($module['main_route'].'.index')->with('success', 'File regenerated Successfully');
-	}
+			return redirect()->route($module['main_route'].'.show_pdf', $je_id);
+		}
+		if(!empty($request->input('redirect_index'))){
+			return redirect()->route($module['main_route'].'.index')->with('success', 'File regenerated Successfully');
+		}
 	}
 
 	public function calculate_fine_days($fine_entry_id){
-	$monthwise_model = Monthwise_Fine::where('entrywise_fine_id',$fine_entry_id)->get()->toArray();
-	$fine_days = 0;
-	if(!empty($monthwise_model)){
-	  foreach($monthwise_model as $mt){
-	    if($mt['fine_amount'] != 1000){
-	      $fine_days += $mt['fine_amount']/50;
-	    } else{
-	      $fine_days += 30;
-	    }
-	  }
-	}
-	return $fine_days;
+		$monthwise_model = Monthwise_Fine::where('entrywise_fine_id',$fine_entry_id)->get()->toArray();
+		$fine_days = 0;
+		if(!empty($monthwise_model)){
+			foreach($monthwise_model as $mt){
+				if($mt['fine_amount'] != 1000){
+					$fine_days += $mt['fine_amount']/50;
+				} else{
+					$fine_days += 30;
+				}
+			}
+		}
+		return $fine_days;
 	}
 
 	public function view_pdf($je_id){
-	$journal_entry = \App\Models\Journal_Entry::find($je_id);
-	$mem_id = $journal_entry->member_id;
-	$member = \App\Models\Members::find($mem_id);
-	$setting_model = new \App\Models\Settings();
-	$rec_name = !empty($member->sublet_name) ? $member->sublet_name : $member->name;
-	$data = [
-	  'note' => $setting_model->getVal('pdf', 'pdf_note'),
-	  'line1' => $setting_model->getVal('pdf', 'line1'),
-	  'address' => $setting_model->getVal('pdf', 'address'),
-	  'name' => $rec_name,
-	  'mobile_number' => $member->mobile_number,
-	  'charge' => $journal_entry->charge,
-	  'series' => $journal_entry->series_number,
-	  'from_month' => $journal_entry->from_month,
-	  'to_month' => $journal_entry->to_month,
-	  'mode' => $journal_entry->payment_mode,
-	  'date' => $journal_entry->entry_date,
-	  'reciept_date' => $journal_entry->reciept_date,
-	  'year' => $journal_entry->entry_year
-	];
-	$pdf = PDF::loadView('include.make_pdf',$data);
-	$pdf->stream();
+		$journal_entry = \App\Models\Journal_Entry::find($je_id);
+		$mem_id = $journal_entry->member_id;
+		$member = \App\Models\Members::find($mem_id);
+		$setting_model = new \App\Models\Settings();
+		$rec_name = !empty($member->sublet_name) ? $member->sublet_name : $member->name;
+		$data = [
+			'note' => $setting_model->getVal('pdf', 'pdf_note'),
+			'line1' => $setting_model->getVal('pdf', 'line1'),
+			'address' => $setting_model->getVal('pdf', 'address'),
+			'name' => $rec_name,
+			'mobile_number' => $member->mobile_number,
+			'charge' => $journal_entry->charge,
+			'series' => $journal_entry->series_number,
+			'from_month' => $journal_entry->from_month,
+			'to_month' => $journal_entry->to_month,
+			'mode' => $journal_entry->payment_mode,
+			'date' => $journal_entry->entry_date,
+			'reciept_date' => $journal_entry->reciept_date,
+			'year' => $journal_entry->entry_year
+		];
+		$pdf = PDF::loadView('include.make_pdf',$data);
+		$pdf->stream();
 	}
 
 	public function show_pdf($je_id){
-
-	$journal_entry = \App\Models\Journal_Entry::find($je_id);
-	$name = $journal_entry->file_name;
-	return view('include.show_pdf',compact('name'));
+		$journal_entry = \App\Models\Journal_Entry::find($je_id);
+		$name = $journal_entry->file_name;
+		return view('include.show_pdf',compact('name'));
 	}
 
 	public function send_msg(Request $request, helpers $helpers){
-	$module = $this->module;
-	$je_id = $request->input('je_id');
-	$api = $this->whatsapp_api;
+		$module = $this->module;
+		$je_id = $request->input('je_id');
+		$api = $this->whatsapp_api;
 		$model = \App\Models\Journal_Entry::find($je_id);
 		$org_id = $model->organization_id;
 		$category = 'journal_entry';
@@ -983,125 +1000,124 @@ class JournalEntryController extends Controller{
 		} else{
 			$month = Carbon::parse($model->from_month)->format('M Y')."-".Carbon::parse($model->to_month)->format('M Y');
 		}
-	// $a = 'charge';
-	$charge_type = \App\Models\ChargeType::find($model->charge_type_id);
-	    
-	$data = [
-	  'name'=> $model->name,
-	  'date'=> $date,
-	  'charge_name'=> $charge_type->alias_name,
-	  'year'=> $model->entry_year,
-	  'mobile_number' => $member->mobile_number,
-	  'charge' => $model->charge,
-	  'month' => $month,
-	  'serial_no' => $model->series_number,
-	  'mode' =>$model->payment_mode,
-	  'unit_no'=> $member->unit_number
-	];
-	if($charge_type->type=='others'){
-	  $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','other_charge_reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
-	  $templ_json = $helpers->make_temp_json($temp->id, $data);
-	  $message = json_encode($message, true);
+		// $a = 'charge';
+		$charge_type = \App\Models\ChargeType::find($model->charge_type_id);
+			
+		$data = [
+		'name'=> $model->name,
+		'date'=> $date,
+		'charge_name'=> $charge_type->alias_name,
+		'year'=> $model->entry_year,
+		'mobile_number' => $member->mobile_number,
+		'charge' => $model->charge,
+		'month' => $month,
+		'serial_no' => $model->series_number,
+		'mode' =>$model->payment_mode,
+		'unit_no'=> $member->unit_number
+		];
+		if($charge_type->type=='others'){
+			$temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','other_charge_reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+			$templ_json = $helpers->make_temp_json($temp->id, $data);
+			$message = json_encode($message, true);
 
-	  if(!empty($member->sublet_message) && $member->sublet_message!='null'){
-	    $sublet_msg_arr =json_decode($member->sublet_message);
-	  }else{
-	    $sublet_msg_arr =[];
-	  }
+			if(!empty($member->sublet_message) && $member->sublet_message!='null'){
+				$sublet_msg_arr =json_decode($member->sublet_message);
+			}else{
+				$sublet_msg_arr =[];
+			}
 
-	  if(!empty($member->mobile_message) && $member->mobile_message!='null'){
-	    $mobile_msg_arr =json_decode($member->mobile_message);
-	  }else{
-	    $mobile_msg_arr =[];
-	  }
+			if(!empty($member->mobile_message) && $member->mobile_message!='null'){
+				$mobile_msg_arr =json_decode($member->mobile_message);
+			}else{
+				$mobile_msg_arr =[];
+			}
 
 
-	  if(in_array('reciept',$mobile_msg_arr)){
-	    dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
-	    // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
-	    return '';
-	            
-	  }
-	  if(in_array('reciept',$sublet_msg_arr)){
-	    $dest_mob_no = $member->sublet_number;
-	    if(!empty($dest_mob_no)){
-	      dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
-	      // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
-	      return '';
-	    }
+			if(in_array('reciept',$mobile_msg_arr)){
+				dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
+				// return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+				return '';					
+			}
+			if(in_array('reciept',$sublet_msg_arr)){
+				$dest_mob_no = $member->sublet_number;
+				if(!empty($dest_mob_no)){
+					dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
+					// return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+					return '';
+				}
 
-	  }
-	} else{
-	  $entrywise_model = \App\Models\Entrywise_Fine::where([['journal_entry_id', '=', $je_id], ['status','>','0'],['delstatus','<','1']])->first();
-	  if(!empty($entrywise_model)){
-	    $data['fine_days'] = $this->calculate_fine_days($entrywise_model->id);
-	    $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','fine'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
-	    $templ_json = $helpers->make_temp_json($temp->id, $data);
-	    $message = json_encode($message, true);
+			}
+		} else{
+			$entrywise_model = \App\Models\Entrywise_Fine::where([['journal_entry_id', '=', $je_id], ['status','>','0'],['delstatus','<','1']])->first();
+			if(!empty($entrywise_model)){
+				$data['fine_days'] = $this->calculate_fine_days($entrywise_model->id);
+				$temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','fine'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+				$templ_json = $helpers->make_temp_json($temp->id, $data);
+				$message = json_encode($message, true);
 
-	    if(!empty($member->sublet_message) && $member->sublet_message!='null'){
-	      $sublet_msg_arr =json_decode($member->sublet_message);
-	    }else{
-	      $sublet_msg_arr =[];
-	    }
+				if(!empty($member->sublet_message) && $member->sublet_message!='null'){
+				$sublet_msg_arr =json_decode($member->sublet_message);
+				}else{
+				$sublet_msg_arr =[];
+				}
 
-	    if(!empty($member->mobile_message) && $member->mobile_message!='null'){
-	      $mobile_msg_arr =json_decode($member->mobile_message);
-	    }else{
-	      $mobile_msg_arr =[];
-	    }
+				if(!empty($member->mobile_message) && $member->mobile_message!='null'){
+				$mobile_msg_arr =json_decode($member->mobile_message);
+				}else{
+				$mobile_msg_arr =[];
+				}
 
-	    if(in_array('reciept',$mobile_msg_arr)){
-	      dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
-	      // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
-	      return '';   
-	    }
-	    if(in_array('reciept',$sublet_msg_arr)){
-	      $dest_mob_no = $member->sublet_number;
-	      if(!empty($dest_mob_no)){
-	        dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
-	        // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
-	        return '';
-	      }
-	    }
+				if(in_array('reciept',$mobile_msg_arr)){
+				dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
+				// return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+				return '';   
+				}
+				if(in_array('reciept',$sublet_msg_arr)){
+				$dest_mob_no = $member->sublet_number;
+				if(!empty($dest_mob_no)){
+					dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
+					// return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+					return '';
+				}
+				}
 
-	  } else{
-	    $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
-	    $templ_json = $helpers->make_temp_json($temp->id, $data);
-	    $message = json_encode($message, true);
-	    if(!empty($member->sublet_message) && $member->sublet_message!='null'){
-	      $sublet_msg_arr =json_decode($member->sublet_message);
-	    }else{
-	      $sublet_msg_arr =[];
-	    }
+			} else{
+				$temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+				$templ_json = $helpers->make_temp_json($temp->id, $data);
+				$message = json_encode($message, true);
+				if(!empty($member->sublet_message) && $member->sublet_message!='null'){
+				$sublet_msg_arr =json_decode($member->sublet_message);
+				}else{
+				$sublet_msg_arr =[];
+				}
 
-	    if(!empty($member->mobile_message) && $member->mobile_message!='null'){
-	      $mobile_msg_arr =json_decode($member->mobile_message);
-	    }else{
-	      $mobile_msg_arr =[];
-	    }
+				if(!empty($member->mobile_message) && $member->mobile_message!='null'){
+				$mobile_msg_arr =json_decode($member->mobile_message);
+				}else{
+				$mobile_msg_arr =[];
+				}
 
-	    if(in_array('reciept',$mobile_msg_arr)){
-	      dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
+				if(in_array('reciept',$mobile_msg_arr)){
+				dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
 
-	      // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
-	      return '';
-	    }
-	    if(in_array('reciept',$sublet_msg_arr)){
-	      $dest_mob_no = $member->sublet_number;
-	      if(!empty($dest_mob_no)){
-	        dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
-	        // return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
-	        return '';
-	      }
-	    }
-	  }
-	}
+				// return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+				return '';
+				}
+				if(in_array('reciept',$sublet_msg_arr)){
+				$dest_mob_no = $member->sublet_number;
+				if(!empty($dest_mob_no)){
+					dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
+					// return redirect()->route($module['main_route'].'.index')->with('success', 'Message send Successfully');
+					return '';
+				}
+				}
+			}
+		}
 
-	// return redirect()->route($module['main_route'].'.index')->with('info', "Message can't be sent");
-	return 'fail';
+		// return redirect()->route($module['main_route'].'.index')->with('info', "Message can't be sent");
+		return 'fail';
 
-	// dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
+		// dispatch( new WhatsappAPI($dest_mob_no,$message, $org_id,$templ_json) )->onConnection('sync');
 
 	}
 
