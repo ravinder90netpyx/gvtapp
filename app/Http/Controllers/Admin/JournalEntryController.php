@@ -122,7 +122,9 @@ class JournalEntryController extends Controller{
 		if($model->getDelStatusColumn()) $model_get = $model_get->where($model->getDelStatusColumn(), '<', '1');
 		
 		if($model->getSortOrderColumn()) $model_get = $model_get->orderBy($model->getSortOrderColumn(), 'ASC');
-		else $model_get = $model_get->latest();
+		else 
+			// $model_get = $model_get->latest();
+			$model_get = $model_get->orderBy('series_number', 'DESC');
 		
 		$query = $request->get('query') ?? '';
 		$unit_no = $request->get('unit_no') ?? '';
@@ -628,7 +630,7 @@ class JournalEntryController extends Controller{
 
     	if($charge_type->type == 'fine'){
     	    $entrywise_model = Entrywise_Fine::where([['member_id','=',$request_data['member_id']],['status','>','0'],['delstatus','<','0']])->orderBy('id','DESC')->first();
-    	    if($entrywise_model->journal_entry_id == $id){
+    	    if(!empty($entrywise_model) && $entrywise_model->journal_entry_id == $id){
                 // $request_data['partial'] = 0;
                 $name = $model->where('organization_id',$request_data['organization_id'])->orderBy('entry_date','DESC')->first();
                 $date = $request_data['entry_date'];
@@ -838,13 +840,21 @@ class JournalEntryController extends Controller{
 		$setting_model = new \App\Models\Settings();
 		$organization = \App\Models\Organization::find($member->organization_id);
 		$name = $organization->name;
+
+		$invoiceNumber = str_replace("/", "-", $journal_entry->series_number).'-'.$journal_entry->file_name;
+
 		if($journal_entry->file_name && file_exists(public_path('upload/pdf_files/'.$journal_entry->file_name.'.pdf'))) {
 			unlink(public_path('upload/pdf_files/' . $journal_entry->file_name.'.pdf'));
 			$file_name = $journal_entry->file_name;
-		} else {
+		} else if($journal_entry->file_name && file_exists(public_path('upload/pdf_files/'.$invoiceNumber.'.pdf'))) {
+			unlink(public_path('upload/pdf_files/' . $invoiceNumber.'.pdf'));
+			$file_name = $invoiceNumber;
+		} else{
 			$now=Carbon::now();
-			$file_name = $je_id.'-'.$now->format('Y-m-d-H-i-s');
+			// $file_name = $je_id.'-'.$now->format('Y-m-d-H-i-s');
+			$file_name = str_replace("/", "-", $journal_entry->series_number).'-'.$now->format('Y-m-d-H-i-s');
 		}
+
 		$charge_type_id = $journal_entry->charge_type_id;
 		$charge = \App\Models\ChargeType::where([['status','>','0'],['delstatus','<','1'],['id','=',$charge_type_id]])->first();
 		$demand = null;
@@ -1315,19 +1325,19 @@ class JournalEntryController extends Controller{
 	}
 
 	public function fine_month_store($fr_month, $to_month, $pay_date, $je_id){
-	$now = Carbon::now();
-	$month_arr = helpers::get_financial_month_year($fr_month, $to_month, 'Y-m');
-	$fine_arr = [];
-	$month_fine = new Monthwise_Fine();
-	$je_model = DefaultModel::find($je_id);
-	foreach($month_arr as $mn){
-	  $late_fee = 0;
-	  $fine_arr['month'] = $mn;
-	  $fine_arr['journal_entry_id'] = $je_id;
-	  $fine_arr['member_id'] = $je_model->member_id;
-	  $fine_arr['fine_amount'] = $je_model->member_id;
-	  $fine_arr['fine_waveoff'] = 0;
-	}
+		$now = Carbon::now();
+		$month_arr = helpers::get_financial_month_year($fr_month, $to_month, 'Y-m');
+		$fine_arr = [];
+		$month_fine = new Monthwise_Fine();
+		$je_model = DefaultModel::find($je_id);
+		foreach($month_arr as $mn){
+			$late_fee = 0;
+			$fine_arr['month'] = $mn;
+			$fine_arr['journal_entry_id'] = $je_id;
+			$fine_arr['member_id'] = $je_model->member_id;
+			$fine_arr['fine_amount'] = $je_model->member_id;
+			$fine_arr['fine_waveoff'] = 0;
+		}
 	}
 
 	public function fine_ajax(Request $request){
@@ -1344,74 +1354,74 @@ class JournalEntryController extends Controller{
 	}
 
 	public function get_table(Request $request){
-	$member_id = $request->input('member_id');
-	$je_model = DefaultModel::where([['member_id','=',$member_id],['status','>','0'],['charge_type_id','=','7'],['delstatus','<','1']])->latest()->take(3)->get()->toArray();
-	$data_arr =[];
-	foreach($je_model as $jm){
-	  $temp_arr =[];
-	  $temp_arr['name'] = $jm['name'] ?? '';
-	  $temp_arr['series_number'] = $jm['series_number'];
-	  $temp_arr['entry_date'] = $jm['entry_date'];
-	  $temp_arr['charge'] = $jm['charge'];
-	  if(empty($jm['custom_month'])){
-	    $temp_arr['month'] = $jm['from_month']!=$jm['to_month']? $jm['from_month'].' - '.$jm['to_month'] : $jm['from_month'];
-	  } else{
-	    $temp_arr['month'] = $jm['custom_month'];
-	  }
-	  $data_arr[] =$temp_arr;
-	}
-	return $data_arr;
+		$member_id = $request->input('member_id');
+		$je_model = DefaultModel::where([['member_id','=',$member_id],['status','>','0'],['charge_type_id','=','7'],['delstatus','<','1']])->latest()->take(3)->get()->toArray();
+		$data_arr =[];
+		foreach($je_model as $jm){
+			$temp_arr =[];
+			$temp_arr['name'] = $jm['name'] ?? '';
+			$temp_arr['series_number'] = $jm['series_number'];
+			$temp_arr['entry_date'] = $jm['entry_date'];
+			$temp_arr['charge'] = $jm['charge'];
+			if(empty($jm['custom_month'])){
+				$temp_arr['month'] = $jm['from_month']!=$jm['to_month']? $jm['from_month'].' - '.$jm['to_month'] : $jm['from_month'];
+			} else{
+				$temp_arr['month'] = $jm['custom_month'];
+			}
+			$data_arr[] =$temp_arr;
+		}
+		return $data_arr;
 	}
 
 	function get_charge(Request $request){
-	$id = $request->input('id');
-	$charge = \App\Models\ChargeType::where([['status','>','0'],['delstatus', '<', '1'],['id','=',$id]])->first();
-	return $charge->type;
+		$id = $request->input('id');
+		$charge = \App\Models\ChargeType::where([['status','>','0'],['delstatus', '<', '1'],['id','=',$id]])->first();
+		return $charge->type;
 	}
 
 	function check_demand(Request $request){
-	$id = $request->input('id');
-	$charge = $request->input('charge_type');
-	$demand_charge = \App\Models\Demand_Charge::where([['charge_type_id','=',$charge],['pending_amount','>',0],['member_id','=',$id]])->get()->toArray();
-	// dump($demand_charge);
-	$return_arr=[];
-	$demand_arr= [];
-	$partial = 0;
-	foreach($demand_charge as $dm){
-	  $temp_arr =[];
-	  $demand = \App\Models\Demand::find($dm['demand_id']);
-	  $member= \App\Models\Members::find($dm['member_id']);
-	  $temp_arr['id'] = $dm['id'];
-	  $temp_arr['name'] = $dm['member_name'];
-	  $temp_arr['partial'] = $dm['partial'];
-	  $temp_arr['unit_number'] = $member->unit_number;
-	  $temp_arr['reciept_number'] = $demand->demand_reciept_number;
-	  $temp_arr['charge'] = $dm['pending_amount'];
-	  $temp_arr['due_date'] = $demand->due_date;
-	  $demand_arr[] = $temp_arr;
-	}
-	if(!empty($demand_arr)){
-	  $return_arr['check'] = 'yes';
-	  $return_arr['array'] =  $demand_arr;
-	  $return_arr['partial'] = $partial;
-	} else{
-	  $return_arr['check'] = 'no';
-	  $return_arr['array'] = [];
-	  $return_arr['partial'] = $partial;
-	}
-	return $return_arr;
+		$id = $request->input('id');
+		$charge = $request->input('charge_type');
+		$demand_charge = \App\Models\Demand_Charge::where([['charge_type_id','=',$charge],['pending_amount','>',0],['member_id','=',$id]])->get()->toArray();
+		// dump($demand_charge);
+		$return_arr=[];
+		$demand_arr= [];
+		$partial = 0;
+		foreach($demand_charge as $dm){
+			$temp_arr =[];
+			$demand = \App\Models\Demand::find($dm['demand_id']);
+			$member= \App\Models\Members::find($dm['member_id']);
+			$temp_arr['id'] = $dm['id'];
+			$temp_arr['name'] = $dm['member_name'];
+			$temp_arr['partial'] = $dm['partial'];
+			$temp_arr['unit_number'] = $member->unit_number;
+			$temp_arr['reciept_number'] = $demand->demand_reciept_number;
+			$temp_arr['charge'] = $dm['pending_amount'];
+			$temp_arr['due_date'] = $demand->due_date;
+			$demand_arr[] = $temp_arr;
+		}
+		if(!empty($demand_arr)){
+			$return_arr['check'] = 'yes';
+			$return_arr['array'] =  $demand_arr;
+			$return_arr['partial'] = $partial;
+		} else{
+			$return_arr['check'] = 'no';
+			$return_arr['array'] = [];
+			$return_arr['partial'] = $partial;
+		}
+		return $return_arr;
 	}
 
 	function demand_submit(Request $request){
-	$demand_val = $request->input('demand_value');
-	$amount =0;
-	// dump($demand_val);
-	foreach($demand_val as $dv){
-	  $demand = \App\Models\Demand_Charge::find($dv['id']);
-	  $charge = $dv['charge'] ?? $demand->pending_amount;
-	  $amount = $amount+$charge;
-	}
-	return $amount;
+		$demand_val = $request->input('demand_value');
+		$amount =0;
+		// dump($demand_val);
+		foreach($demand_val as $dv){
+			$demand = \App\Models\Demand_Charge::find($dv['id']);
+			$charge = $dv['charge'] ?? $demand->pending_amount;
+			$amount = $amount+$charge;
+		}
+		return $amount;
 	}
 
 //     public function sendPdfToWhatsapp($destination,$message, $org_id, $template){
