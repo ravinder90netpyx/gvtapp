@@ -222,10 +222,10 @@ class JournalEntryController extends Controller{
                     //     $fail('The money for further month is already paid kindly select the next month to pay the money');
                     // }
                     if($value>$act_from_mon){
-                        //$fail('The money of previous month is not paid please select previous month to pay');
+                        $fail('The money of previous month is not paid please select previous month to pay');
                     }
                     if($to_month < $value){
-                        //$fail('From Month should not be ahead of To Month');
+                        $fail('From Month should not be ahead of To Month');
                     }
                 }
             ],
@@ -246,7 +246,7 @@ class JournalEntryController extends Controller{
                     if(!empty($report_model2->money_pending)) $count =$count-1;
                     if(!empty($request->paid_money)){
                         if($count !=ceil(($request->paid_money-$pending_money)/$charge)){
-                            //$fail('Amount Paid and selected month are not proportional kindly adjust the value or month');
+                            $fail('Amount Paid and selected month are not proportional kindly adjust the value or month');
                         }
                     }
                 }
@@ -273,7 +273,7 @@ class JournalEntryController extends Controller{
                     if(!empty($report_model2->money_pending)) $count =$count-1;
                     if(!empty($request->paid_money)){
                         if($count !=ceil(($request->paid_money-$pending_money)/$charge)){
-                            //$fail('Amount Paid and selected month are not proportional kindly adjust the value or month');
+                            $fail('Amount Paid and selected month are not proportional kindly adjust the value or month');
                         }
                     }
                 }
