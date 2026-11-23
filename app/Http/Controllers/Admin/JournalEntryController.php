@@ -124,7 +124,7 @@ class JournalEntryController extends Controller{
 		if($model->getSortOrderColumn()) $model_get = $model_get->orderBy($model->getSortOrderColumn(), 'ASC');
 		else 
 			// $model_get = $model_get->latest();
-			$model_get = $model_get->orderBy('series_number', 'DESC');
+			$model_get = $model_get->orderByRaw("UBSTRING_INDEX(SUBSTRING_INDEX(series_number, '-', -2), '-', 1) DESC, CAST(SUBSTRING_INDEX(series_number, '-', -1) AS UNSIGNED) DESC");
 		
 		$query = $request->get('query') ?? '';
 		$unit_no = $request->get('unit_no') ?? '';
