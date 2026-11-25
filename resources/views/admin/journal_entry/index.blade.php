@@ -106,7 +106,26 @@ function form_submit(send , id = null){
   $.ajax({
     url: action,
     method: method,
-    data: {'_token': '{!! csrf_token() !!}', 'series_id' : series_id, 'entry_date' : entry_date, 'entry_year' : entry_year, 'member_id' : member_id, 'organization_id' : organization_id, 'paid_money' : paid, 'from_month' : from_month, 'to_month': to_month, 'payment_mode':payment_mode, 'send' : send, 'remarks' : remarks, 'custom_month':custom_month, 'charge_type_id': charge_type_id, 'reciept_date':reciept_date, 'fine_amt':fine_amt, 'demand_charge':demand,'next_number':next_number},
+    data: {
+      '_token': '{!! csrf_token() !!}',
+      'series_id' : series_id,
+      'entry_date' : entry_date,
+      'entry_year' : entry_year,
+      'member_id' : member_id,
+      'organization_id' : organization_id,
+      'paid_money' : paid,
+      'from_month' : from_month,
+      'to_month': to_month,
+      'payment_mode':payment_mode,
+      'send' : send,
+      'remarks' : remarks,
+      'custom_month':custom_month,
+      'charge_type_id': charge_type_id,
+      'reciept_date':reciept_date,
+      'fine_amt':fine_amt,
+      'demand_charge':demand,
+      'next_number':next_number
+    },
     success: function(response){
       $('#cred_modal').modal('hide');
       location.reload();
@@ -388,21 +407,115 @@ function get_charge_type(id, callback){
   });
 }
 
-function reciept_datetimepicker(){
+
+function getValidEntryDate() {
+  let val = $('#entry_date').val();
+  let date = new Date(val);
+  let isValid = !isNaN(date.getTime()) && val !== '';
+
+  if (isValid) {
+    return val;
+  }
+
+  let yearVal = $('#entry_year').val();
+  if (yearVal !== '') {
+    let arr = yearVal.split('-');
+    return arr[0] + "-04-01 00:00:00";
+  }
+
+  @php $now = Carbon\Carbon::now(); @endphp
+  return "{!! $now->toDateTimeString() !!}";
+}
+
+function getTodayMaxMoment() {
+  return moment().endOf('day');
+} 
+
+function resetReceiptDate() {
+  var $receipt = $('#reciept_date');
+  var picker = $receipt.data('DateTimePicker');
+
+  if (picker) {
+    // Pass null to clear the selected date without firing a conflicting loop
+    picker.date(null);
+  }
+  $receipt.val('');
+}
+
+function isJournalInsertMode() {
+  return (typeof id === 'undefined' || id === null || id === '');
+}
+
+function onPaymentDateChanged() {
+  var $entry = $('#entry_date');
+  var val = $entry.val();
+  var parsed = new Date(val);
+  var isValid = !isNaN(parsed.getTime()) && val !== '';
+
+  if (!isValid) {
+    var time = getValidEntryDate();
+    var entryPicker = $entry.data('DateTimePicker');
+    if (entryPicker) {
+      var next = moment(time);
+      var current = entryPicker.date();
+      if (!current || !current.isSame(next)) {
+        entryPicker.date(next);
+        return;
+      }
+    } else if (val !== time) {
+      $entry.val(time);
+    }
+  }
+
+  // Insert: changing Payment Date clears Reciept Date.
+  // Edit: keep Reciept Date, but it cannot be after Payment Date.
+  syncReceiptDateLimit(isJournalInsertMode());
+}
+
+function syncReceiptDateLimit(shouldReset) {
+  let entryVal = getValidEntryDate();
+  let entryMoment = moment(entryVal);
+
+  if (!entryMoment.isValid()) {
+    return;
+  }
+
+  if (shouldReset) {
+    resetReceiptDate();
+  }
+
+  let picker = $('#reciept_date').data('DateTimePicker');
+  if (picker) {
+    // Reciept Date must be less than or equal to Payment Date
+    picker.maxDate(entryMoment.clone().endOf('day'));
+
+    if (!shouldReset) {
+      let currentReceipt = picker.date();
+      if (currentReceipt && currentReceipt.isAfter(entryMoment, 'day')) {
+        picker.date(entryMoment.clone().startOf('day'));
+      }
+    }
+  }
+}
+
+function reciept_datetimepicker() {
+  let initialEntryMoment = moment(getValidEntryDate());
+
   $('#reciept_date').datetimepicker({
-    useCurrent : false,
-    showClose : true,
-    format : "YYYY-MM-DD",
-    icons:{
-      time : "fa fa-clock",
-      date : "fa fa-calendar-day",
-      up : "fa fa-chevron-up",
-      down : "fa fa-chevron-down",
-      previous : 'fa fa-chevron-left',
-      next :'fa fa-chevron-right',
-      today :'fa fa-screenshot',
-	    clear : 'fa fa-trash',
-      close : 'fa fa-remove'
+    useCurrent: false,
+    showClose: true,
+    format: "YYYY-MM-DD",
+    maxDate: initialEntryMoment.isValid() ? initialEntryMoment.clone().endOf('day') : false,
+    icons: {
+      time: "fa fa-clock",
+      date: "fa fa-calendar-day",
+      up: "fa fa-chevron-up",
+      down: "fa fa-chevron-down",
+      previous: 'fa fa-chevron-left',
+      next: 'fa fa-chevron-right',
+      today: 'fa fa-screenshot',
+      clear: 'fa fa-trash',
+      close: 'fa fa-remove'
     }
   });
 }
@@ -438,6 +551,7 @@ $(function(){
     @endphp
     $('#entry_date').val("{{ $now }}");
     $('#entry_year').val("{{ $val_year }}");
+    onPaymentDateChanged();
 
     @if(!in_array(1, $roles))
       autocomplete_trigger('{{ $auth_user->organization_id}}');
@@ -552,27 +666,56 @@ $(function(){
     }
   });
 
-  $(document).on('click', '#back_date', function(){
-  	var val=$(this).prop('checked');
-    if(val){
-    	$('#entry_date').datetimepicker({
-      	useCurrent : true,
-        showClose : true,
-        format : "YYYY-MM-DD HH:mm:ss",
-        icons:{
-        	time : "fa fa-clock",
-          date : "fa fa-calendar-day",
-          up : "fa fa-chevron-up",
-          down : "fa fa-chevron-down",
-          previous : 'fa fa-chevron-left',
-          next :'fa fa-chevron-right',
-          today :'fa fa-screenshot',
-          clear : 'fa fa-trash',
-          close : 'fa fa-remove'
-      	}
+  $(document).on('click', '#back_date', function () {
+    var isChecked = $(this).prop('checked');
+    var $entryDate = $('#entry_date');
+
+    if (isChecked) {
+      var maxDateMoment = getTodayMaxMoment();
+      $entryDate.datetimepicker({
+        useCurrent: true,
+        showClose: true,
+        format: "YYYY-MM-DD HH:mm:ss",
+        maxDate: maxDateMoment,
+        icons: {
+          time: "fa fa-clock",
+          date: "fa fa-calendar-day",
+          up: "fa fa-chevron-up",
+          down: "fa fa-chevron-down",
+          previous: 'fa fa-chevron-left',
+          next: 'fa fa-chevron-right',
+          today: 'fa fa-screenshot',
+          clear: 'fa fa-trash',
+          close: 'fa fa-remove'
+        }
       });
-    } else{
-    	$('#entry_date').datetimepicker('destroy');
+
+      // Populate or normalize #entry_date if empty/invalid, then sync #reciept_date maxDate
+      var validDate = getValidEntryDate();
+      if (!$entryDate.val()) {
+        var picker = $entryDate.data('DateTimePicker');
+        if (picker) {
+          picker.date(moment(validDate, "YYYY-MM-DD HH:mm:ss", true).isValid() ? moment(validDate) : validDate);
+        } else {
+          $entryDate.val(validDate);
+        }
+      }
+
+      syncReceiptDateLimit(false);
+    } else {
+      var pickerInstance = $entryDate.data('DateTimePicker');
+      var previousDate = $entryDate.val();
+      if (pickerInstance) {
+        $entryDate.datetimepicker('destroy');
+      }
+
+      // Reset #entry_date using getValidEntryDate() and re-sync #reciept_date
+      $entryDate.val(getValidEntryDate());
+      if ($entryDate.val() !== previousDate) {
+        onPaymentDateChanged();
+      } else {
+        syncReceiptDateLimit(false);
+      }
     }
   });
 
@@ -762,27 +905,23 @@ $(function(){
     var arr= val.split('-');
     var yr = arr[0];
     var time= yr+"-04-01 00:00:00";
-    $('#entry_date').val(time);
+    var $entryDate = $('#entry_date');
+    var entryPicker = $entryDate.data('DateTimePicker');
+    if (entryPicker) {
+      entryPicker.date(moment(time, 'YYYY-MM-DD HH:mm:ss'));
+    } else {
+      $entryDate.val(time);
+      onPaymentDateChanged();
+    }
   });
 
-  $('#entry_date').on('change', function(){
+  // Payment Date picker fires dp.change, not the native change event.
+  $(document).on('dp.change', '#entry_date', function () {
+    onPaymentDateChanged();
+  });
 
-    val= $(this).val();
-    var date = new Date(val);
-    check = !isNaN(date.getTime()) && val !== '';
-    if(check){
-            
-    } else{
-      val = $('#entry_year').val();
-      if(val !='') {
-      	var arr= val.split('-');
-    	  var time = arr[0]+"-04-01 00:00:00";
-  	  } else{
-      	@php $now=Carbon\Carbon::now(); @endphp
-        var time = "{!! $now->toDateTimeString() !!}";
-      }
-      $(this).val(time);
-    }
+  $(document).on('change', '#entry_date', function () {
+    onPaymentDateChanged();
   });
 
   $('#form_btn_submit').on('click', function(e){
@@ -825,10 +964,10 @@ $(function(){
   });
 
   $(document).on('hidden.bs.modal', '.modal', function () {
-  if ($('.modal:visible').length) {
-    $('body').addClass('modal-open');
-  }
-});
+    if ($('.modal:visible').length) {
+      $('body').addClass('modal-open');
+    }
+  });
 });
 </script>
 @endsection

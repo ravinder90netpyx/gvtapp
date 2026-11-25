@@ -19,14 +19,26 @@
 </head>
 <body>
     @php
-        $charge_type = \App\Models\ChargeType::where([['status','>','0'],['delstatus','<','1'],['id','=',$charge_type_id]])->first(); 
+        $charge_type = \App\Models\ChargeType::where([
+            ['status','>','0'],
+            ['delstatus','<','1'],
+            ['id','=',$charge_type_id]
+        ])->first();
+        
+        $allowedCharge = ['Maintenance', 'Maintenance Fine', 'Debris Downloading', 'Shifting Charge'];
+        if (in_array($charge_type->name, $allowedCharge, true)) {
+            $chargeName = $charge_type->name.' for Flat Number: ' .$flat_number;
+        }else{
+            //$chargeName = $charge_type->alias_name;
+            $chargeName = $charge_type->name;
+        }
     @endphp
 
     <div class="entry-section" style="text-align: center; padding:10px;">
         <h2 class="text-center">{{ $org_name }}</h2>
         <p class="text-center">{!! $address !!}</p>
             <p>Payment Receipt</p>
-            <p style="text-align: left;">Thank You for Paying {{ $charge_type->alias_name }}. Here is the payment receipt.</p>
+            <p style="text-align: left;">Thank You for Paying {{ $chargeName }}. Here is the payment receipt.</p>
         <div class="table-responsive" style="text-align:center;">
             <table border="1" cellpadding="2" cellspacing="0" width="100%">
                 <tbody>

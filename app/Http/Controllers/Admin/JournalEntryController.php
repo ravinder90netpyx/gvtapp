@@ -190,6 +190,7 @@ class JournalEntryController extends Controller{
             ],
             'entry_year' => 'required',
             'entry_date' => 'required|date_format:Y-m-d H:i:s',
+            'reciept_date' => $this->receiptDateRules(),
             // 'form_data.member_mob' => 'required',
             'member_id' => 'required|numeric',
             'payment_mode' => 'required|in:online,cash,cheque',
@@ -308,6 +309,8 @@ class JournalEntryController extends Controller{
         $request->validate($rules);
         $request_data = $request->input();
         $report_data = [];
+
+		dd('ok');
         if(empty($request_data['organization_id'])) $request_data['organization_id'] = $auth_user->organization_id;
 
         $check = \App\Models\Members::where('id',$request->input('member_id'))->count();        
@@ -537,6 +540,7 @@ class JournalEntryController extends Controller{
     		}
     	$request->validate([
 			'entry_date' => 'required|date_format:Y-m-d H:i:s',
+			'reciept_date' => $this->receiptDateRules(),
 			'from_month' => 
 			[
 				empty($request->input('custom_month')) && $charge_name == 'maintenance' ? 'required':'nullable',
@@ -889,6 +893,7 @@ class JournalEntryController extends Controller{
 			'charge_type_id' => $journal_entry->charge_type_id,
 			'demand_reciept_number' => $dem_reciept_num,
 			// 'demand_pending_money' => $demand_pending_money,
+			'flat_number' => $member->unit_number,
 		];
 
 		// dd($data);
@@ -1227,33 +1232,35 @@ class JournalEntryController extends Controller{
     	$member = \App\Models\Members::find($modl_find->member_id);
     	$mem_id = $modl_find->member_id;
     	$message = array(
-    	  'type' => $api['type'],
-    	  $api['type'] => array(
-    	    'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
-    	    'filename' => 'Reciept'
-    	  )
+    	  	'type' => $api['type'],
+    	   	$api['type'] => array(
+				'link' => url('/upload/pdf_files/'.$file_name.'.pdf'),
+				'filename' => 'Reciept'
+			)
     	);
+
     	$date_arr = explode(' ', $modl_find->entry_date);
     	$date = Carbon::parse($date_arr[0])->format('d-M-Y');
     	if(empty($modl_find->from_month) && empty($modl_find->to_month)){
-    	  if($modl_find->from_month != $modl_find->to_month){
-    	    $month = Carbon::parse($modl_find->from_month)->format('M Y')."-".Carbon::parse($modl_find->to_month)->format('M Y');
-    	  } else{
-    	    $month = Carbon::parse($modl_find->from_month)->format('M Y');
-    	  }
+    	  	if($modl_find->from_month != $modl_find->to_month){
+    	    	$month = Carbon::parse($modl_find->from_month)->format('M Y')."-".Carbon::parse($modl_find->to_month)->format('M Y');
+    	  	} else{
+    	    	$month = Carbon::parse($modl_find->from_month)->format('M Y');
+    	  	}
     	} else{
-    	  $month = '';
-    	  $val_ar = explode(',',$modl_find->custom_data);
-    	  $count = 0;
-    	  foreach($val_ar as $vl){
-    	    $count++;
-    	    if($count == count($val_ar)){
-    	      $month = $month.Carbon::parse($vl)->format('M Y');
-    	    } else{
-    	      $month = $month.Carbon::parse($vl)->format('M Y').',';
-    	    }
-    	  }
+			$month = '';
+			$val_ar = explode(',',$modl_find->custom_data);
+			$count = 0;
+			foreach($val_ar as $vl){
+				$count++;
+				if($count == count($val_ar)){
+					$month = $month.Carbon::parse($vl)->format('M Y');
+				} else {
+					$month = $month.Carbon::parse($vl)->format('M Y').',';
+				}
+			}
     	}
+
     	$data = [
     	  'name'=> $modl_find->name,
     	  'date'=> $date,
@@ -1265,37 +1272,55 @@ class JournalEntryController extends Controller{
     	  'mode' =>$modl_find->payment_mode,
     	  'unit_no'=> $member->unit_number
     	];
-    	$entrywise_model = \App\Models\Entrywise_Fine::where([['journal_entry_id', '=', $je_id], ['status','>','0'],['delstatus','<','1']])->first();
-    	if(!empty($entrywise_model)){
-    	  $data['fine_days'] = $this->calculate_fine_days($entrywise_model->id);
-    	  $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','fine'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
-    	  $templ_json = $helpers->make_temp_json($temp->id, $data);
-    	  $destination = $member->mobile_number;
-    	  $message = json_encode($message,true);
 
-    	  if(!empty($member->sublet_message) && $member->sublet_message!='null'){
-    	    $sublet_msg_arr =json_decode($member->sublet_message);
-    	  } else{
-    	    $sublet_msg_arr =[];
-    	  }
+    	$entrywise_model = \App\Models\Entrywise_Fine::where([
+			['journal_entry_id', '=', $je_id],
+			['status','>','0'],
+			['delstatus','<','1']
+		])->first();
+    	if	(!empty($entrywise_model))	{
+    	  	$data['fine_days'] = $this->calculate_fine_days($entrywise_model->id);
+			$temp= \App\Models\Templates::where([
+				['organization_id', '=',$org_id],
+				['name','=','fine'],
+				['delstatus', '<', '1'],
+				['status', '>', '0']
+			])->first();
 
-    	  if(!empty($member->mobile_message) && $member->mobile_message!='null'){
-    	    $mobile_msg_arr =json_decode($member->mobile_message);
-    	  } else{
-    	    $mobile_msg_arr =[];
-    	  }
-    	  if(in_array('reciept',$mobile_msg_arr)){
-    	    dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
-    	  }
-    	  if(in_array('reciept',$sublet_msg_arr)){
-    	    $destination = $member->sublet_number;
-    	    if(!empty($destination)){
-    	      dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
-    	    }
-    	  }
+			$templ_json = $helpers->make_temp_json($temp->id, $data);
+			$destination = $member->mobile_number;
+			$message = json_encode($message,true);
 
-    	} else{
-            $temp= \App\Models\Templates::where([['organization_id', '=',$org_id],['name','=','reciept'], ['delstatus', '<', '1'], ['status', '>', '0']])->first();
+			if (!empty($member->sublet_message) && $member->sublet_message!='null') {
+				$sublet_msg_arr =json_decode($member->sublet_message);
+			} else {
+				$sublet_msg_arr =[];
+			}
+
+			if (!empty($member->mobile_message) && $member->mobile_message!='null') {
+				$mobile_msg_arr =json_decode($member->mobile_message);
+			} else {
+				$mobile_msg_arr =[];
+			}
+
+			if (in_array('reciept',$mobile_msg_arr)) {
+				dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
+			}
+
+			if (in_array('reciept',$sublet_msg_arr)) {
+				$destination = $member->sublet_number;
+				if(!empty($destination)){
+					dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
+				}
+			}
+
+    	} else	{
+            $temp= \App\Models\Templates::where([
+				['organization_id', '=',$org_id],
+				['name','=','reciept'],
+				['delstatus', '<', '1'],
+				['status', '>', '0']
+			])->first();
             $templ_json = $helpers->make_temp_json($temp->id, $data);
             $member_id = $modl_find->member_id;
             $member = \App\Models\Members::find($member_id);
@@ -1307,20 +1332,20 @@ class JournalEntryController extends Controller{
                 $sublet_msg_arr =[];
             }
 
-    	  if(!empty($member->mobile_message) && $member->mobile_message!='null'){
-    	    $mobile_msg_arr =json_decode($member->mobile_message);
-    	  }else{
-    	    $mobile_msg_arr =[];
-    	  }
-    	  if(in_array('reciept',$mobile_msg_arr)){
-    	    dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
-    	  }
-    	  if(in_array('reciept',$sublet_msg_arr)){
-    	    $destination = $member->sublet_number;
-    	    if(!empty($destination)){
-    	      dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
-    	    }
-    	  }
+			if(!empty($member->mobile_message) && $member->mobile_message!='null'){
+				$mobile_msg_arr =json_decode($member->mobile_message);
+			}else{
+				$mobile_msg_arr =[];
+			}
+			if(in_array('reciept',$mobile_msg_arr)){
+				dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
+			}
+			if(in_array('reciept',$sublet_msg_arr)){
+				$destination = $member->sublet_number;
+				if(!empty($destination)){
+					dispatch( new WhatsappAPI($destination,$message, $org_id,$templ_json, $category, $mem_id, $je_id) )->onConnection('sync');
+				}
+			}
     	}
 	}
 
@@ -1488,4 +1513,24 @@ class JournalEntryController extends Controller{
 //         curl_close($curl);
 //         echo $response;
 //     }
+
+	private function receiptDateRules(){
+		return [
+			'required',
+			'date',
+			function($attribute, $value, $fail){
+				$payment = request()->input('entry_date');
+				try {
+					$paymentDay = Carbon::parse($payment)->startOf('day');
+					$receiptDay = Carbon::parse($value)->startOf('day');
+				} catch (\Exception $e) {
+					$fail('Reciept Date is not a valid date.');
+					return;
+				}
+				if ($receiptDay->gt($paymentDay)) {
+					$fail('Reciept Date must be less than or equal to Payment Date.');
+				}
+			}
+		];
+	}
 }
