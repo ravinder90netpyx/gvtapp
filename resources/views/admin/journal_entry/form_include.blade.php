@@ -30,7 +30,10 @@
     @php
         $row_data=[];
         if($mode=='show' || $mode == 'edit') {
-            $data_select=\App\Models\Series::where([['delstatus','<','1'],['status','>','0']])->get();
+            $data_select=\App\Models\Series::where([
+                ['delstatus','<','1'],
+                ['status','>','0']
+            ])->get();
             foreach($data_select as $ds) $row_data[$ds->id]= $ds->name;
         }
     @endphp
@@ -38,7 +41,10 @@
     {{-- @php $current_field = 'series_id';
         $row_data=[];
         if($mode!="edit" && in_array('1', array_keys($roles))){
-            $data_select=\App\Models\Series::where([['delstatus','<','1'],['status','>','0']])->get();
+            $data_select=\App\Models\Series::where([
+                ['delstatus','<','1'],
+                ['status','>','0']
+            ])->get();
             foreach($data_select as $ds) $row_data[$ds->id]= $ds->name;
         }
     @endphp
@@ -66,9 +72,13 @@
 </div>
 
 <div class="col-md-6">
-    @php $current_field = 'charge_type_id';
-        $row_data=[];
-        $charge_type_model = \App\Models\ChargeType::where([['status','>','0'],['delstatus','<','1']])->get();
+    @php 
+        $current_field = 'charge_type_id';
+        $row_data = [];
+        $charge_type_model = \App\Models\ChargeType::where([
+            ['status','>','0'],
+            ['delstatus','<','1']
+        ])->get();
         foreach($charge_type_model as $ch){
             $row_data[$ch->id] = $ch->name;
         }
@@ -77,15 +87,21 @@
 </div>
 
 <div class="col-md-6">
-    @if($bsmodal==true)
-        @php $current_field = 'member_mob';
+    @if ($bsmodal == true)
+        @php 
+            $current_field = 'member_mob';
             $row_data = [];
-            if($mode =="show"){
+            if ($mode == "show") {
                 $row_data[$form_data->$current_field] = $form_data['member_val'];
             }
-            if($mode =='edit'){
-                $member = \App\Models\Members::where([['organization_id','=',$form_data['organization_id']], ['delstatus','<','1'], ['status','>','0']])->get()->toArray();
-                foreach($member as $mem){
+
+            if ($mode == 'edit') {
+                $member = \App\Models\Members::where([
+                    ['organization_id', '=', $form_data['organization_id']],
+                    ['delstatus', '<', '1'], 
+                    ['status', '>', '0']
+                ])->get()->toArray();
+                foreach ($member as $mem) {
                     $row_data[$mem['id']] = "Name : ".$mem['name']."; Unit No : ".$mem['unit_number']."; Mob No : ".$mem['mobile_number'];
                 }
             }
@@ -94,10 +110,15 @@
         {!! Form::bsSelect($current_field, __('Search Member'), $row_data, $form_data->$current_field ?? '', ['required', $disable], ['vertical'=>true]); !!}
 
     @else
-        @php $current_field = 'member_id';
-            $row_data=[];
-            $data_select=\App\Models\Members::where([['delstatus','<','1'],['status','>','0'], ['organization_id']])->get();
-            foreach($data_select as $ds) $row_data[$ds->id]= $ds->name;
+        @php 
+            $current_field = 'member_id';
+            $row_data = [];
+            $data_select = \App\Models\Members::where([
+                ['delstatus','<','1'],
+                ['status','>','0'],
+                ['organization_id']
+            ])->get();
+            foreach($data_select as $ds) $row_data[$ds->id] = $ds->name;
         @endphp
         {!! Form::bsSelect($current_field, __('Member'), $row_data, $form_data->$current_field ?? '', ['required', $disable], ['vertical'=>true]); !!}
     @endif
@@ -105,18 +126,19 @@
 
 <div class="col-md-6 fine_amount" style="display:none;">
     @php 
-    $current_field = 'fine_amt';
-    $add_perm = ['vertical'=>true];
-    $apm = ['addon_check'=>'fine_wave_off', 'addon_check_title' => 'Wave off Fine'];
-    $add_perm = array_merge($add_perm, $apm);
+        $current_field = 'fine_amt';
+        $add_perm = ['vertical' => true];
+        $apm = ['addon_check' => 'fine_wave_off', 'addon_check_title' => 'Wave off Fine'];
+        $add_perm = array_merge($add_perm, $apm);
     @endphp
     {!! Form::bsInput('number', $current_field, __('Fine Amount'), $form_data->$current_field ?? '', ['disabled'], $add_perm); !!}
 </div>
 
 <div class="col-md-6 charge" @if($mode == 'insert') style="display:none;" @endif>
-    @php $current_field = 'charge';
-        $add_perm = ['vertical'=>true];
-        $apm = ['addon_check'=>'unpaid', 'addon_check_title' => 'Not Fully Paid'];
+    @php 
+        $current_field = 'charge';
+        $add_perm = ['vertical' => true];
+        $apm = ['addon_check' => 'unpaid', 'addon_check_title' => 'Not Fully Paid'];
         $add_perm = array_merge($add_perm, $apm);
     @endphp
     {!! Form::bsInput('number', $current_field, __('Paid Money'), $form_data->$current_field ?? '', ['disabled'], $add_perm); !!}
