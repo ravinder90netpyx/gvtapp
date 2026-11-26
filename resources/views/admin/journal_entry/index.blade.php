@@ -735,8 +735,7 @@ $(function(){
 	//     //         $('#member_id').val(item);
 	//     //         this.setCustomValidity('');
 	//     //     }
-	//     // });
-			
+	//     // });			
 	// });
 
   $('#unit_btn_search').on('click', function(e){
@@ -894,7 +893,6 @@ $(function(){
   });
 
   $('#entry_year').on('change',function(){
-
     var val = $(this).val();
     @if(!in_array(1, $roles))
       series_select('{{ $auth_user->organization_id}}');
