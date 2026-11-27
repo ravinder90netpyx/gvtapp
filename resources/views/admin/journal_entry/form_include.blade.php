@@ -166,7 +166,8 @@
 </div>
 
 <div class="col-md-6 ">
-    @php $current_field = 'payment_mode';
+    @php 
+        $current_field = 'payment_mode';
         $row_data = \App\Models\Journal_Entry::getPaymentMode();
     @endphp
     {!! Form::bsSelect($current_field, __('Mode'), $row_data, $form_data->$current_field ?? '', ['required', 'placeholder'=>'Select Mode' , $disable], ['vertical'=>true]); !!}
@@ -180,5 +181,5 @@
 {!! Form::hidden('member_id', '', ['required', $disable,'id'=>'member_id']); !!}
 
 @if($mode=="edit")
-{!! Form::hidden('edit_id', $id, ['required', $disable, 'id'=>'member_id']); !!}
+    {!! Form::hidden('edit_id', $id, ['required', $disable, 'id'=>'member_id']); !!}
 @endif

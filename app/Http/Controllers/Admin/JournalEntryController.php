@@ -129,29 +129,32 @@ class JournalEntryController extends Controller{
 		$query = $request->get('query') ?? '';
 		$unit_no = $request->get('unit_no') ?? '';
 		if($query!=''){
-				$model_get = $model_get->where('series_number', 'LIKE', '%'.$query.'%')->orwhere('name', 'LIKE', '%'.$query.'%');
-				$model_get = $model_get->orWhere(function($q) use ($query) {
-						$q->whereHas('memberSearch', function($q2) use ($query) {
-								$q2->where('unit_number', 'LIKE', '%'.$query.'%');
-						});
+			$model_get = $model_get->where('series_number', 'LIKE', '%'.$query.'%')
+			->orwhere('name', 'LIKE', '%'.$query.'%');
+			$model_get = $model_get->orWhere(function($q) use ($query) {
+				$q->whereHas('memberSearch', function($q2) use ($query) {
+					$q2->where('unit_number', 'LIKE', '%'.$query.'%');
 				});
+			});
 		}
 		if($unit_no !=''){
-				$model_get = $model_get->where(function($q) use ($unit_no) {
-						$q->whereHas('memberSearch', function($q2) use ($unit_no) {
-								$q2->where('unit_number', 'LIKE', '%'.$unit_no.'%');
-						});
+			$model_get = $model_get->where(function($q) use ($unit_no) {
+				$q->whereHas('memberSearch', function($q2) use ($unit_no) {
+					$q2->where('unit_number', 'LIKE', '%'.$unit_no.'%');
 				});
+			});
 		}
 
 		$serial_id = isset($series->id) ? $series->id:'';
-
 		$data = $model_get->paginate($perpage)->onEachSide(2);
-
 		$title_shown = 'Manage '.$module['main_heading'];
 		$folder = $this->folder;
-
-		return view($module['main_view'].'.index', compact('data', 'action', 'method', 'act', 'model', 'mode', 'carbon', 'serial_id', 'module', 'perpage', 'folder', 'title_shown', 'title_showns', 'query', 'financial_years', 'unit_no'))->with('i', ($request->input('page', 1) - 1) * $perpage);
+		return view($module['main_view'].'.index', compact(
+			'data','action', 'method', 'act', 'model', 
+			'mode', 'carbon', 'serial_id', 'module', 'perpage', 
+			'folder', 'title_shown', 'title_showns', 'query', 
+			'financial_years', 'unit_no'
+		))->with('i', ($request->input('page', 1) - 1) * $perpage);
   	}
 
 	public function create(DefaultModel $model, helpers $helpers){
@@ -163,11 +166,13 @@ class JournalEntryController extends Controller{
 		$mode = 'insert';
 		$financial_years = $helpers->get_financial_years($module['start_date'], null);
 
-		return view($module['main_view'].'.cred2', compact('module', 'model', 'financial_years', 'action', 'method', 'mode', 'folder', 'title_shown'));
+		return view($module['main_view'].'.cred2', compact(
+			'module', 'model', 'financial_years', 'action',
+			'method', 'mode', 'folder', 'title_shown'
+		));
 	}
 
     public function store(Request $request, DefaultModel $model, helpers $helpers){
-        // dd($request->input());
         $module = $this->module;
         $auth_user = Auth::user();
         $charge_name = '';
@@ -208,12 +213,26 @@ class JournalEntryController extends Controller{
                             $fail("The money of ".$mt."is already paid");
                         }
                     }
-                    // dd($report_month);
-                    $report_model = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','=', '0']])->orderBy('month', 'DESC')->first();
-                    $report_model2 = Report::where([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0'], ['money_pending','>', '0']])->orwhere([['member_id','=',$request->input('member_id')], ['delstatus','<', '1'], ['status', '>', '0']])->orderBy('month', 'DESC')->first();
+					
+					$report_model = Report::where([
+						['member_id','=',$request->input('member_id')],
+						['delstatus','<', '1'],
+						['status', '>', '0'],
+						['money_pending','=', '0']
+					])->orderBy('month', 'DESC')->first();
+
+                    $report_model2 = Report::where([
+						['member_id','=',$request->input('member_id')],
+						['delstatus','<', '1'], ['status', '>', '0'],
+						['money_pending','>', '0']
+					])->orwhere([
+						['member_id','=',$request->input('member_id')],
+						['delstatus','<', '1'],
+						['status', '>', '0']
+					])->orderBy('month', 'DESC')->first();
                     $last_month = $report_model->month ?? '0000-00';
                     $act_from_mon = $report_model2->month ?? '9999-12';
-                    if(empty($report_model2->money_pending)){
+                    if (empty($report_model2->money_pending)) {
                         $date = Carbon::createFromFormat('Y-m', $act_from_mon);
                         $date->addMonth();
                         $act_from_mon = $date->format('Y-m');
@@ -282,14 +301,22 @@ class JournalEntryController extends Controller{
         ];
         $validator=\Illuminate\Support\Facades\Validator::make([], []);
         $report_model = new \App\Models\Report();
-        $report_last_month = $report_model->where([['member_id','=',$request->input('member_id')],['delstatus','<','1'], ['status','>','0']])->orderBy('month', 'DESC')->first();
-        if(in_array('1', array_keys($roles))){
+        $report_last_month = $report_model->where([
+			['member_id','=',$request->input('member_id')],
+			['delstatus','<','1'], ['status','>','0']
+		])->orderBy('month', 'DESC')->first();
+
+        if (in_array('1', array_keys($roles))) {
             $rules['organization_id'] = 'required|numeric';
         }
 
         $from_month = $request->input('from_month');
         $to_month = $request->input('to_month');
-        $member_je = $model->where([['member_id','=',$request->input('member_id')],['delstatus','<', '1'], ['status', '>', '0']])->get();
+        $member_je = $model->where([
+			['member_id','=',$request->input('member_id')],
+			['delstatus','<', '1'],
+			['status', '>', '0']
+		])->get();
         $mon_arr=[];
         $last_month = $report_last_month->month ?? '0000-00';
         foreach($member_je as $je){
@@ -302,15 +329,13 @@ class JournalEntryController extends Controller{
             $month_arr = $helpers->get_financial_month_year($from_month,$to_month,'Y-m');
         } else{
             $month_arr = explode(',', $request->input('custom_month'));
-        }
-
-        
+        }        
         
         $request->validate($rules);
         $request_data = $request->input();
         $report_data = [];
 
-		dd('ok');
+		
         if(empty($request_data['organization_id'])) $request_data['organization_id'] = $auth_user->organization_id;
 
         $check = \App\Models\Members::where('id',$request->input('member_id'))->count();        
@@ -1400,15 +1425,22 @@ class JournalEntryController extends Controller{
 
 	function get_charge(Request $request){
 		$id = $request->input('id');
-		$charge = \App\Models\ChargeType::where([['status','>','0'],['delstatus', '<', '1'],['id','=',$id]])->first();
+		$charge = \App\Models\ChargeType::where([
+			['status','>','0'],
+			['delstatus', '<', '1'],
+			['id','=',$id]
+		])->first();
 		return $charge->type;
 	}
 
 	function check_demand(Request $request){
 		$id = $request->input('id');
 		$charge = $request->input('charge_type');
-		$demand_charge = \App\Models\Demand_Charge::where([['charge_type_id','=',$charge],['pending_amount','>',0],['member_id','=',$id]])->get()->toArray();
-		// dump($demand_charge);
+		$demand_charge = \App\Models\Demand_Charge::where([
+			['charge_type_id','=',$charge],
+			['pending_amount','>',0],
+			['member_id','=',$id]
+		])->get()->toArray();
 		$return_arr=[];
 		$demand_arr= [];
 		$partial = 0;
